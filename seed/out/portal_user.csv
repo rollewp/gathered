@@ -1,0 +1,10 @@
+user_id,person_id,role,email
+27a5d684-ef07-5eca-98f2-1f6018433474,02604693-41fd-556a-804b-63432bfb6786,manager,manager@demo.gathered.invalid
+974b269f-6d3e-5de6-8587-313bd2136d79,876c2013-ba03-5dba-b3fb-6b32704f417e,leader,leader_tom@demo.gathered.invalid
+6444ce29-9494-5c44-a9d7-d48467152225,d20258dc-ba87-5350-a44f-94aba35f4629,leader,leader_grace@demo.gathered.invalid
+ae51a814-5c6d-5a38-8079-ae8831ed223c,3e8f55f3-8dd3-54b4-9914-d63bd0871b2b,leader,leader_chris@demo.gathered.invalid
+ed9a0b00-1943-5c52-b543-86d27930bed9,62bbaabc-6ea0-5ee3-b432-c29b25fc0b2c,member,member_marcus@demo.gathered.invalid
+677cff8c-c36c-5f7f-af1d-bbbe785c98dc,de34b225-1ae5-5c58-9ae2-15b9cf539f11,member,member_dana@demo.gathered.invalid
+4d8b9317-bdca-52f5-af97-780f562f1397,b9ee47b6-5e26-5d96-81d6-d4c73eabe1ff,member,member_ruth@demo.gathered.invalid
+6e6c5534-6aaa-5060-a28a-59799e36bbad,e00ece7e-280a-552a-8d3e-b1b6a014329b,member,member_priya@demo.gathered.invalid
+ad7e2d1d-52a9-5ecd-a224-e03d82bcb561,5c5c3753-9609-5af0-b184-c385187d0ab6,member,member_jordan@demo.gathered.invalid

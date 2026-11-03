@@ -1,0 +1,15 @@
+person_id,label_key,expected_group_id,expected_group_name,acceptable_group_ids,cue
+fdf0a769-9104-5792-924f-07559379b676,e01,bc84aba9-e583-5856-b5f6-fdecde941014,Deep Roots,,I've read theology for years and want women who will push me on doctrine. Homework is fine.
+5096981e-8c44-5c1b-b5be-6c134fc8aa23,e02,2818aefa-e083-51be-b405-7c78ebf79341,Thursday Women in the Word,,I want to memorize Scripture and move quickly. I'm disciplined and I love a reading plan.
+94b116e4-0126-55b0-a61b-189788ca46b5,e03,efdd496c-34ca-50c3-9711-f6f5fa08c551,Midweek Prayer & Worship,,"I don't need a lot of discussion. I want to pray for people, and for our church."
+2505f6ad-426f-5616-94af-2150bb2acf0f,e04,9d19f232-5363-53c4-94ca-bf7bb4c2a3c8,First Steps,,Not sure what I believe yet. A friend invited me and I have a lot of questions.
+ad123e3f-66fd-5f57-a454-5ba316ad4506,e05,8a50cdc3-9e93-5be1-bc84-424bb4e9d4dd,Online Thursday Study,,"I travel for work half the month, so I'd need to join from wherever I am."
+3531d7a9-c641-5de8-8fc0-544b1c160ada,e06,9b923707-67ad-53dc-92c3-1ab476ee3bb8,Sunday Supper Families,,"My wife and I want to do this together, and our kids need to be included somehow."
+9b12cfee-eda1-5aaa-853d-fb5d18f8c3ae,e07,5dfc3bc9-43e6-515a-a50b-cc351f4c3b6a,Men of Iron,,I've taught Sunday school for twenty years. I want to go deep in Romans with men my age.
+2a55af9f-6318-5da4-845d-6ee2b4d9d829,e08,8367e63f-c5e6-568c-8a17-57a38cee0d5b,Tuesday Men's Accountability,,"There are some things I need to confess to other men. I need accountability, not a lecture."
+eceb93fc-e1a9-51fd-b499-5df1d4422523,e09,fda8d3ab-c227-50cf-bdf4-2bd1030b36af,Tuesday Night Dads,9b923707-67ad-53dc-92c3-1ab476ee3bb8,Two toddlers at home. I want other dads in the same season.
+d9ed10ef-7ad8-5013-8337-1ee3a43dfbc6,e10,a8a6a43a-4a3f-53eb-91e8-f55bb2bf0011,Sunday Lunch D-Group,,I'd love to keep the sermon conversation going right after church over lunch.
+3186c1e7-5475-5523-a633-2e3c16c1ba36,e11,41fe7a3f-0947-52ae-8582-1330d0ff5785,New Men's D-Group (forming),fda8d3ab-c227-50cf-bdf4-2bd1030b36af,New dad. I'd like to start something fresh with other young dads.
+bc9c4998-7e27-59d3-9b1b-ac062621eb81,e12,bc84aba9-e583-5856-b5f6-fdecde941014,Deep Roots,,Seminary-trained and looking for women who want real depth.
+62bbaabc-6ea0-5ee3-b432-c29b25fc0b2c,persona,fda8d3ab-c227-50cf-bdf4-2bd1030b36af,Tuesday Night Dads,,persona
+de34b225-1ae5-5c58-9ae2-15b9cf539f11,persona,9d19f232-5363-53c4-94ca-bf7bb4c2a3c8,First Steps,,persona

@@ -1,0 +1,70 @@
+person_id,opted_in_at,consent_version,life_stage,available_slots,max_distance_mi,group_pref,interests,about_me,profile_source,confirmed_at
+62bbaabc-6ea0-5ee3-b432-c29b25fc0b2c,2026-10-22T20:00:00,v1-2026-10,young_kids,"{sun_pm,tue_eve}",5,men,"{men,parenting,bible_reading}","Dad of two little ones. I help in the preschool room during second service most Sundays. Looking for a few guys to actually go deep with, not just small talk.",llm_confirmed,2026-11-02T09:00:00
+de34b225-1ae5-5c58-9ae2-15b9cf539f11,2026-10-03T20:00:00,v1-2026-10,single,"{wed_eve,thu_eve}",5,women,"{bible_reading,new_to_faith,prayer}","Moved here for work in September. I grew up going to church but never really read the Bible on my own. I'd like to start, with people who won't judge my questions.",llm_confirmed,2026-11-02T09:00:00
+b9ee47b6-5e26-5d96-81d6-d4c73eabe1ff,2026-10-25T20:00:00,v1-2026-10,empty_nest,"{sat_am,wed_am,tue_am}",5,mixed,"{prayer,serving_together}",Kids are grown and gone. I love hosting and I've walked alongside a lot of young moms over the years.,llm_confirmed,2026-11-02T09:00:00
+6aee0f71-d063-5138-97ec-e02ab0fcde29,2026-10-14T20:00:00,v1-2026-10,young_kids,"{thu_eve,tue_eve}",5,men,"{men,parenting}",Two kids under three. Thursdays are the one night I can reliably get out.,llm_confirmed,2026-11-02T09:00:00
+e00ece7e-280a-552a-8d3e-b1b6a014329b,2026-09-27T20:00:00,v1-2026-10,young_kids,"{thu_am,tue_am}",5,women,"{parenting,women,prayer}",Home with a toddler and a baby. Evenings are impossible with bedtime. A weekday morning with other moms would be a lifeline.,llm_confirmed,2026-11-02T09:00:00
+dde60d40-b8c1-532a-9225-f285d3dbd680,2026-09-17T20:00:00,v1-2026-10,young_kids,"{tue_am,wed_am}",5,women,"{parenting,women,prayer}",Mornings are the only time I can do anything. Looking for other moms of little ones and something that allows kids.,llm_confirmed,2026-11-02T09:00:00
+4529a147-69bb-5dbf-8b37-2ca33f292390,2026-10-14T20:00:00,v1-2026-10,young_kids,"{thu_am,tue_am}",5,women,"{parenting,women,prayer}",I work part-time from home. Weekday mornings work best; my two-year-old would need to come with me.,llm_confirmed,2026-11-02T09:00:00
+1472cbc8-14df-5c8e-9b73-9a8e4073ed10,2026-09-28T20:00:00,v1-2026-10,young_kids,"{thu_am,wed_am}",5,women,"{parenting,women,prayer}",Home with a toddler and a baby. Evenings are impossible with bedtime. A weekday morning with other moms would be a lifeline.,llm_confirmed,2026-11-02T09:00:00
+66335b23-7bed-5258-bbed-a1b76fec48b0,2026-10-10T20:00:00,v1-2026-10,young_kids,"{tue_am,wed_am}",5,women,"{parenting,women,prayer}",I work part-time from home. Weekday mornings work best; my two-year-old would need to come with me.,llm_confirmed,2026-11-02T09:00:00
+aa008aab-c736-528b-aea1-de054e34e299,2026-09-05T20:00:00,v1-2026-10,young_kids,"{thu_am,tue_am}",5,women,"{parenting,women,prayer}",I work part-time from home. Weekday mornings work best; my two-year-old would need to come with me.,llm_confirmed,2026-11-02T09:00:00
+fdf0a769-9104-5792-924f-07559379b676,2026-09-05T20:00:00,v1-2026-10,single,"{wed_eve,thu_eve}",5,women,"{theology,book_study}",I've read theology for years and want women who will push me on doctrine. Homework is fine.,llm_confirmed,2026-11-02T09:00:00
+5096981e-8c44-5c1b-b5be-6c134fc8aa23,2026-09-20T20:00:00,v1-2026-10,single,"{wed_eve,thu_eve}",5,women,{bible_reading},I want to memorize Scripture and move quickly. I'm disciplined and I love a reading plan.,llm_confirmed,2026-11-02T09:00:00
+94b116e4-0126-55b0-a61b-189788ca46b5,2026-09-11T20:00:00,v1-2026-10,empty_nest,"{wed_eve,thu_eve}",5,mixed,{prayer},"I don't need a lot of discussion. I want to pray for people, and for our church.",llm_confirmed,2026-11-02T09:00:00
+2505f6ad-426f-5616-94af-2150bb2acf0f,2026-10-11T20:00:00,v1-2026-10,single,"{wed_eve,thu_eve}",5,mixed,{new_to_faith},Not sure what I believe yet. A friend invited me and I have a lot of questions.,llm_confirmed,2026-11-02T09:00:00
+ad123e3f-66fd-5f57-a454-5ba316ad4506,2026-09-11T20:00:00,v1-2026-10,single,"{wed_eve,thu_eve}",5,mixed,{bible_reading},"I travel for work half the month, so I'd need to join from wherever I am.",llm_confirmed,2026-11-02T09:00:00
+3531d7a9-c641-5de8-8fc0-544b1c160ada,2026-09-16T20:00:00,v1-2026-10,young_kids,"{tue_eve,sun_pm}",5,couples,"{marriage,parenting}","My wife and I want to do this together, and our kids need to be included somehow.",llm_confirmed,2026-11-02T09:00:00
+9b12cfee-eda1-5aaa-853d-fb5d18f8c3ae,2026-10-02T20:00:00,v1-2026-10,empty_nest,"{tue_eve,sun_pm}",5,men,{theology},I've taught Sunday school for twenty years. I want to go deep in Romans with men my age.,llm_confirmed,2026-11-02T09:00:00
+2a55af9f-6318-5da4-845d-6ee2b4d9d829,2026-10-08T20:00:00,v1-2026-10,school_age_kids,"{tue_eve,sun_pm}",5,men,"{men,prayer}","There are some things I need to confess to other men. I need accountability, not a lecture.",llm_confirmed,2026-11-02T09:00:00
+eceb93fc-e1a9-51fd-b499-5df1d4422523,2026-09-10T20:00:00,v1-2026-10,young_kids,"{tue_eve,sun_pm}",5,men,"{parenting,men}",Two toddlers at home. I want other dads in the same season.,llm_confirmed,2026-11-02T09:00:00
+d9ed10ef-7ad8-5013-8337-1ee3a43dfbc6,2026-10-19T20:00:00,v1-2026-10,school_age_kids,"{sun_pm,tue_eve}",5,men,"{theology,men}",I'd love to keep the sermon conversation going right after church over lunch.,llm_confirmed,2026-11-02T09:00:00
+3186c1e7-5475-5523-a633-2e3c16c1ba36,2026-10-21T20:00:00,v1-2026-10,young_kids,"{thu_eve,tue_eve}",5,men,{parenting},New dad. I'd like to start something fresh with other young dads.,llm_confirmed,2026-11-02T09:00:00
+bc9c4998-7e27-59d3-9b1b-ac062621eb81,2026-09-06T20:00:00,v1-2026-10,married_no_kids,"{wed_eve,thu_eve}",5,women,{theology},Seminary-trained and looking for women who want real depth.,llm_confirmed,2026-11-02T09:00:00
+75c94aee-4155-502f-8574-23a8ed323adf,2026-09-10T20:00:00,v1-2026-10,young_kids,"{wed_eve,sat_am}",5,mixed,"{serving_together,marriage,bible_reading}",,llm_confirmed,2026-11-02T09:00:00
+b931ea2d-fe59-537d-be41-2a8c97ce80d6,2026-10-12T20:00:00,v1-2026-10,married_no_kids,"{thu_eve,sun_pm}",5,couples,"{men,outdoors,parenting}",,llm_confirmed,2026-11-02T09:00:00
+de5289a4-6b6d-580a-acae-fbccd2ad5a7e,2026-09-29T20:00:00,v1-2026-10,young_kids,"{mon_eve,tue_eve}",5,mixed,"{new_to_faith,serving_together,outdoors}",,llm_confirmed,2026-11-02T09:00:00
+cb0bbb73-91b3-52d6-9e53-ed8142582854,2026-10-19T20:00:00,v1-2026-10,school_age_kids,"{thu_eve,mon_eve}",5,mixed,"{serving_together,prayer,new_to_faith}",,llm_confirmed,2026-11-02T09:00:00
+bfc014c5-7de2-59d4-b80e-9853a6d25da6,2026-10-02T20:00:00,v1-2026-10,married_no_kids,"{mon_eve,thu_eve}",5,mixed,"{new_to_faith,women,outdoors}",,llm_confirmed,2026-11-02T09:00:00
+a7bbc177-37f4-5e55-b433-d188f21320d8,2026-09-22T20:00:00,v1-2026-10,young_kids,"{thu_eve,mon_eve}",5,mixed,"{prayer,marriage,book_study}",,llm_confirmed,2026-11-02T09:00:00
+c8aadb4b-f0b9-56d3-bdde-9ff45a7606c8,2026-09-16T20:00:00,v1-2026-10,young_kids,"{sun_pm,thu_eve}",5,men,"{bible_reading,women,serving_together}",,llm_confirmed,2026-11-02T09:00:00
+060fa1a0-a652-55dd-bb52-b4d8d41db7de,2026-10-11T20:00:00,v1-2026-10,young_kids,"{thu_eve,sun_pm}",5,mixed,"{serving_together,recovery_friendly,prayer}",,llm_confirmed,2026-11-02T09:00:00
+96408307-d8a3-577f-b768-a16a14ce65fa,2026-09-07T20:00:00,v1-2026-10,married_no_kids,"{sun_pm,tue_eve}",5,couples,"{marriage,book_study,men}",,llm_confirmed,2026-11-02T09:00:00
+e5516624-7ac3-5d4e-b978-ce8690518346,2026-10-16T20:00:00,v1-2026-10,young_kids,"{sat_am,sun_pm}",5,men,"{outdoors,recovery_friendly,new_to_faith}",,llm_confirmed,2026-11-02T09:00:00
+4d88f2ce-9ec4-52dc-92ef-9afb8e87a565,2026-10-16T20:00:00,v1-2026-10,school_age_kids,"{thu_eve,sat_am}",5,women,"{book_study,prayer,women}",,llm_confirmed,2026-11-02T09:00:00
+0a28c19a-c881-5ae7-bf86-00fb1f635cfe,2026-09-29T20:00:00,v1-2026-10,single,"{sat_am,thu_eve}",5,men,"{parenting,outdoors,theology}",,llm_confirmed,2026-11-02T09:00:00
+30a44e14-36e8-5cd5-b659-d973e628cb8f,2026-10-02T20:00:00,v1-2026-10,school_age_kids,"{wed_eve,thu_eve}",5,mixed,"{book_study,new_to_faith,prayer}",,llm_confirmed,2026-11-02T09:00:00
+7a18c844-5948-5f22-bcad-9f1c356290a6,2026-09-22T20:00:00,v1-2026-10,school_age_kids,"{tue_eve,sat_am}",5,mixed,"{serving_together,men,prayer}",,llm_confirmed,2026-11-02T09:00:00
+27ee786e-c15a-51a1-8272-519b202d4ac0,2026-10-09T20:00:00,v1-2026-10,teens,"{mon_eve,wed_eve}",5,men,"{new_to_faith,bible_reading,parenting}",,llm_confirmed,2026-11-02T09:00:00
+bb11251f-9a34-5a03-a1cb-0769978592c7,2026-10-13T20:00:00,v1-2026-10,single,"{sun_pm,sat_am}",5,women,"{book_study,recovery_friendly,marriage}",,llm_confirmed,2026-11-02T09:00:00
+5d7bbaed-4d77-56a9-9355-6eb137a910af,2026-10-21T20:00:00,v1-2026-10,young_kids,"{thu_eve,tue_eve}",5,women,"{book_study,bible_reading,outdoors}",,llm_confirmed,2026-11-02T09:00:00
+326d25ef-89a0-56d3-903b-d422c0d989ce,2026-09-15T20:00:00,v1-2026-10,married_no_kids,"{tue_eve,wed_eve}",5,women,"{recovery_friendly,theology,new_to_faith}",,llm_confirmed,2026-11-02T09:00:00
+8289ee0e-ba3b-5f78-96dc-c87dac94420f,2026-09-03T20:00:00,v1-2026-10,young_kids,"{sat_am,wed_eve}",5,men,"{outdoors,prayer,theology}",,llm_confirmed,2026-11-02T09:00:00
+f0f92acc-fae4-5698-954e-040fe396c3da,2026-10-18T20:00:00,v1-2026-10,empty_nest,"{wed_eve,thu_eve}",5,women,"{recovery_friendly,bible_reading,new_to_faith}",,llm_confirmed,2026-11-02T09:00:00
+f8f78087-579b-581a-80e8-a367d743dec5,2026-10-09T20:00:00,v1-2026-10,teens,"{sat_am,sun_pm}",5,mixed,"{men,recovery_friendly,outdoors}",,llm_confirmed,2026-11-02T09:00:00
+599b8b0a-a624-58eb-946b-3bcd96a7ba97,2026-10-29T20:00:00,v1-2026-10,young_kids,"{sat_am,sun_pm}",5,women,"{prayer,women,outdoors}",,llm_confirmed,2026-11-02T09:00:00
+1e5648e0-eb50-5158-8c71-f8209adec31d,2026-10-05T20:00:00,v1-2026-10,young_kids,"{thu_eve,tue_eve}",5,men,"{outdoors,new_to_faith,marriage}",,llm_confirmed,2026-11-02T09:00:00
+dd1e7d17-fe5f-5697-8d6c-af21d42ea5ef,2026-09-04T20:00:00,v1-2026-10,school_age_kids,"{thu_eve,sat_am}",5,men,"{women,book_study,bible_reading}",,llm_confirmed,2026-11-02T09:00:00
+1e5ecd4f-1132-5101-a0ae-7fbc5a3175d2,2026-09-30T20:00:00,v1-2026-10,young_kids,"{sun_pm,mon_eve}",5,men,"{bible_reading,theology,new_to_faith}",,llm_confirmed,2026-11-02T09:00:00
+3a8673af-6c42-5937-87cc-3a5219857c66,2026-09-22T20:00:00,v1-2026-10,retired,"{sat_am,wed_eve}",5,mixed,"{prayer,men,recovery_friendly}",,llm_confirmed,2026-11-02T09:00:00
+651d49ec-c0cb-57b4-b26f-2c6216af45a2,2026-09-06T20:00:00,v1-2026-10,teens,"{sat_am,wed_eve}",5,women,"{book_study,bible_reading,outdoors}",,llm_confirmed,2026-11-02T09:00:00
+f57e6518-e736-598d-ae36-647f093f604d,2026-09-13T20:00:00,v1-2026-10,single,"{thu_eve,wed_eve}",5,men,"{book_study,theology,outdoors}",,llm_confirmed,2026-11-02T09:00:00
+00b714d2-136d-55ec-bfff-c2f374cb1fe9,2026-09-04T20:00:00,v1-2026-10,teens,"{tue_eve,sun_pm}",5,women,"{bible_reading,serving_together,women}",,llm_confirmed,2026-11-02T09:00:00
+1786c142-c757-5746-a5f3-5640618103d0,2026-10-12T20:00:00,v1-2026-10,retired,"{sat_am,tue_eve}",5,mixed,"{serving_together,women,theology}",,llm_confirmed,2026-11-02T09:00:00
+13699448-9ba7-548c-979d-25c929e07c02,2026-10-25T20:00:00,v1-2026-10,single,"{tue_eve,mon_eve}",5,women,"{serving_together,outdoors,theology}",,llm_confirmed,2026-11-02T09:00:00
+4cda5fbe-f20e-551f-bdd7-80264f6bac45,2026-09-07T20:00:00,v1-2026-10,young_kids,"{mon_eve,tue_eve}",5,women,"{men,bible_reading,book_study}",,llm_confirmed,2026-11-02T09:00:00
+384d7fd1-18df-5ae6-9c07-21dddf274937,2026-10-10T20:00:00,v1-2026-10,teens,"{wed_eve,thu_eve}",5,mixed,"{serving_together,prayer,parenting}",,llm_confirmed,2026-11-02T09:00:00
+ed3c185a-559f-5fdc-b6e8-27528c071d12,2026-09-29T20:00:00,v1-2026-10,empty_nest,"{sat_am,mon_eve}",5,mixed,"{men,recovery_friendly,prayer}",,llm_confirmed,2026-11-02T09:00:00
+526e2d6c-a153-59be-b75b-ae56b05c3941,2026-10-20T20:00:00,v1-2026-10,school_age_kids,"{sat_am,thu_eve}",5,mixed,"{parenting,recovery_friendly,men}",,llm_confirmed,2026-11-02T09:00:00
+df5fc8c9-ca51-56ad-b02a-36c067e7abe5,2026-10-15T20:00:00,v1-2026-10,young_kids,"{sat_am,thu_eve}",5,men,"{prayer,outdoors,theology}",,llm_confirmed,2026-11-02T09:00:00
+8e5a8edf-703b-50e7-841d-e6ab5713c6ed,2026-09-28T20:00:00,v1-2026-10,teens,"{wed_eve,mon_eve}",5,mixed,"{serving_together,recovery_friendly,outdoors}",,llm_confirmed,2026-11-02T09:00:00
+c7b88b98-5291-5824-b412-26b7eb3625a3,2026-10-25T20:00:00,v1-2026-10,empty_nest,"{tue_eve,sun_pm}",5,mixed,"{women,parenting,prayer}",,llm_confirmed,2026-11-02T09:00:00
+8733c4fa-3b70-56ba-9839-b50d8188df33,2026-10-02T20:00:00,v1-2026-10,retired,"{thu_eve,wed_eve}",5,men,"{new_to_faith,theology,outdoors}",,llm_confirmed,2026-11-02T09:00:00
+d186400f-3905-5349-89a3-03d694219329,2026-09-25T20:00:00,v1-2026-10,teens,"{sun_pm,tue_eve}",5,men,"{prayer,parenting,new_to_faith}",,llm_confirmed,2026-11-02T09:00:00
+fe56dcc2-450b-5356-a48b-d842daa93dc8,2026-10-24T20:00:00,v1-2026-10,young_kids,"{sat_am,wed_eve}",5,men,"{men,bible_reading,outdoors}",,llm_confirmed,2026-11-02T09:00:00
+cf22ee9f-ac9f-5bb4-a0bc-0ac79785f6bf,2026-10-09T20:00:00,v1-2026-10,single,"{wed_eve,sun_pm}",5,mixed,"{book_study,bible_reading,parenting}",,llm_confirmed,2026-11-02T09:00:00
+8dc9ddd7-5354-5a9b-883b-082ff49d382d,2026-09-18T20:00:00,v1-2026-10,single,"{wed_eve,tue_eve}",5,mixed,"{marriage,bible_reading,prayer}",,llm_confirmed,2026-11-02T09:00:00
+43c06600-7356-54af-aef7-dde86d2dd7d6,2026-09-10T20:00:00,v1-2026-10,young_kids,"{sat_am,wed_eve}",5,women,"{recovery_friendly,women,prayer}",,llm_confirmed,2026-11-02T09:00:00
+a72cbe9a-55b7-5ce8-909a-ff34ca566d96,2026-09-15T20:00:00,v1-2026-10,empty_nest,"{thu_eve,wed_eve}",5,mixed,"{women,men,theology}",,llm_confirmed,2026-11-02T09:00:00
+fe535e5e-4954-592b-9a85-c0897e5c0ab5,2026-10-28T20:00:00,v1-2026-10,young_kids,{tue_eve},5,men,"{parenting,men}",,llm_confirmed,2026-11-02T09:00:00
+8ca745f0-b278-5401-b8bb-9955fae66cdd,2026-10-01T20:00:00,v1-2026-10,young_kids,{tue_eve},5,men,"{parenting,men}",,llm_confirmed,2026-11-02T09:00:00
