@@ -123,8 +123,8 @@ def add_household(key, z=None, loc=None):
     households[hh["household_id"]] = dict(row=hh, adults=[], kids=[])
     return hh
 
-def add_person(hh, first, last, gender, birth_year, role, first_attended):
-    pid = uid("person", hh["household_id"], first, birth_year, role)
+def add_person(hh, first, last, gender, birth_year, role, first_attended, seq=0):
+    pid = uid("person", hh["household_id"], first, birth_year, role, seq)  # seq disambiguates siblings who draw the same first name + birth year
     row = dict(person_id=pid, household_id=hh["household_id"], first_name=first, last_name=last, gender=gender,
                birth_year=birth_year, household_role=role, first_attended_on=first_attended.isoformat(), is_synthetic=True)
     T["person"].append(row)
@@ -154,8 +154,8 @@ def make_family(key, stage, gender=None, age=None, tenure=None, loc=None, z=None
     if kids is None:
         rng = {"young_kids": (0, 4), "school_age_kids": (5, 12), "teens": (13, 18)}.get(stage)
         kids = [R.randint(*rng) for _ in range(R.randint(1, 3))] if rng else []
-    for ka in kids:
-        add_person(hh, R.choice(KID), last, R.choice(["M", "F"]), TODAY.year - ka, "child", tenure_start(tenure))
+    for i, ka in enumerate(kids):
+        add_person(hh, R.choice(KID), last, R.choice(["M", "F"]), TODAY.year - ka, "child", tenure_start(tenure), seq=i)
         for a in ids: people[a]["kids"].append(ka)
     return ids[0]
 
@@ -175,8 +175,8 @@ def persona(key, first, last, gender, age, stage, tenure_m, z, kids=(), role="me
     if spouse:
         sp = add_person(hh, spouse[0], last, spouse[1], TODAY.year - age + 1, "adult", tenure_start(tenure_m))
         people[sp].update(stage=stage, tenure=tenure_m); adults.append(sp); RESERVED.add(sp)
-    for ka in kids:
-        add_person(hh, R.choice(KID), last, R.choice(["M", "F"]), TODAY.year - ka, "child", tenure_start(tenure_m))
+    for i, ka in enumerate(kids):
+        add_person(hh, R.choice(KID), last, R.choice(["M", "F"]), TODAY.year - ka, "child", tenure_start(tenure_m), seq=i)
         for a in households[hh["household_id"]]["adults"]: people[a]["kids"].append(ka)
     if landing:
         PERSONAS[key] = dict(person_id=pid, display=f"{first} {last}", role=role)
