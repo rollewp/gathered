@@ -5,6 +5,7 @@ AI for Church Hackathon entry (build window Oct 30 – Nov 27, 2026; **submit by
 
 ## Source of truth (read before significant work)
 - `docs/Gathered - Data Model & Architecture.md`: decisions W1–W13, schema, RLS matrix, matching, escalations, seed spec. **If code and spec disagree, the spec wins. Ask before changing a decision.**
+- `docs/Gathered - Demo Journeys.md`: the build slices in order (Slice −1 ranking test first), per-journey screens, data, LLM calls and guardrails, plus the v0 screen inventory.
 - `docs/AI for Church Hackathon - Submission Deliverables.md`: form fields and the safeguards that must be built and shown.
 - `seed/generate_seed.py` → `seed/out/*.csv`: synthetic Winter Garden, FL church (deterministic, RNG 516).
 
