@@ -66,6 +66,23 @@ Below that, fix the prompt or the shortlist size before building any UI. The fin
 - **Output (JSON schema, zod-validated):** `{ "ranked": [{"group_id": uuid, "rank": 1..3}], "internal_rationale": string ≤ 60 words, "confidence": "high"|"medium"|"low" }`
 - **Model:** `OPENROUTER_MODEL_FAST` (Haiku). If the pass mark is missed, try Sonnet once before rewriting the prompt, so you learn whether it's the model or the prompt.
 
+
+**Result (2026-11-05, run `rank_eval-2026-11-05T18-02-26`, Haiku, `rank-v1`): PASS.**
+
+| Variant | Top-1 | Top-3 | Fallbacks | Stable top-1 |
+|---|---|---|---|---|
+| C: score only, no LLM | 9/14 | 12/14 | n/a | n/a |
+| A: LLM sees scores | **42/42** (3 runs) | 42/42 | 0 | 14/14 |
+| B: LLM, scores hidden, shuffled order | 40/42 | 42/42 | 0 | 14/14 |
+
+- **Shortlist recall:** 14/14.
+- **Cost:** about $0.02 per 42 calls. Latency is about 3.8 s per call.
+- **The LLM's added value:** +5 top-1 picks over the score alone. It wins exactly on the cue-driven cases: e05 (travels, so online), e10 ("right after church," which the score ranked 4th), e02, e09, e11. Variant A beat the score order 5 times, so it isn't copying the scores.
+- **B's two misses:** both e11, which picked Tuesday Night Dads (an accepted alternate) over the forming group for "start something fresh." **Fix:** pass `status` and `open_seats` in the shortlist input (`rank-v2`).
+- **Rationale check:** the rationales stick to stated preferences and group facts. In e08, the member mentioned needing to confess things; the rationale refers only to the *group's* confession focus and never describes the member.
+- **Caveat for the write-up:** these are 14 designed labels written alongside the groups, so it's an easy test. Report it as a designed test set, not field accuracy. Add 6–10 harder labels written by someone else before quoting the number publicly.
+- **Shipping decision:** variant A (the hybrid of score and judgment). Quote both A and B.
+
 ---
 
 ## Slice 0 · Connection test (no features)

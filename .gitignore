@@ -5,3 +5,6 @@ node_modules/
 .vercel/
 *.log
 eval/out/
+*.tsbuildinfo
+next-env.d.ts
+.pnpm-debug.log*

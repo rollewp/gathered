@@ -1,0 +1,8 @@
+export const groups = [
+  { id: 'mornings', name: 'Tuesday Morning Table', description: 'A gentle, honest space for people navigating the full and beautiful season of raising young children.', tags: ['Parents', 'Young children', 'Prayer'], slot: 'Tuesdays · 9:30 AM', area: 'Northside · hosted at home', openSeats: 2, childcare: 'Childcare available' },
+  { id: 'midweek', name: 'Midweek Neighbors', description: 'A low-pressure group for finding friendship, making room for questions, and sharing a midweek meal.', tags: ['All ages', 'Dinner', 'Questions welcome'], slot: 'Wednesdays · 6:00 PM', area: 'Downtown · community room', openSeats: 3, childcare: 'Kids welcome' },
+  { id: 'young-adults', name: 'The Common Table', description: 'A thoughtful, warm group for young adults building a life together in the city.', tags: ['Young adults', 'Discussion', 'Community'], slot: 'Sundays · 6:30 PM', area: 'Eastside · cafe room', openSeats: 1, childcare: 'No childcare' },
+]
+export const joiners = [{ name: 'Jordan K.', detail: 'Interested in Tuesday Morning Table', time: 'Today' }, { name: 'Sam R.', detail: 'Interested in Midweek Neighbors', time: 'Yesterday' }]
+export const requests = [{ name: 'Jordan Kim', note: 'I am hoping to find a steady rhythm with other parents.', group: 'Tuesday Morning Table' }, { name: 'Maya Patel', note: 'I would love a place where questions are welcome.', group: 'Midweek Neighbors' }]
+export const escalations = [{ id: 'E-104', name: 'Taylor Morgan', issue: 'No strong match after 3 reviews', updated: '2 hours ago', status: 'Needs review' }, { id: 'E-103', name: 'Chris D.', issue: 'Preference conflict in top recommendation', updated: 'Yesterday', status: 'Needs review' }]
