@@ -1,5 +1,5 @@
 # Gathered: Postgres spike (45-minute timebox)
-Pass/fail table: `FaithTech/Gathered - Data Model & Architecture.md` §10.
+Pass/fail table and results: [`docs/Gathered - Data Model & Architecture.md`](../docs/Gathered%20-%20Data%20Model%20%26%20Architecture.md) §10.1.
 
 **Walt does (needs sign-in or passwords):**
 1. In Databricks, create a Lakebase project (P1). Note whether Free Edition allows it.

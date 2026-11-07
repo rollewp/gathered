@@ -25,9 +25,9 @@ if (!ownerUrl) {
   process.exit(1);
 }
 
-// Parent-to-child load order. Column lists are the exact seed/out/<file> header order; COPY
-// matches this list positionally, which is how recommendation.csv's why_text column lands in
-// the renamed internal_rationale column without touching the CSV.
+// Parent-to-child load order. Column lists must equal each seed/out/<file> header, name for name
+// and in order: COPY runs with HEADER MATCH (Postgres 15+), so a renamed or reordered CSV column
+// fails the load instead of landing in the wrong table column.
 const TABLES = [
   { table: "household", file: "household.csv",
     columns: ["household_id", "zip", "lat_approx", "lng_approx", "checkin_app_opt_in", "app_opt_in_at"] },
@@ -79,7 +79,7 @@ try {
 
   for (const { table, file, columns } of TABLES) {
     const csvPath = path.join(SEED_DIR, file);
-    const copySql = `copy app.${table} (${columns.join(", ")}) from stdin with (format csv, header true)`;
+    const copySql = `copy app.${table} (${columns.join(", ")}) from stdin with (format csv, header match)`;
     const stream = client.query(copyFrom(copySql));
     await pipeline(fs.createReadStream(csvPath), stream);
   }

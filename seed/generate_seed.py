@@ -84,7 +84,7 @@ INTERESTS = ["bible_reading", "prayer", "new_to_faith", "parenting", "marriage",
 
 # Column lists so empty tables still get headers
 COLS = {
-    "recommendation": ["rec_id", "person_id", "group_id", "rank", "score", "score_breakdown", "why_text", "model", "prompt_version", "generated_at"],
+    "recommendation": ["rec_id", "person_id", "group_id", "rank", "score", "score_breakdown", "internal_rationale", "model", "prompt_version", "generated_at"],
     "escalation": ["escalation_id", "source", "kind", "severity", "group_id", "person_id", "summary", "evidence", "status", "created_at", "resolved_by"],
     "audit_log": ["id", "actor_user_id", "action", "entity", "entity_id", "detail", "at"],
 }
