@@ -113,9 +113,9 @@ Lakebase passed external connection, a stable native credential and per-request 
 ## Foundation
 What the slices build on:
 
-- **Schema:** `migrations/0001_app_schema.sql` (tables), `0002_rls_policies.sql` (row-level security and column grants), `0003_security_definer_functions.sql` (`app.group_card()`, `app.manager_recommendation_audit()`). Applied with `scripts/migrate.mjs` using the owner URL.
+- **Schema:** `migrations/0001_app_schema.sql` (tables), `0002_rls_policies.sql` (row-level security and column grants), `0003_security_definer_functions.sql` (`app.group_card()`), `0004_recommendation_run.sql` (recommendation runs, shortlist, persistence, audit and invalidation triggers), `0005_audit_log_sequence_grant.sql`. Applied with `scripts/migrate.mjs` using the owner URL.
 - **Seed data:** `seed/generate_seed.py` → `seed/out/*.csv`, loaded with `scripts/load_seed.mjs` using the owner URL (architecture §9).
-- **Person features:** a nightly Databricks notebook computes `person_features` from the engagement tables and writes it into Lakebase (architecture §3b). *Fallback: a local Python job fills `person_features` if Databricks gets in the way.* Until it runs, `busy_slots` can be derived from `serving_assignment`, as the evaluation script does.
+- **Person features:** a nightly Databricks notebook is the intended producer of `person_features` (architecture §3b). Until it exists, `scripts/compute_person_features.mjs` is a **local bootstrap producer** of the same output contract from the seed files: deterministic, idempotent, and it writes a row only when a value changed (`npm run features:local`). It is a development and recovery tool, not the deployed architecture.
 - **UI scaffold:** the screens below were generated as a Next.js App Router + Tailwind + shadcn/ui scaffold with mock data only, and are wired to the database slice by slice.
 
 | Route | Screen | Key components |
@@ -151,6 +151,8 @@ What the slices build on:
 ---
 
 ## Slice 1: Recommendation Lifecycle
+**Status: Complete (2026-11-07).** All acceptance criteria below passed against the development database; evidence was reported with the implementation.
+
 **Goal:** prove the persisted recommendation lifecycle before building member screens around it (architecture §5–§6, W9, W14–W17).
 
 ```
@@ -160,18 +162,20 @@ next request → reuse
 material change → invalidate (0 LLM calls) → next request regenerates
 ```
 
-**Prerequisite:** `person_features` populated in Lakebase (Build Priorities, step 3). The shortlist needs `busy_slots`, `kids_age_bands` and `serving_areas`, and the table is empty until the Databricks job, or its documented local fallback, runs.
+**Prerequisite:** `person_features` populated in Lakebase. The shortlist needs `busy_slots`, `kids_age_bands` and `serving_areas`. Slice 1 uses the local bootstrap producer; the Databricks job follows in the *Next increment*.
 
 **Establishes:**
 - **Eligibility:** opted-in members with no active group membership only (§5.1). A member with an active membership gets their group experience instead (Journey 6), with no matching.
 - **Deterministic stage in the database:** `app.recommendation_shortlist()` implements the hard filters and weighted score (§5.2–5.3), moved from the evaluation script, returning up to 6 candidates with `score_breakdown`.
 - **Haiku ranking with `rank-v2`:** the `rank-v1` contract plus each group's `status` and `open_seats`, zod-validated, shortlist-only, retry once, then score-order fallback. Re-evaluated against the 14 labels before it ships.
-- **Persistence:** a `recommendation_run` with its full shortlist (`recommendation_run_candidate`) and its ordered `recommendation` rows, written only by `app.persist_recommendation_run()`; one `audit_log` row per LLM call.
+- **Persistence:** a `recommendation_run` with its full shortlist (`recommendation_run_candidate`) and its ordered `recommendation` rows, written only by `app.persist_recommendation_run()`. The ranking client writes one `audit_log` row per model attempt; the run stores final provenance and aggregate usage and does not duplicate those rows.
 - **Manager-only audit:** score, breakdown, rationale, provenance and invalidation history readable only through `app.manager_recommendation_audit()`. Members read ordered groups and public group cards only.
 - **Current/invalid semantics:** one current run per member; material changes (§6.3) invalidate affected runs through database triggers (§6.6), with a reason and timestamp, no LLM call, and no change to Leader RLS.
 - **Empty runs:** zero eligible groups creates a valid empty run, reused on revisits (§6.2).
 - **Prompt-version invalidation:** deploying a new `prompt_version` invalidates runs made under the old one, without regenerating.
 - **Reuse:** a request with a current run returns it with zero ranking calls.
+
+**Tests:** `npm run test:recommendations` runs the stubbed regression and integration suite (no external LLM calls; safe to repeat and for CI): shortlist parity with the reference implementation, eligibility, persistence and integrity, reuse, every invalidation trigger including no-op writes and the Leader-accept path, empty runs, prompt-version invalidation, visibility by direct query, audit access, retry and fallback, and concurrency. `npm run verify:openrouter` is the separate, explicitly invoked live check (one eligible request plus one revisit). Neither runs as part of `npm run build`. Run them with Node 20 or newer.
 
 **Screens:** none new. A temporary `/recommendation-test` page (like Slice 0's `/connection-test`) with a "Request recommendations" button and a debug readout: run ID, current/invalid, outcome, and the count of ranking audit rows. For the Manager persona it also shows the audit rows. Journey 1 replaces it.
 
@@ -321,10 +325,10 @@ material change → invalidate (0 LLM calls) → next request regenerates
 | How it's built and the evaluation number | 0:15 |
 
 ### Build Priorities & Cut Order
-1. ~~Recommendation Model Evaluation~~ (done, 2026-11-05)
+1. ~~Recommendation Model Evaluation~~ (done, 2026-11-05; re-run on `rank-v2` 2026-11-07)
 2. Slice 0: Application & Data Connection
-3. Databricks: load the engagement tables and write `person_features` into Lakebase (fallback: local Python job)
-4. Slice 1: Recommendation Lifecycle
+3. ~~Slice 1: Recommendation Lifecycle~~ (done, 2026-11-07), on the local `person_features` bootstrap producer
+4. **Next increment: Databricks `person_features`** (below)
 5. Journey 1
 6. Journey 3
 7. Journey 2
@@ -334,5 +338,14 @@ material change → invalidate (0 LLM calls) → next request regenerates
 11. Journey 4: AI unmet demand
 12. Journey 6
 13. Dashboard tile: online-first households
+
+#### Next increment: Databricks `person_features`
+Slice 1 runs on the local bootstrap producer. The deployed architecture computes features in Databricks. In order:
+1. **Create the Databricks job** that reads the engagement tables (attendance events, serving assignments, services, ministries) and writes `person_features` into Lakebase, using the existing output contract and the owner-role write path.
+2. **Compare its output to the local bootstrap producer** for the synthetic dataset.
+3. **Require schema and value parity:** the same columns and types, and identical values for every adult, including the attendance-derived columns whose definitions are listed in `lib/features/person-features.mjs`. Resolve any definition difference in the architecture (§3b) first, then in whichever side is wrong.
+4. **Switch the deployed/demo feature refresh path to Databricks.** Because the writer is idempotent and the invalidation triggers fire only on changed values, a parity run against unchanged data invalidates no recommendation run.
+5. **Retain the local script** for deterministic development and recovery, and do not present it as the deployed analytical architecture.
+6. Once parity is confirmed, decide whether to turn the consistency factor on in the score (it is neutral, 7.5, until then); that is a new scoring version and a prompt/score evaluation, not part of the cutover.
 
 Journey 6 sits below the cut line as a demo segment, but the eligibility rule behind it (members in a group get no recommendations) is built in Slice 1.

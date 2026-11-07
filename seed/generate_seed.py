@@ -84,13 +84,12 @@ INTERESTS = ["bible_reading", "prayer", "new_to_faith", "parenting", "marriage",
 
 # Column lists so empty tables still get headers
 COLS = {
-    "recommendation": ["rec_id", "person_id", "group_id", "rank", "score", "score_breakdown", "internal_rationale", "model", "prompt_version", "generated_at"],
     "escalation": ["escalation_id", "source", "kind", "severity", "group_id", "person_id", "summary", "evidence", "status", "created_at", "resolved_by"],
     "audit_log": ["id", "actor_user_id", "action", "entity", "entity_id", "detail", "at"],
 }
 T = {k: [] for k in ["household", "person", "member_profile", "portal_user", "service", "attendance_event",
                      "ministry", "serving_assignment", "grp", "group_tag", "group_leader", "group_membership",
-                     "group_meeting", "meeting_attendance", "join_request", "recommendation", "escalation", "audit_log",
+                     "group_meeting", "meeting_attendance", "join_request", "escalation", "audit_log",
                      "eval_label", "_truth_household", "_truth_person"]}
 
 # ---------------------------------------------------------------- ministries & services

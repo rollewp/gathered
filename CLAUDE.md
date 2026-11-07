@@ -45,6 +45,9 @@ AI for Church Hackathon entry (build window Oct 30 – Nov 27, 2026; **submit by
 ## Working rules
 - Propose a short plan, then implement in small steps. Run SQL against Lakebase with the owner URL only for migrations and seeds.
 - Re-run `node --env-file=.env.local pgtest.mjs pg`-style persona checks after any RLS change.
+- Tests: `npm run test:recommendations` (stubbed, no external LLM calls, needs Node 20+) and `npm run build` are routine. `npm run verify:openrouter` and `scripts/rank_eval.mjs` make real OpenRouter calls and are run explicitly only.
+- `npm run seed:reset` reloads the seed and recomputes `person_features` (returns the demo database to a known state, with no recommendation runs).
+- `scripts/compute_person_features.mjs` is a local bootstrap producer; Databricks is the intended deployed producer of `person_features`.
 - Drop schema `spike` once `app` exists.
 
 ## Repo layout

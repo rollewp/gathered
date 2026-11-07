@@ -44,6 +44,7 @@ export default async function ConnectionTestPage() {
             <dt>Cards returned</dt><dd className="font-mono">{cards.length} · {ms} ms</dd>
           </dl>
           <Link href="/" className="mt-3 inline-block font-semibold underline underline-offset-4">Switch persona</Link>
+          <Link href="/recommendation-test" className="mt-3 ml-4 inline-block font-semibold underline underline-offset-4">Recommendation test</Link>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {cards.map((c) => (

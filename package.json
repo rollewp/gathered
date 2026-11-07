@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "npm run test:recommendations",
+    "test:recommendations": "node --import tsx --conditions=react-server --env-file=.env.local scripts/test_recommendations.mjs",
+    "verify:openrouter": "node --import tsx --conditions=react-server --env-file=.env.local scripts/verify_openrouter.mjs",
+    "features:local": "node --env-file=.env.local scripts/compute_person_features.mjs",
+    "seed:reset": "node --env-file=.env.local scripts/load_seed.mjs && node --env-file=.env.local scripts/compute_person_features.mjs"
   },
   "engines": {
     "node": ">=20.9"
@@ -37,6 +42,7 @@
     "@types/react-dom": "^19",
     "postcss": "^8.5",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
     "typescript": "5.7.3"
   }
 }

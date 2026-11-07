@@ -52,9 +52,6 @@ const TABLES = [
     columns: ["meeting_id", "group_id", "met_on"] },
   { table: "meeting_attendance", file: "meeting_attendance.csv",
     columns: ["meeting_id", "person_id", "present"] },
-  { table: "recommendation", file: "recommendation.csv",
-    columns: ["rec_id", "person_id", "group_id", "rank", "score", "score_breakdown",
-              "internal_rationale", "model", "prompt_version", "generated_at"] },
   { table: "join_request", file: "join_request.csv",
     columns: ["request_id", "person_id", "group_id", "rec_id", "status", "member_note",
               "requested_at", "decided_at", "decided_by", "decline_reason"] },
@@ -65,16 +62,22 @@ const TABLES = [
     columns: ["id", "actor_user_id", "action", "entity", "entity_id", "detail", "at"] },
 ];
 
+// Tables with no seed CSV that are cleared on every reload: person_features is rewritten by
+// scripts/compute_person_features.mjs (or the Databricks job); recommendation runs are created
+// by the app (migration 0004), so a reseed returns the demo database to "no recommendations yet".
+const DERIVED_TABLES = [
+  "app.recommendation", "app.recommendation_run_candidate", "app.recommendation_run", "app.person_features",
+];
+
 const client = new pg.Client({ connectionString: ownerUrl, ssl: { rejectUnauthorized: false } });
 await client.connect();
 
 try {
   await client.query("begin");
 
-  // One statement so FK relationships among these tables (and person_features's FK to person)
-  // don't block it. person_features has no seed CSV and isn't reloaded below; known tradeoff:
-  // once the nightly job populates it, re-running this script will also clear it.
-  const truncateList = [...TABLES.map((t) => `app.${t.table}`), "app.person_features"].join(", ");
+  // One statement so FK relationships among these tables (and the derived tables' FKs) don't
+  // block it. Derived tables are cleared, not reloaded; rerun compute_person_features.mjs after.
+  const truncateList = [...TABLES.map((t) => `app.${t.table}`), ...DERIVED_TABLES].join(", ");
   await client.query(`truncate ${truncateList} restart identity`);
 
   for (const { table, file, columns } of TABLES) {

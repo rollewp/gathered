@@ -1,5 +1,5 @@
 # Gathered: Data Model & Architecture
-**Version 0.5 · 2026-11-07 · Canonical build specification** for the Gathered entry to the AI for Church Hackathon 2026.
+**Version 0.6 · 2026-11-07 · Canonical build specification** for the Gathered entry to the AI for Church Hackathon 2026.
 **Companions:** `Gathered - Demo Journeys.md` (build plan, slices and journeys) · `AI for Church Hackathon - Submission Deliverables.md` (submission fields and safeguards checklist)
 
 **How to use this document**
@@ -164,7 +164,7 @@ The recommendation run, its shortlist candidates and the slimmed `recommendation
   - `service`: two Sunday services (9:00, and 11:00, which is livestreamed) and Wednesday night. Includes `slot` and `livestreamed`.
   - `attendance_event`: `person_id`, `service_id`, `channel`, `checked_in_by`, `checked_in_at`, `minutes_watched`.
   - `ministry`, `serving_assignment`: `schedule_slot` (e.g. `sun_11`) is what makes the "kids-ministry volunteer arrives late" conflict detectable.
-- **person_features** (derived nightly in Databricks, written into Lakebase):
+- **person_features** (derived nightly in Databricks, written into Lakebase; until that job exists, `scripts/compute_person_features.mjs` is a **local bootstrap producer** of the same contract, with formulas in `lib/features/person-features.mjs`. It is a development and recovery tool, not the deployed architecture. Databricks must reach schema and value parity with it before cutover, see Demo Journeys, *Next increment*):
   - `observed_weeks_12w`: weeks with any signal, counting the adult on a kiosk row's `checked_in_by`
   - `attendance_rate_12w`: of observed signals only
   - `signal_sources`: the channels seen for this person
@@ -335,8 +335,10 @@ A change is **material** if it can change who is eligible, which groups pass the
 - **Not material:** page views, creating a join request (a pending request holds no seat), escalation activity, raw attendance events (they matter only through `person_features`).
 
 ### 6.4 · Audit
-- Every generation writes an `audit_log` row: purpose `rank`, model, prompt version, token counts, latency, whether retry or fallback was used, and the run it produced. It never contains the full prompt when that includes `about_me`.
-- Reusing a stored run makes no LLM call and writes no ranking audit row. Counting ranking audit rows is how Slice 1 proves that a page view cost zero calls.
+- **One `audit_log` row per actual model attempt**, written by the application's ranking client (`lib/ranking/llm.ts`): purpose `recommendation_rank`, model, prompt version, attempt number, outcome (`ok` · `invalid_output` · `error`), latency and token counts. It never stores the prompt or `about_me`.
+- **The run stores final provenance and aggregate usage** (model, prompt version, outcome, confidence, attempts, tokens, latency). `persist_recommendation_run` writes no `audit_log` row, so a model call is never recorded twice.
+- **Fallbacks:** if both attempts return invalid output, the failed attempts stay in `audit_log` and the run records `score_fallback`. If both attempts cannot reach the model at all, nothing is persisted and the next request retries.
+- **Reuse** makes no model call and writes no ranking audit row. Counting `llm_rank_attempt` rows is how the tests prove that a revisit cost zero calls. An empty run involves no ranking and writes none.
 - The Manager's audit view lists every run for a member, including invalidated runs and why they were invalidated.
 
 ### 6.5 · Data model: the recommendation run
@@ -404,7 +406,7 @@ Two simultaneous first requests may both reach the LLM. The per-member lock in `
 | **Recommendation ranking** | Haiku | An eligible member requests recommendations and no valid run exists (§6) | Member preferences and own words + the deterministic shortlist (§5.5) | Top `min(3, n)` group IDs from the shortlist, internal rationale, confidence | Shortlist-only, validated, retry then score fallback. Rationale is Manager-only. Never runs on a plain page view |
 | **Escalation review** | Sonnet | Manager runs the review (Journey 4) | Structured facts + group description + the member's request note and `about_me` | `{raise, kind, severity, summary, evidence[]}` | Advisory only; the Manager decides |
 
-- **Every LLM call** goes to OpenRouter from server code (the key never reaches the browser) and writes an `audit_log` row with purpose, model, prompt version and token counts.
+- **Every model attempt** goes to OpenRouter from server code (the key never reaches the browser) and writes one `audit_log` row with purpose, model, prompt version, attempt, outcome, latency and token counts (§6.4).
 - **Library:** the OpenAI-compatible SDK pointed at OpenRouter, with zod schemas for structured output. **No LangChain:** these are single-shot structured calls with no agent loop.
 
 ---
@@ -499,8 +501,9 @@ Haiku with `rank-v1`, 14 designed labels, 3 runs per variant. Variant A (LLM see
 4. **Empty results:** a valid empty run (§6.2, §6.5).
 5. **Prompt change:** invalidates runs from the previous version, without regenerating (§6.2, §6.6).
 
-### 11.3 · Open for Slice 1
-1. **`person_features` must exist before Slice 1 can run.** The database table is empty, and the shortlist needs `busy_slots`, `kids_age_bands` and `serving_areas`. See the Slice 1 prerequisites in Demo Journeys.
+### 11.3 · Open
+1. **Databricks `person_features` job and cutover.** Slice 1 runs on the local bootstrap producer. The Databricks job, its value parity with the bootstrap output, and the switch of the deployed feature refresh path are the next increment (Demo Journeys, *Next increment*).
+2. **Consistency factor.** The scorer keeps consistency neutral (7.5) until Databricks parity confirms the `consistency_score` and `signal_confidence` definitions (§3b).
 
 ---
 
@@ -512,6 +515,7 @@ Haiku with `rank-v1`, 14 designed labels, 3 runs per variant. Variant A (LLM see
 ---
 
 ## Revision history
+- **v0.6 (2026-11-07):** Slice 1 implemented: migrations `0004` (recommendation runs) and `0005` (audit-log sequence grant), local `person_features` bootstrap, per-attempt LLM audit ownership.
 - **v0.5 (2026-11-07):** adopted the recommendation run (W16), database-owned invalidation (W17), Manager-only score, empty runs, prompt-version invalidation and `rank-v2`; added §12 (MVP limitations).
 - **v0.4 (2026-11-07):**
   - Codified hybrid matching (W9, D3) and the persisted recommendation lifecycle (W14, D2, §6).
