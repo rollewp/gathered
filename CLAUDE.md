@@ -4,7 +4,7 @@
 AI for Church Hackathon entry (build window Oct 30 – Nov 27, 2026; **submit by Tue Nov 24**). Gathered matches members to small groups (D-Groups) with a deterministic shortlist plus LLM final ranking, inside a 3-persona demo portal.
 
 ## Source of truth (read before significant work)
-- [`docs/Gathered - Data Model & Architecture.md`](docs/Gathered%20-%20Data%20Model%20%26%20Architecture.md): decisions W1–W15 and D1–D7, schema, RLS matrix, hybrid matching, recommendation lifecycle, escalations, seed spec, validation results, open questions. **If code and spec disagree, the spec wins. Ask before changing a decision.**
+- [`docs/Gathered - Data Model & Architecture.md`](docs/Gathered%20-%20Data%20Model%20%26%20Architecture.md): decisions W1–W17 and D1–D7, schema, RLS matrix, hybrid matching, recommendation lifecycle, escalations, seed spec, validation results, open questions. **If code and spec disagree, the spec wins. Ask before changing a decision.**
 - [`docs/Gathered - Demo Journeys.md`](docs/Gathered%20-%20Demo%20Journeys.md): build principles, pre-build validation (incl. the recommendation model evaluation), Slice 0 (connection) and Slice 1 (recommendation lifecycle), per-journey screens, data and guardrails, the screen inventory, and build order with the cut line.
 - [`docs/AI for Church Hackathon - Submission Deliverables.md`](docs/AI%20for%20Church%20Hackathon%20-%20Submission%20Deliverables.md): form fields and the safeguards that must be built and shown.
 - [`seed/generate_seed.py`](seed/generate_seed.py) → `seed/out/*.csv`: synthetic Winter Garden, FL church (deterministic, RNG 516).
@@ -36,7 +36,9 @@ AI for Church Hackathon entry (build window Oct 30 – Nov 27, 2026; **submit by
   - Then a weighted score to a shortlist of ~6. Then the LLM returns the top 3 group IDs and an internal rationale.
   - The LLM never adds a group that wasn't on the shortlist.
   - Only opted-in members with no active group membership get recommendations.
-  - Recommendation runs are persisted. A page view or refresh never calls the ranking LLM by itself; material changes invalidate runs without calling it; regeneration happens on the next eligible request with no valid run.
+  - Score, score breakdown, shortlist and internal rationale are Manager-only, enforced by grants and `SECURITY DEFINER` functions, not the UI. Members read ordered groups and public group cards only.
+  - Recommendation runs are persisted. A page view or refresh never calls the ranking LLM by itself; material changes invalidate runs through database triggers without calling it (a run is a first-class record that keeps its full shortlist; empty results are valid runs; a prompt-version change invalidates old runs); regeneration happens on the next eligible request with no valid run.
+- **Scope:** Gathered is not a crisis-detection or pastoral emergency-response system; do not add that capability in the MVP.
 - **Contact:** Gathered never contacts anyone. Every LLM call goes to `audit_log`.
 - **Minimal CRUD:** the only user-initiated writes are member intake confirmation, join request, leader accept/decline, manager acknowledge/resolve. System writes that follow from them: recommendation runs and invalidation, escalation inserts, audit rows.
 

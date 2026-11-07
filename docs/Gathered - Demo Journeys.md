@@ -1,7 +1,7 @@
 # Gathered: Demo Journeys & Build Plan
 **Version 0.2 · 2026-11-07**
 **Companions:**
-- `Gathered - Data Model & Architecture.md`: decisions W1–W15, schema, row-level security, matching and the recommendation lifecycle. It is canonical; if this plan disagrees with it, it wins.
+- `Gathered - Data Model & Architecture.md`: decisions W1–W17, schema, row-level security, matching and the recommendation lifecycle. It is canonical; if this plan disagrees with it, it wins.
 - `AI for Church Hackathon - Submission Deliverables.md`: submission fields and safeguards checklist.
 
 This document is the build plan. Each **slice** proves one piece of infrastructure; each **user journey** is one vertical slice of the product and one segment of the demo video. Build them in the order under *Build Priorities & Cut Order*. Demo them in the order under *Video Run Order*. Target submission: **Tue Nov 24**; if behind, cut from the bottom of the build list.
@@ -151,34 +151,39 @@ What the slices build on:
 ---
 
 ## Slice 1: Recommendation Lifecycle
-**Goal:** prove the persisted recommendation lifecycle before building member screens around it (architecture §5–§6, W9, W14, W15).
+**Goal:** prove the persisted recommendation lifecycle before building member screens around it (architecture §5–§6, W9, W14–W17).
 
 ```
-eligible request → valid stored run? → yes: reuse (0 LLM calls)
-                                     → no:  shortlist → Haiku → persist → return
+eligible request → current run stored? → yes: reuse (0 LLM calls)
+                                       → no:  shortlist → Haiku (rank-v2) → persist run → return
 next request → reuse
+material change → invalidate (0 LLM calls) → next request regenerates
 ```
+
+**Prerequisite:** `person_features` populated in Lakebase (Build Priorities, step 3). The shortlist needs `busy_slots`, `kids_age_bands` and `serving_areas`, and the table is empty until the Databricks job, or its documented local fallback, runs.
 
 **Establishes:**
 - **Eligibility:** opted-in members with no active group membership only (§5.1). A member with an active membership gets their group experience instead (Journey 6), with no matching.
-- **Deterministic stage:** hard filters and weighted score (§5.2–5.3), moved from the evaluation script into the app's database layer, producing a shortlist of up to 6 with `score_breakdown`.
-- **Haiku ranking:** the `rank-v1` contract (or `rank-v2` with `status` and `open_seats`), zod-validated, shortlist-only, retry once, then score-order fallback.
-- **Persistence:** a run with its ranked rows, score, score breakdown, internal rationale, model, prompt version and generation time, plus an `audit_log` row per LLM call.
-- **Manager-only audit:** the internal rationale and score breakdown are readable only through `app.manager_recommendation_audit()`; the member's read path returns groups and order only.
-- **Validity and invalidation:** material changes (§6.3) mark affected runs invalid with a reason, without calling the LLM.
-- **Reuse:** a request with a valid stored run returns it with zero ranking calls.
+- **Deterministic stage in the database:** `app.recommendation_shortlist()` implements the hard filters and weighted score (§5.2–5.3), moved from the evaluation script, returning up to 6 candidates with `score_breakdown`.
+- **Haiku ranking with `rank-v2`:** the `rank-v1` contract plus each group's `status` and `open_seats`, zod-validated, shortlist-only, retry once, then score-order fallback. Re-evaluated against the 14 labels before it ships.
+- **Persistence:** a `recommendation_run` with its full shortlist (`recommendation_run_candidate`) and its ordered `recommendation` rows, written only by `app.persist_recommendation_run()`; one `audit_log` row per LLM call.
+- **Manager-only audit:** score, breakdown, rationale, provenance and invalidation history readable only through `app.manager_recommendation_audit()`. Members read ordered groups and public group cards only.
+- **Current/invalid semantics:** one current run per member; material changes (§6.3) invalidate affected runs through database triggers (§6.6), with a reason and timestamp, no LLM call, and no change to Leader RLS.
+- **Empty runs:** zero eligible groups creates a valid empty run, reused on revisits (§6.2).
+- **Prompt-version invalidation:** deploying a new `prompt_version` invalidates runs made under the old one, without regenerating.
+- **Reuse:** a request with a current run returns it with zero ranking calls.
 
-**Prerequisite decisions:** the run record, invalidation mechanism, member visibility of `score`, empty-result handling and prompt-version policy (architecture §11.2) must be settled first; the first two likely need a new migration.
-
-**Screens:** none new. Drive it from the member home (`/member`) for a seeded persona, plus a minimal debug readout of the run ID, status and the count of ranking audit rows, removed after Journey 1.
+**Screens:** none new. A temporary `/recommendation-test` page (like Slice 0's `/connection-test`) with a "Request recommendations" button and a debug readout: run ID, current/invalid, outcome, and the count of ranking audit rows. For the Manager persona it also shows the audit rows. Journey 1 replaces it.
 
 **Done when:**
-1. The first request by an eligible member (e.g. Dana) generates a run and stores it with its ranked rows.
+1. The first request by an eligible member (e.g. Dana) generates a run and stores it with its shortlist and ranked rows.
 2. Immediately revisiting or refreshing returns the same run with **zero** additional ranking LLM calls (no new ranking `audit_log` row).
-3. A known material change (e.g. a membership change in a group on Dana's shortlist, or Dana re-confirming her profile) marks the run invalid with a reason, and makes no LLM call.
-4. Dana's next request generates a new run; the old run remains, marked invalidated.
-5. Both runs are visible to the Manager through the audit function, with score breakdown, internal rationale, model and prompt version, and are not visible to a Leader or Member.
-6. A member with an active membership (Ruth) gets her group, and no run is generated.
+3. A known material change (e.g. a leader accepting a request into a group on Dana's shortlist, or Dana re-confirming her profile) marks the run invalid with a reason and timestamp, and makes no LLM call.
+4. Dana's next request generates a new run; the old run remains, marked invalid.
+5. Both runs are visible to the Manager through the audit function, with shortlist scores, breakdown, internal rationale, model and prompt version, and none of that is readable by a Leader or Member (verified by direct queries, not just the UI).
+6. A member whose filters leave no eligible group (Priya) gets a valid empty run, and a revisit reuses it.
+7. A member with an active membership (Ruth) gets her group, and no run is generated.
+8. Switching the deployed prompt version marks existing current runs invalid with no LLM call; the next request regenerates under the new version.
 
 ---
 
@@ -223,7 +228,7 @@ next request → reuse
 - **The intake LLM call** returns only allowed values (`life_stage`, `available_slots`, `group_pref`, `interests`), validated by a zod schema.
 - **On save:** `insert member_profile` (`profile_source = 'llm_confirmed'`, `consent_version = 'v1-2026-10'`) plus an `audit_log` row. Jordan is now eligible and has no run, so opening the member home generates his first run (Slice 1). A later profile change would invalidate it.
 
-**Guardrail:** the LLM proposes and the member confirms. Personal details never become profile fields.
+**Guardrail:** the LLM proposes and the member confirms. Personal details never become profile fields. Free-text intake is used for group matching only; Gathered is not a crisis-detection system (architecture §12).
 
 ### Journey 3 · A leader accepts, and the group changes (Chris → Sam → Jordan) · video 0:45
 **Story:** Chris leads a forming men's group with no members yet. He accepts Sam, the first member. Jordan's recommendations shift, because the group now has a dad of toddlers in it.
