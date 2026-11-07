@@ -8,3 +8,5 @@ eval/out/
 *.tsbuildinfo
 next-env.d.ts
 .pnpm-debug.log*
+
+.vercel
