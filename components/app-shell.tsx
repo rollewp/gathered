@@ -13,7 +13,7 @@ const personaMeta = {
 }
 
 export function DemoBanner() {
-  return <div className="border-b border-[#d9e2d8] bg-[#eef4ed] px-4 py-2 text-center text-xs text-[#54705b]">Demo data only · Nothing here is saved or sent</div>
+  return <div className="border-b border-[#d9e2d8] bg-[#eef4ed] px-4 py-2 text-center text-xs text-[#54705b]">Showcase Demonstration · AI-powered Recommendations with Guardrails</div>
 }
 
 export function AppHeader({ persona }: { persona?: Persona }) {
