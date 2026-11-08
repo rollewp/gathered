@@ -4,9 +4,10 @@
 AI for Church Hackathon entry (build window Oct 30 – Nov 27, 2026; **submit by Tue Nov 24**). Gathered matches members to small groups (D-Groups) with a deterministic shortlist plus LLM final ranking, inside a 3-persona demo portal.
 
 ## Source of truth (read before significant work)
-- [`docs/Gathered - Data Model & Architecture.md`](docs/Gathered%20-%20Data%20Model%20%26%20Architecture.md): decisions W1–W17 and D1–D7, schema, RLS matrix, hybrid matching, recommendation lifecycle, escalations, seed spec, validation results, open questions. **If code and spec disagree, the spec wins. Ask before changing a decision.**
-- [`docs/Gathered - Demo Journeys.md`](docs/Gathered%20-%20Demo%20Journeys.md): build principles, pre-build validation (incl. the recommendation model evaluation), Slice 0 (connection) and Slice 1 (recommendation lifecycle), per-journey screens, data and guardrails, the screen inventory, and build order with the cut line.
-- [`docs/AI for Church Hackathon - Submission Deliverables.md`](docs/AI%20for%20Church%20Hackathon%20-%20Submission%20Deliverables.md): form fields and the safeguards that must be built and shown.
+- [`docs/Gathered - Data Model & Architecture.md`](docs/Gathered%20-%20Data%20Model%20%26%20Architecture.md): **canonical technical architecture and decisions.** Decisions W1–W17 and D1–D7, schema, RLS matrix, hybrid matching, recommendation lifecycle and invalidation, Lakebase/Databricks responsibilities, LLM contracts and guardrails, escalations, seed spec, validation results, open questions. **If code and spec disagree, the spec wins. Ask before changing a decision.**
+- [`docs/Gathered - Demo Journeys.md`](docs/Gathered%20-%20Demo%20Journeys.md): **canonical product behavior.** User journeys (stable numbers, not build order), personas and stories, screens, data effects, guardrails, scope boundaries, and the demo video narrative. It is not a status or sequencing document.
+- [`docs/Gathered - Build Tracker.md`](docs/Gathered%20-%20Build%20Tracker.md): **implementation status.** Current and next work, dependencies, sequencing, completed work, and cut decisions. Update it when work starts, finishes or is cut; do not put status in the other documents.
+- [`docs/AI for Church Hackathon - Submission Deliverables.md`](docs/AI%20for%20Church%20Hackathon%20-%20Submission%20Deliverables.md): submission requirements and the safeguards that must be built and shown.
 - [`seed/generate_seed.py`](seed/generate_seed.py) → `seed/out/*.csv`: synthetic Winter Garden, FL church (deterministic, RNG 516).
 
 ## Stack
@@ -51,6 +52,6 @@ AI for Church Hackathon entry (build window Oct 30 – Nov 27, 2026; **submit by
 - Drop schema `spike` once `app` exists.
 
 ## Repo layout
-- `docs/`: build spec (canonical), submission deliverables, application text, ER diagram.
+- `docs/`: architecture (canonical), product behavior (Demo Journeys), Build Tracker, submission deliverables, application text, ER diagram.
 - `seed/`: `generate_seed.py` and its output CSVs (`seed/out`). Regenerate rather than hand-edit CSVs.
 - `spike/` and `pgtest.mjs`: the Postgres validation test (passed 2026-11-02). Delete once the `app` schema is in.

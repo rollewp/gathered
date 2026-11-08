@@ -10,3 +10,5 @@ next-env.d.ts
 .pnpm-debug.log*
 
 .vercel
+
+prompts/

@@ -1,9 +1,10 @@
 # Gathered: Data Model & Architecture
-**Version 0.6 · 2026-11-07 · Canonical build specification** for the Gathered entry to the AI for Church Hackathon 2026.
-**Companions:** `Gathered - Demo Journeys.md` (build plan, slices and journeys) · `AI for Church Hackathon - Submission Deliverables.md` (submission fields and safeguards checklist)
+**Version 0.7 · 2026-11-08 · Canonical build specification** for the Gathered entry to the AI for Church Hackathon 2026.
+**Companions:** `Gathered - Demo Journeys.md` (product behavior, user journeys and demo scenarios) · `Gathered - Build Tracker.md` (implementation status, sequencing and cut decisions) · `AI for Church Hackathon - Submission Deliverables.md` (submission fields and safeguards checklist)
 
 **How to use this document**
 - If code and this document disagree, this document wins. Change a decision here first, then in code.
+- This document describes how the system is designed to work. It does not track what is built or what comes next; that is the Build Tracker.
 - Decision IDs (W1–W17, D1–D7) and section numbers §3b, §5 and §10 are cited from code comments. Keep them stable.
 - Naming is generic on purpose: Manager / Leader / Member, and "group" rather than "D-Group" in the schema, so the model carries over outside church settings.
 
@@ -62,7 +63,7 @@
 │   recommendation runs + ranked rows · escalations · audit log      │
 │   person_features (written nightly from Databricks)                │
 │   fn group_card() · fn manager_recommendation_audit()              │
-│   deterministic shortlist (filters + score), added in Slice 1      │
+│   deterministic shortlist (filters + score)                         │
 ├──────────────▲─────────────────────────────────────────────────────┤
 │              │ nightly: person_features written into Lakebase      │
 │ DATA PLATFORM (Databricks Free Edition, Delta tables)              │
@@ -133,7 +134,7 @@ erDiagram
     AUDIT_LOG { bigint id PK  uuid actor_user_id FK  text action  text entity  uuid entity_id  jsonb detail  timestamptz at }
 ```
 
-The recommendation run, its shortlist candidates and the slimmed `recommendation` table are the Slice 1 schema (migration `0004`, designed in §6.5). Until that migration is applied, the deployed `recommendation` table still has the older single-table shape.
+The recommendation run, its shortlist candidates and the slimmed `recommendation` table are defined by migration `0004` and designed in §6.5.
 
 ---
 
@@ -164,7 +165,7 @@ The recommendation run, its shortlist candidates and the slimmed `recommendation
   - `service`: two Sunday services (9:00, and 11:00, which is livestreamed) and Wednesday night. Includes `slot` and `livestreamed`.
   - `attendance_event`: `person_id`, `service_id`, `channel`, `checked_in_by`, `checked_in_at`, `minutes_watched`.
   - `ministry`, `serving_assignment`: `schedule_slot` (e.g. `sun_11`) is what makes the "kids-ministry volunteer arrives late" conflict detectable.
-- **person_features** (derived nightly in Databricks, written into Lakebase; until that job exists, `scripts/compute_person_features.mjs` is a **local bootstrap producer** of the same contract, with formulas in `lib/features/person-features.mjs`. It is a development and recovery tool, not the deployed architecture. Databricks must reach schema and value parity with it before cutover, see Demo Journeys, *Next increment*):
+- **person_features** (derived nightly in Databricks, written into Lakebase; until that job exists, `scripts/compute_person_features.mjs` is a **local bootstrap producer** of the same contract, with formulas in `lib/features/person-features.mjs`. It is a development and recovery tool, not the deployed architecture. Databricks must reach schema and value parity with it before cutover; that work is tracked in the Build Tracker):
   - `observed_weeks_12w`: weeks with any signal, counting the adult on a kiosk row's `checked_in_by`
   - `attendance_rate_12w`: of observed signals only
   - `signal_sources`: the channels seen for this person
@@ -270,11 +271,11 @@ A member with an active membership sees their group (Journey 6) and is never sen
 The top groups by score, **up to 6**, go to the LLM. If fewer than 6 pass the filters, all of them go. If none pass, there is nothing to rank: the member sees the empty state, and that situation feeds the unmet-demand escalation (§8, #3).
 
 ### 5.5 · LLM ranking (Claude Haiku via OpenRouter)
-- **Input:** the member's `life_stage`, `group_pref`, `interests` and `about_me` (no name, attendance or address), and for each shortlisted group its public facts, an aggregated member mix (counts only) and its score. Full prompt contract: Demo Journeys, *Recommendation Model Evaluation*.
+- **Input:** the member's `life_stage`, `group_pref`, `interests` and `about_me` (no name, attendance or address), and for each shortlisted group its public facts, an aggregated member mix (counts only) and its score. Full prompt contract: §10.2.
 - **Output** (zod-validated): `ranked[]` of `{group_id, rank}`, an `internal_rationale` of 60 words or fewer, and a `confidence` of `high` · `medium` · `low`.
 - **Validation:** every `group_id` must come from the shortlist, with no duplicates and exactly `min(3, n)` items. On failure, retry once. If the retry also fails, fall back to the score order and record that the fallback was used.
 - **Prompt rules:** base the choice on the member's own words and stated preferences compared with group descriptions and tags. Never infer or mention anything about the member's spiritual state, marriage, health or struggles. The rationale refers to group facts and stated preferences only (W10).
-- **Prompt versions:** `rank-v1` is evaluated (§10.2). **Slice 1 ships `rank-v2`**, which adds each group's `status` and `open_seats` to the shortlist input (the fix suggested by the evaluation) and is re-evaluated before it ships. A change of prompt version invalidates runs created under the previous one (W17).
+- **Prompt versions:** `rank-v1` is evaluated (§10.2). **The current version is `rank-v2`**, which adds each group's `status` and `open_seats` to the shortlist input (the fix suggested by the `rank-v1` evaluation); it was re-evaluated (§10.2). A change of prompt version invalidates runs created under the previous one (W17).
 
 ### 5.6 · What is stored, and terminology
 - **Stored per run:** the shortlist with scores and breakdowns, the ranked rows, the internal rationale, model, prompt version, confidence and generation time (§6.5).
@@ -342,7 +343,7 @@ A change is **material** if it can change who is eligible, which groups pass the
 - The Manager's audit view lists every run for a member, including invalidated runs and why they were invalidated.
 
 ### 6.5 · Data model: the recommendation run
-Adopted for Slice 1 (migration `0004`). All three tables are written only by `SECURITY DEFINER` functions and triggers.
+Defined by migration `0004`. All three tables are written only by `SECURITY DEFINER` functions and triggers.
 
 **`recommendation_run`**: one generation event for one member.
 
@@ -476,15 +477,70 @@ Goal: decide where the operational store lives, testing Lakebase first with Neon
 | P1 | A Lakebase project can be created in Free Edition | Yes | PASS: project `gathered-demo`, Postgres 17.11 |
 | P2 | An app outside Databricks can connect with a **stable credential** (a native Postgres role and password, not a 1-hour OAuth token) | Yes | PASS: `gathered_app` with a native password, 381 ms |
 | P3 | Row-level security works with per-request settings, so personas see different rows | Yes | PASS: leader, member, manager and no-context saw 2/1/3/0 rows |
-| P4 | Cold start after scale-to-zero is under ~5 seconds | Yes (judges will hit it cold) | 381 ms on a probably-warm connection. **A true cold start after 10+ minutes idle is still to be measured** (Slice 0) |
+| P4 | Cold start after scale-to-zero is under ~5 seconds | Yes (judges will hit it cold) | 381 ms on a probably-warm connection. **A true cold start after 10+ minutes idle is still to be measured** (tracked in the Build Tracker) |
 | P5 | A synced table from Delta into Lakebase works for `person_features` | Nice to have | Not tested; not needed (the nightly notebook writes directly) |
 | P6 | The Databricks SQL API answers a query with a personal access token (only needed for the Neon fallback) | Fallback only | Not tested; not needed |
 
 - **Decision:** Lakebase. `gathered_app` has LOGIN only (no superuser, CREATEDB, CREATEROLE or BYPASSRLS) and is the only role the app uses. The owner role runs migrations and seeds only.
 - **Alternatives considered:** Neon (would have needed a pull-based feature sync, since Free Edition limits outbound connections from Databricks); Supabase free tier (not chosen: it pauses inactive projects).
 
-### 10.2 · Recommendation model evaluation (2026-11-05) → PASS
-Haiku with `rank-v1`, 14 designed labels, 3 runs per variant. Variant A (LLM sees scores): **top-1 42/42, top-3 42/42**, 0 fallbacks. Score order alone: top-1 9/14. The LLM's gain comes on cue-driven cases the fixed score can't read. Full method, results and caveats: Demo Journeys, *Recommendation Model Evaluation*.
+### 10.2 · Recommendation model evaluation → PASS
+**Goal:** show that the shortlist-then-LLM ranking picks the right group (W9).
+
+**Script:** `scripts/rank_eval.mjs` (`node --env-file=.env.local scripts/rank_eval.mjs`, explicit only because it makes real OpenRouter calls). The deterministic stage is `lib/ranking/reference-shortlist.mjs` and the prompt contract is `lib/ranking/rank-v2.mjs`, the same modules the application is tested against.
+1. For each row in `seed/out/eval_label.csv`, build the member context from Lakebase. The owner URL is acceptable here because this is offline evaluation, not the app.
+2. **Hard filters** (§5.2) and **weighted score** (§5.3) → a shortlist of up to 6, with `score_breakdown`.
+3. **LLM call** using the prompt contract below, in two variants:
+   - (A) the shortlist includes each group's score
+   - (B) the shortlist has no scores and is shuffled (tests whether the LLM just copies the score order)
+
+   A third baseline, (C), takes the score order with no LLM.
+4. **Validate the output:** every `group_id` comes from the shortlist, with no duplicates and `min(3, n)` items. On failure, retry once; if that fails, fall back to the score order and log it.
+5. **Report** per label: the shortlist, the LLM's top 3, the expected group, hit or miss, and the rationale (printed locally only). Summary: top-1 and top-3 hits out of 14 (an accepted alternate counts for top-3), invalid outputs, latency and token cost, **3 runs per variant** to check stability.
+
+**Pass mark (set before running):** top-1 ≥ 10 of 14; top-3 ≥ 13 of 14; 0 invalid outputs after retry; the same top-1 in at least 2 of 3 runs.
+
+**Prompt contract:**
+- **System prompt (`rank-v1`):**
+  - "You choose up to three small groups for a church member from a shortlist the church already filtered for schedule, distance, gender focus and open seats."
+  - "Use only `group_id`s from the shortlist."
+  - "Base the choice on the member's own words and stated preferences compared with each group's description and tags."
+  - "Do not infer or mention anything about the member's spiritual state, marriage, health or struggles beyond what they wrote, and never describe the member's personal circumstances."
+  - "The rationale is an internal audit note for the groups pastor: refer to group facts and the member's stated preferences."
+  - `rank-v2` adds that each group shows its status (forming or open) and its open seats.
+- **Input (JSON):**
+  - `member`: `life_stage`, `group_pref`, `interests[]`, `about_me`. No names, no attendance, no address.
+  - `shortlist[]`: `group_id`, `name`, `description`, `tags[]`, `meeting_slot`, `gender_focus`, `life_stage_focus`, `childcare`, `is_online`, `group_mix` (aggregated counts only, e.g. `{"young_kids": 3}`), and in variant A `score`. `rank-v2` adds `status` and `open_seats`.
+- **Output (JSON schema, zod-validated):** `{ "ranked": [{"group_id": uuid, "rank": 1..3}], "internal_rationale": string ≤ 60 words, "confidence": "high"|"medium"|"low" }`
+- **Model:** `OPENROUTER_MODEL_FAST` (Claude Haiku).
+
+**Result, `rank-v1` (2026-11-05, run `rank_eval-2026-11-05T18-02-26`, Haiku): PASS.**
+
+| Variant | Top-1 | Top-3 | Fallbacks | Stable top-1 |
+|---|---|---|---|---|
+| C: score only, no LLM | 9/14 | 12/14 | n/a | n/a |
+| A: LLM sees scores | **42/42** (3 runs) | 42/42 | 0 | 14/14 |
+| B: LLM, scores hidden, shuffled order | 40/42 | 42/42 | 0 | 14/14 |
+
+- **Shortlist recall:** 14/14. **Cost and latency:** about $0.02 for 42 calls; about 3.8 s per call.
+- **What the LLM adds:** +5 top-1 picks over the score alone, exactly on the cue-driven cases: e05 (travels, so online), e10 ("right after church," which the score ranked 4th), e02, e09 and e11. Variant A departed from the score order 5 times, so it isn't copying the scores.
+- **B's two misses:** both e11, which picked Tuesday Night Dads (an accepted alternate) over the forming group for "start something fresh." The suggested fix was to pass `status` and `open_seats` (`rank-v2`).
+- **Rationale check:** the rationales stick to stated preferences and group facts. In e08 the member mentioned needing to confess things; the rationale refers only to the *group's* confession focus and never describes the member.
+
+**Result, `rank-v2` (2026-11-07, Haiku, 3 runs per variant): PASS.**
+
+| Variant | Top-1 | Top-3 | Fallbacks | Stable top-1 |
+|---|---|---|---|---|
+| C: score only, no LLM | 9/14 | 12/14 | n/a | n/a |
+| A: LLM sees scores | **42/42** | 42/42 | 0 | 14/14 |
+| B: LLM, scores hidden, shuffled order | 39/42 | 42/42 | 0 | 14/14 |
+
+- **Shortlist recall:** 14/14. **Cost:** about $0.02 per variant (42 calls).
+- Adding `status` and `open_seats` did **not** fix variant B's e11 miss (all three runs still chose the accepted alternate, still a top-3 hit). Variant A, the shipping variant, is unaffected.
+
+**Shipping decision:** variant A, the hybrid of score and judgment. Report both A and B.
+
+**Caveat:** these are 14 designed labels written alongside the groups, so it is an easy test. Report it as a designed test set, not field accuracy. Add 6–10 harder labels written by someone else before quoting the number publicly.
 
 ---
 
@@ -494,7 +550,7 @@ Haiku with `rank-v1`, 14 designed labels, 3 runs per variant. Variant A (LLM see
 1. **Cold start:** measure the deployed app after 10+ minutes idle (P4).
 2. **Hosting terms and uptime for judging:** Vercel Hobby and Databricks Free Edition are licensed for non-commercial use; the app must be live and warm enough for judging, Nov 28–30.
 
-### 11.2 · Resolved for Slice 1 (2026-11-07)
+### 11.2 · Resolved (2026-11-07)
 1. **Run record:** a separate `recommendation_run` entity with a retained shortlist (W16, §6.5).
 2. **Invalidation:** explicit, database-owned, by `SECURITY DEFINER` triggers (W17, §6.6).
 3. **Score visibility:** score, breakdown and rationale are Manager-only; members see ordered groups and public group cards (§4).
@@ -502,7 +558,7 @@ Haiku with `rank-v1`, 14 designed labels, 3 runs per variant. Variant A (LLM see
 5. **Prompt change:** invalidates runs from the previous version, without regenerating (§6.2, §6.6).
 
 ### 11.3 · Open
-1. **Databricks `person_features` job and cutover.** Slice 1 runs on the local bootstrap producer. The Databricks job, its value parity with the bootstrap output, and the switch of the deployed feature refresh path are the next increment (Demo Journeys, *Next increment*).
+1. **Databricks `person_features` job and cutover.** The recommendation lifecycle runs on the local bootstrap producer. The Databricks job, its value parity with the bootstrap output, and the switch of the deployed feature refresh path are tracked in the Build Tracker.
 2. **Consistency factor.** The scorer keeps consistency neutral (7.5) until Databricks parity confirms the `consistency_score` and `signal_confidence` definitions (§3b).
 
 ---
@@ -515,6 +571,7 @@ Haiku with `rank-v1`, 14 designed labels, 3 runs per variant. Variant A (LLM see
 ---
 
 ## Revision history
+- **v0.7 (2026-11-08):** documentation boundaries: project status and build sequencing moved out to the Build Tracker; the recommendation model evaluation (method, prompt contract, results) moved here from Demo Journeys. No architecture decisions changed.
 - **v0.6 (2026-11-07):** Slice 1 implemented: migrations `0004` (recommendation runs) and `0005` (audit-log sequence grant), local `person_features` bootstrap, per-attempt LLM audit ownership.
 - **v0.5 (2026-11-07):** adopted the recommendation run (W16), database-owned invalidation (W17), Manager-only score, empty runs, prompt-version invalidation and `rank-v2`; added §12 (MVP limitations).
 - **v0.4 (2026-11-07):**
