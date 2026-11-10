@@ -38,7 +38,7 @@ This is the member's-eye view of the recommendation lifecycle (architecture §5�
 
 **When a member gets recommendations**
 - Only members who opted in (they have a confirmed profile) and are **not in an active group** are eligible. A member already in a group sees their group instead (Journey 6), and a member with no profile yet is sent to intake (Journey 2).
-- The first time an eligible member asks, Gathered filters the groups by what the member can actually attend (open seats, gender focus, an available and not-busy meeting time, within 5 miles of the leader's home unless the group is online), scores them, and keeps the best six. The model then picks and orders the top three from those six.
+- The first time an eligible member asks (the home screen offers a "Show me groups" button when there is no saved result), Gathered filters the groups by what the member can actually attend (open seats, gender focus, an available and not-busy meeting time, within 5 miles of the leader's home unless the group is online), scores them, and keeps the best six. The model then picks and orders the top three from those six.
 - The member sees up to three **group cards**: name, description, tags, meeting time, area, open seats, childcare. No explanation accompanies them.
 
 **What a member sees on a return visit**
@@ -93,8 +93,12 @@ Next.js App Router + Tailwind + shadcn/ui, with the screens below.
    - heading: "Groups that might fit you"
    - 3 group cards: name, description, tags, meeting time, area, open seats, childcare
    - **no explanation of why a group was recommended**
+   - before the member has asked, or after their saved result went out of date: a calm "Ready when you are" panel with a **Show me groups** button (opening or refreshing the page never generates anything by itself)
+   - groups the member has already asked to join show a **Request sent · pending** marker, and a "Your requests" list names the leader who will reach out
 2. **Group detail:** the full description, then "Ask to join" with an optional note (`member_note`).
-3. **Request sent:** "Tom will reach out if it's a fit." Shown as pending on the home screen.
+3. **Request sent:** "{Leader's first name} will reach out if it's a fit." (for example, "Tom will reach out if it's a fit.") Shown as pending on the home screen. The form is replaced by this confirmation, and a second request for the same group is not possible.
+
+**Rules for asking to join:** only a member who is looking for a group can ask; the group must be open or forming with a seat; a group with a gender focus accepts requests only from members it is meant for; a note is optional and limited to 500 characters; there is at most one open request per member and group. A member may ask to join a group that is not in their recommendations; the request is then simply not linked to a recommendation.
 
 **Data:**
 - **Recommendations:** the member's current run (see *How Recommendations Behave*). The member reads the ordered groups joined to the public group cards; score breakdown and rationale are not on that path.
@@ -120,7 +124,7 @@ Next.js App Router + Tailwind + shadcn/ui, with the screens below.
 
 **Data:**
 - **The intake LLM call** returns only allowed values (`life_stage`, `available_slots`, `group_pref`, `interests`), validated by a zod schema.
-- **On save:** `insert member_profile` (`profile_source = 'llm_confirmed'`, `consent_version = 'v1-2026-10'`) plus an `audit_log` row. Jordan is now eligible and has no saved result, so opening the member home generates his first recommendations. A later confirmed profile change makes that result out of date.
+- **On save:** `insert member_profile` (`profile_source = 'llm_confirmed'`, `consent_version = 'v1-2026-10'`) plus an `audit_log` row. Jordan is now eligible and has no saved result, so asking for groups from the member home generates his first recommendations. A later confirmed profile change makes that result out of date.
 
 **Guardrail:** the LLM proposes and the member confirms. Personal details never become profile fields. Free-text intake is used for group matching only; Gathered is not a crisis-detection system (architecture §12).
 
@@ -138,7 +142,7 @@ Next.js App Router + Tailwind + shadcn/ui, with the screens below.
 **Data:**
 - **One transaction:** `update join_request` (`accepted`, `decided_at`, `decided_by`) + `insert group_membership` + `audit_log`.
 - **Out of date, not regenerated:** the new membership is a material change (architecture §6.3). It marks Sam's own result out of date (he is no longer eligible) and every result that shortlisted New Men's D-Group, including Jordan's. No model call happens at accept time.
-- **Jordan's next visit** to his home screen finds no current result and generates a new one. New Men's D-Group's member mix and kids-age overlap have changed, so its score rises. The old result stays for the audit, so Journey 5 can show before and after.
+- **Jordan's next request** from his home screen finds no current result and generates a new one. New Men's D-Group's member mix and kids-age overlap have changed, so its score rises. The old result stays for the audit, so Journey 5 can show before and after.
 
 **Guardrail:** the leader sees no profile, attendance or rationale. Journey 5 proves it on screen.
 

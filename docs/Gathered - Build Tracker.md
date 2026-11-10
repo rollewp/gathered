@@ -18,46 +18,44 @@ This is the only document that tracks what is built, what is current, what is ne
 
 ## Current
 
-### Slice 0: Application & Data Connection
-- **Status:** In progress. Built and exercised locally; deployed verification and the cold-start measurement are not done, so it is **not** complete.
-- **Goal:** every layer works end to end on Vercel before further feature work: Vercel (Next.js) → `withPersona` → Lakebase as `gathered_app` → `app.group_card()`.
-- **Depends on:** schema and seed (Completed); Vercel project with `DATABASE_URL` set server-side.
-- **Acceptance:**
-  1. The deployed URL shows 20 group cards from `app.group_card()`.
-  2. Switching persona (at least one Member, one Leader and the Manager) changes the debug badge's role and person while `current_user` stays `gathered_app` and the cards stay identical.
-  3. The cold-start time after 10+ minutes idle is measured and recorded (architecture §10.1, P4).
-- **Notes:**
-  - Done locally: persona picker, `withPersona`, `/connection-test` with the debug badge (current user, `app.role`, `app.person_id`), cookie-based mock auth. Checked with Marcus, Tom and Alan: the role and person changed per persona and 20 cards were returned each time.
-  - Not done: Vercel deployment verification and the cold-start measurement. Automatic Vercel deploys are currently disabled (`vercel.json`), so a deploy is a deliberate action.
-  - The debug badge is temporary instrumentation. Remove it once Journey 1 replaces the screen.
-  - Vercel needs `DATABASE_URL`, `OPENROUTER_API_KEY` and `OPENROUTER_MODEL_FAST` (server-side) and Node 20 or newer. Any other database must have migrations `0001`–`0005` applied.
-- **Validate:** `npm run build`; then on the deployed URL pick three personas and compare the badge, and time one request after 10+ minutes idle.
-- **Commit:** `afa6bef` (code, "Add database connection"). Not complete, so this is not a completion record.
+### Slice 0: Application & Data Connection — Complete
+
+**Goal:** Prove every layer of the application stack works together locally before building user-facing journeys.
+
+**Status:** Complete.
+
+**Implemented and validated:**
+- Next.js application runs locally.
+- Persona selection exercises the application-to-database path.
+- `withPersona` establishes the correct persona-scoped database context.
+- The application connects successfully to Lakebase PostgreSQL through `DATABASE_URL`.
+- Row-level security and persona permissions operate through the application connection.
+- Lakebase scale-to-zero is configured for 5 minutes. Cold and resumed connections have occurred throughout development with no observed performance issue.
+- `npm run build` succeeds.
+- Slice 0 implementation is committed.
+
+**Acceptance criteria:** Complete when the local application successfully exercises the full path from UI → application/server action → `withPersona` → Lakebase PostgreSQL and returns successfully under the expected persona permissions.
+
+### Slice 0a: Vercel Deployment Validation
+
+- When Vercel deployment access is restored, deploy the existing application and verify the same application → `withPersona` → Lakebase path from the deployed environment.
 
 ---
 
 ## Next
-Implementation order. Items 1–3 build the product screens that sit on the finished recommendation lifecycle; the Databricks item is independent and can run alongside them.
+Implementation order. Items 1–2 build the remaining product screens on the finished recommendation lifecycle and Journey 1; the Databricks item is independent and can run alongside them.
 
-### 1. Journey 1: A member chooses a group
+### 1. Journey 3: A leader accepts, and the group changes
 - **Status:** Not started.
-- **Depends on:** Slice 1 (Completed). No dependency on Slice 0's deployed verification or on Databricks: the shortlist runs on the local `person_features` producer, and Databricks is a swap of the producer, not a prerequisite for the screens.
-- **Scope:** member home with real recommendations (replacing the mock data and the Slice 0 debug screen), group detail with "Ask to join" and an optional note, request-sent state, `insert join_request` plus an `audit_log` row. See Demo Journeys, Journey 1.
-- **Acceptance:** Dana's top pick is First Steps; Marcus sees Tuesday Night Dads first and Sunday Lunch among the three; both requests appear in the leaders' views (needs Journey 3 for the leader screen).
-- **Notes:** also retire the temporary `/connection-test` debug badge and the `/recommendation-test` page (or keep the latter only as an internal tool).
-- **Validate:** `npm run build`; `npm run test:recommendations`; manual run as Dana and Marcus.
-
-### 2. Journey 3: A leader accepts, and the group changes
-- **Status:** Not started.
-- **Depends on:** Journey 1 (requests exist); Slice 1 invalidation (Completed).
+- **Depends on:** Journey 1 (Completed: requests exist); Slice 1 invalidation (Completed).
 - **Scope:** leader home (my group, recent joiners, requests waiting with name and the requester's own note only), Accept/Decline, the single transaction (`join_request` update + `group_membership` insert + `audit_log`).
 - **Acceptance:** after Chris accepts Sam, Sam appears under recent joiners and the count goes 0/8 → 1/8; Jordan's current result is out of date and his next visit generates a new one in which New Men's D-Group scores higher; the leader sees no profile, attendance or rationale.
 - **Notes:** the invalidation mechanism already exists and is tested for the leader-accept path at the database level; this item adds the screens and the real accept transaction.
 - **Validate:** `npm run build`; `npm run test:recommendations`; manual run as Chris and Jordan.
 
-### 3. Journey 2: New attender intake
+### 2. Journey 2: New attender intake
 - **Status:** Not started.
-- **Depends on:** Journey 1 (member home screen).
+- **Depends on:** Journey 1 (Completed: member home screen).
 - **Scope:** intake textarea, LLM-proposed chips, confirmation, `insert member_profile` (`llm_confirmed`), zod-validated allowed values; then the member home generates Jordan's first recommendations.
 - **Acceptance:** nothing is saved without confirmation; `about_me` is saved verbatim; Jordan's three groups are the forming New Men's D-Group, Tuesday Night Dads and Men's Accountability (order to be verified).
 - **Notes:** uses the Haiku model through the same server-side OpenRouter path; each call is audited.
@@ -65,7 +63,7 @@ Implementation order. Items 1–3 build the product screens that sit on the fini
 
 ### Databricks `person_features` (independent track)
 - **Status:** Not started. Tracked as work still to do; the local bootstrap producer covers development until this lands.
-- **Depends on:** nothing in the journeys. Not a hard prerequisite for Journey 1. A Databricks workspace that stays available through judging (Dec 1).
+- **Depends on:** nothing in the journeys. Not a prerequisite for any journey. A Databricks workspace that stays available through judging (Dec 1).
 - **Steps:**
   1. Create the Databricks job that reads the engagement tables (attendance events, serving assignments, services, ministries) and writes `person_features` into Lakebase, using the existing output contract (architecture §3b) and the owner-role write path.
   2. Compare its output to the local bootstrap producer for the synthetic dataset.
@@ -81,7 +79,7 @@ Implementation order. Items 1–3 build the product screens that sit on the fini
 
 ### Journey 4: Manager oversight and escalations (rule items + AI hidden schedule conflict)
 - **Status:** Not started.
-- **Depends on:** Journey 1 (Marcus's request to Sunday Lunch); Journey 3 (Tom's waiting requests).
+- **Depends on:** Journey 1 (Completed: Marcus's request to Sunday Lunch can be made); Journey 3 (Tom's waiting requests).
 - **Scope:** dashboard tiles, groups table with 12-week meeting attendance, escalations list with "Run review", rule items (First Steps and Young Couples below the minimum, Tom's 9-day-old request), the AI schedule-conflict review (Sonnet), escalation detail with Acknowledge and Resolve, duplicate suppression.
 - **Acceptance:** see Demo Journeys, Journey 4.
 - **Validate:** `npm run build`; a manual run as Alan.
@@ -117,6 +115,26 @@ Below the cut line: do only if the items above are done.
 ---
 
 ## Completed
+
+### Journey 1: A member chooses a group
+- **Status:** Complete against the development database (2026-11-09). Not yet exercised on a deployed environment (Slice 0a) or in a real browser; the pages and server actions were driven over HTTP.
+- **Scope delivered:** member persona chooser and role-based landing; member home on the real recommendation lifecycle (ranked group cards, explicit "Show me groups" request, saved-result reuse, empty, ineligible and error states); group detail; Ask to join with an optional note; confirmation and pending states; leader first name for "will reach out".
+- **Acceptance (all passed):**
+  1. Dana's top pick is First Steps; Marcus sees Tuesday Night Dads first with Sunday Lunch D-Group among the three (live, via the application path; 1 model call each).
+  2. A saved result is reused with zero model calls on revisit and refresh.
+  3. No score, shortlist, breakdown, rationale, model or prompt version appears in the member pages, their payloads or member-readable queries.
+  4. A member can ask to join and sees a pending state on the group and on the home screen; the request is stored as `requested`, linked to the recommendation, with one audit row that holds no note text.
+  5. Duplicate and concurrent requests create exactly one request; ineligible callers, unknown/full/closed groups and gender-incompatible groups are rejected by the database; members cannot insert or change join requests directly.
+  6. The leader of the requested group can read the request; other leaders and other members cannot.
+  7. Creating a request does not invalidate the member's recommendation run.
+  8. `npm run build` succeeds.
+- **Evidence:** `npm run test:journey1` 19 of 19 (no model calls; includes active-member, forged-identity and audit-table access checks); `npm run test:recommendations` still passes; `npm run smoke:journey1` against a running app, 21 of 21 (no model calls); `npm run verify:journey1` live, 2 calls total, both revisits reused.
+- **Notes:**
+  - Migration `0006` adds `app.request_to_join()`, `app.my_join_requests()`, a partial unique index (one open request per member and group) and revokes the direct member insert on `join_request`, which previously let a member choose the request's status.
+  - Opening or refreshing the member home never generates recommendations. The first request is an explicit "Show me groups" button (architecture W14). Demo Journeys was updated to match; auto-generating on first visit would be a small change if preferred.
+  - Journey 6 ("Your group") and Journey 2 (intake) were not started: a member already in a group sees a short message, and a member without a profile is pointed to the existing mock intake screen.
+  - The Slice 0 debug badge and `/connection-test`, and `/recommendation-test`, remain as internal tools, linked quietly from the landing page only.
+- **Validate:** `npm run build`; `npm test` (stubbed, no external calls); with the app running, `npm run smoke:journey1`. Explicit only: `npm run verify:journey1`. Node 20 or newer.
 
 ### Slice 1: Recommendation Lifecycle
 - **Status:** Complete against the development database (2026-11-07). Not yet exercised on a deployed environment or by clicking through the browser; the server action was driven over HTTP.

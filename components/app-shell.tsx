@@ -16,7 +16,7 @@ export function DemoBanner() {
   return <div className="border-b border-[#d9e2d8] bg-[#eef4ed] px-4 py-2 text-center text-xs text-[#54705b]">Showcase Demonstration · AI-powered Recommendations with Guardrails</div>
 }
 
-export function AppHeader({ persona }: { persona?: Persona }) {
+export function AppHeader({ persona, name }: { persona?: Persona; name?: string }) {
   return (
     <>
       <DemoBanner />
@@ -27,7 +27,7 @@ export function AppHeader({ persona }: { persona?: Persona }) {
             <span className="font-serif text-xl font-semibold tracking-tight">Gathered</span>
           </Link>
           <div className="flex items-center gap-3">
-            {persona && <span className="hidden text-sm text-[#69736b] sm:inline">Viewing as <strong className="font-medium text-[#36463b]">{personaMeta[persona].label}</strong></span>}
+            {persona && <span className="hidden text-sm text-[#69736b] sm:inline">Viewing as <strong className="font-medium text-[#36463b]">{name ? `${name} (${personaMeta[persona].label})` : personaMeta[persona].label}</strong></span>}
             <Link href="/" className="text-sm font-medium text-[#647267] underline-offset-4 hover:text-[#26382b] hover:underline">Switch persona</Link>
             <button className="rounded-md p-2 text-[#647267] sm:hidden" aria-label="Open menu"><Menu className="size-5" /></button>
           </div>

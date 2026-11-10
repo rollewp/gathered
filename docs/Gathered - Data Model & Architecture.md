@@ -1,5 +1,5 @@
 # Gathered: Data Model & Architecture
-**Version 0.7 · 2026-11-08 · Canonical build specification** for the Gathered entry to the AI for Church Hackathon 2026.
+**Version 0.8 · 2026-11-09 · Canonical build specification** for the Gathered entry to the AI for Church Hackathon 2026.
 **Companions:** `Gathered - Demo Journeys.md` (product behavior, user journeys and demo scenarios) · `Gathered - Build Tracker.md` (implementation status, sequencing and cut decisions) · `AI for Church Hackathon - Submission Deliverables.md` (submission fields and safeguards checklist)
 
 **How to use this document**
@@ -192,7 +192,7 @@ The recommendation run, its shortlist candidates and the slimmed `recommendation
 - **recommendation_run_candidate:** the complete deterministic shortlist for a run: group, shortlist position, `score` and `score_breakdown`. Kept in full because a change to a shortlisted group can invalidate the run even if the group did not reach the top 3.
 - **recommendation:** the final ordered result of a run: `run_id`, `person_id`, `group_id`, `rank` (1–3) and nothing else. This is all a member can read about a recommendation. A database constraint ties each row to a candidate of the same run, so a recommended group is always a shortlisted group.
   - *Naming:* earlier drafts called the rationale column `why_text`. It is now `internal_rationale`, on the run, because the LLM returns one rationale for the whole set.
-- **join_request:** `status` = `requested` · `accepted` · `declined` · `withdrawn` · `expired`. `rec_id` links a request to the recommendation row it came from, if any. Accepting a request inserts the membership in the same transaction.
+- **join_request:** `status` = `requested` · `accepted` · `declined` · `withdrawn` · `expired`. Members create requests only through `app.request_to_join()` (migration `0006`), a `SECURITY DEFINER` function that requires an eligible member (§5.1), a group that is `open` or `forming` with a seat and compatible with its gender focus, and no other open request for the same group (also enforced by a partial unique index). The status is always `requested`, one `audit_log` row is written (never the note text), and `gathered_app` has no direct insert grant. `app.my_join_requests()` returns the caller's own requests plus the leader's first name. `rec_id` links a request to the recommendation row it came from, if any. Accepting a request inserts the membership in the same transaction.
 - **escalation:** `source` = `rule` | `ai`; `status` = `open` · `acknowledged` · `resolved`.
   - `evidence` stores the facts the escalation was built from. AI escalations also store the model and prompt version.
 - **audit_log:** every accept, decline, profile confirmation, escalation acknowledge or resolve, and every LLM call (§7).
@@ -215,7 +215,7 @@ This is what lets a group's makeup affect matching. When the first dad of toddle
 |---|---|---|---|
 | Own profile | ✔ read/write | ✔ (as a member) | ✔ all |
 | Own current recommendations: which groups, in what order | ✔ read | ✔ (as a member) | ✔ all, including invalidated runs |
-| Own join requests | ✔ read/create | ✔ (as a member) | ✔ all |
+| Own join requests | ✔ read; create only through `app.request_to_join()` | ✔ (as a member) | ✔ all |
 | Public group card (name, description, tags, slot, area, open seats, childcare) | ✔ | ✔ | ✔ |
 | A group's member list | ✖ | **own groups only** | ✔ all |
 | Join requests to a group | ✖ | **requests to own groups** | ✔ all |
@@ -571,6 +571,7 @@ Goal: decide where the operational store lives, testing Lakebase first with Neon
 ---
 
 ## Revision history
+- **v0.8 (2026-11-09):** Journey 1: member join requests moved behind `app.request_to_join()` / `app.my_join_requests()` (migration `0006`); direct member insert on `join_request` revoked.
 - **v0.7 (2026-11-08):** documentation boundaries: project status and build sequencing moved out to the Build Tracker; the recommendation model evaluation (method, prompt contract, results) moved here from Demo Journeys. No architecture decisions changed.
 - **v0.6 (2026-11-07):** Slice 1 implemented: migrations `0004` (recommendation runs) and `0005` (audit-log sequence grant), local `person_features` bootstrap, per-attempt LLM audit ownership.
 - **v0.5 (2026-11-07):** adopted the recommendation run (W16), database-owned invalidation (W17), Manager-only score, empty runs, prompt-version invalidation and `rank-v2`; added §12 (MVP limitations).

@@ -7,8 +7,11 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test": "npm run test:recommendations",
+    "test": "npm run test:recommendations && npm run test:journey1",
+    "test:journey1": "node --import tsx --conditions=react-server --env-file=.env.local scripts/test_journey1.mjs",
     "test:recommendations": "node --import tsx --conditions=react-server --env-file=.env.local scripts/test_recommendations.mjs",
+    "verify:journey1": "node --import tsx --conditions=react-server --env-file=.env.local scripts/verify_journey1.mjs",
+    "smoke:journey1": "node --env-file=.env.local scripts/smoke_journey1.mjs",
     "verify:openrouter": "node --import tsx --conditions=react-server --env-file=.env.local scripts/verify_openrouter.mjs",
     "features:local": "node --env-file=.env.local scripts/compute_person_features.mjs",
     "seed:reset": "node --env-file=.env.local scripts/load_seed.mjs && node --env-file=.env.local scripts/compute_person_features.mjs"

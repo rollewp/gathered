@@ -8,5 +8,5 @@ export async function selectPersona(formData: FormData) {
   const key = String(formData.get('personaKey') ?? '')
   if (!findPersona(key)) throw new Error('Unknown persona')
   ;(await cookies()).set(PERSONA_COOKIE, key, { httpOnly: true, sameSite: 'lax', path: '/' })
-  redirect('/connection-test')
+  redirect(`/${findPersona(key)!.role}`)
 }
