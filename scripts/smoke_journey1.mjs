@@ -22,7 +22,7 @@ const startAuditId = Number((await own.query("select coalesce(max(id), 0) m from
 
 let failed = 0;
 const check = (name, ok, extra = "") => { console.log(`  ${ok ? "PASS" : "FAIL"}  ${name}${ok ? "" : "  " + extra}`); if (!ok) failed++; };
-const text = (h) => h.replace(/<script[\s\S]*?<\/script>/g, " ").replace(/<[^>]+>/g, " ").replace(/&#x27;|&#39;/g, "'").replace(/&amp;/g, "&").replace(/\s+/g, " ");
+const text = (h) => h.replace(/<!--[\s\S]*?-->/g, "").replace(/<script[\s\S]*?<\/script>/g, " ").replace(/<[^>]+>/g, " ").replace(/&#x27;|&#39;/g, "'").replace(/&amp;/g, "&").replace(/\s+/g, " ");
 const get = async (key, url) => { const r = await fetch(BASE + url, { headers: { cookie: key ? `personaKey=${key}` : "" }, redirect: "manual" }); return { status: r.status, html: await r.text(), loc: r.headers.get("location") }; };
 
 async function persist(personKey) {
@@ -48,20 +48,55 @@ const names = Object.fromEntries((await own.query("select group_id, name from ap
 const HIDDEN = /rationale|score_breakdown|shortlist|prompt_version|rank-v|stub-model|confidence|internal_rationale|"score"/i;
 
 try {
-  console.log("Member home");
+  console.log("Browse Groups (catalog)");
+  const total = (await own.query("select count(*)::int n from app.grp")).rows[0].n;
+  const cards = (html) => (html.match(/href="\/member\/groups\/[0-9a-f-]{36}"/g) ?? []).length;
   let r = await get("member_dana", "/member");
-  check("no saved result: shows the explicit request control and makes no recommendation", r.status === 200 && text(r.html).includes("Show me groups") && !text(r.html).includes("Recommended for you"));
-  check("renders the persona name in the header", text(r.html).includes("Dana Ruiz"));
+  const b = text(r.html);
+  check("no saved result: Browse Groups with the database total, the explicit request control, and no recommendation made",
+    r.status === 200 && r.html.includes('aria-label="Browse groups"') && b.includes(`${total} groups meet`) && b.includes("Find my best matches") && !b.includes("selected for you"), b.slice(0, 300));
+  check(`first page shows 12 cards of ${total}, not all of them`, cards(r.html) === 12 && b.includes(`Showing 1\u201312 of ${total} groups`), `${cards(r.html)} cards`);
+  check("renders the persona name in the header", b.includes("Dana Ruiz"));
+  check("no ranking data in the catalog HTML", !HIDDEN.test(r.html), (r.html.match(HIDDEN) ?? [])[0]);
+  check("no address or coordinates in the catalog HTML", !/lat_approx|lng_approx|latitude|longitude|street/i.test(r.html));
+  check("filters are labelled form controls (search, day, time, format, life stage, childcare, open)",
+    ["catalog-q", "catalog-day", "catalog-time", "catalog-format", "catalog-stage"].every((id) => r.html.includes(`for="${id}"`) && r.html.includes(`id="${id}"`)) && r.html.includes('name="childcare"') && r.html.includes('name="open"'));
+  check("the result count is a polite live region", /role="status"[^>]*aria-live="polite"|aria-live="polite"[^>]*role="status"/.test(r.html));
+  const p2 = await get("member_dana", "/member?page=2");
+  check("page 2 shows the next 12 and links back", cards(p2.html) === 12 && text(p2.html).includes(`Showing 13\u201324 of ${total}`) && p2.html.includes("Previous"));
+  const f = await get("member_dana", "/member?day=thu&childcare=1");
+  const fn = (await own.query("select count(*)::int n from app.grp where meeting_slot like 'thu\\_%' and childcare")).rows[0].n;
+  check("two filters narrow the list and show the matching count", text(f.html).includes(`of ${fn} matching group`) && cards(f.html) === Math.min(12, fn) && text(f.html).includes("Clear all"), text(f.html).match(/Showing[^.]*/)?.[0]);
+  const none = await get("member_dana", "/member?q=zzzz-nothing");
+  check("no matches: friendly empty state, no cards", text(none.html).includes("No groups match those filters") && cards(none.html) === 0);
+  const bad = await get("member_dana", "/member?day=funday&page=-2&size=9999&childcare=maybe");
+  check("invalid parameters are ignored with a note (page size clamped to 24), never an error", bad.status === 200 && text(bad.html).includes("weren't recognised") && cards(bad.html) === 24);
+  const noRuns = (await own.query("select count(*)::int n from app.recommendation_run")).rows[0].n;
+  check("browsing, paging and filtering created no recommendation run and no audit row", noRuns === 0 && (await own.query("select count(*)::int n from app.audit_log where id > $1", [startAuditId])).rows[0].n === 0);
+  const noSaved = await get("member_dana", "/member?view=recommendations");
+  check("asking to view recommendations with none saved falls back to Browse (never generates)", noSaved.html.includes('aria-label="Browse groups"') && (await own.query("select count(*)::int n from app.recommendation_run")).rows[0].n === 0);
 
+  console.log("\nRecommendations");
   const dana = await persist("member_dana");
   r = await get("member_dana", "/member");
+  check("with a saved run, Browse offers 'View my best matches' (a link, not a regeneration)", text(r.html).includes("View my best matches") && !text(r.html).includes("Find my best matches"));
+  r = await get("member_dana", "/member?view=recommendations");
   const t = text(r.html);
   const order = dana.map((id) => t.indexOf(names[id]));
-  check("saved result: heading and three group cards render in ranked order", t.includes("Groups that might fit you") && order.every((i) => i > 0) && order.join() === [...order].sort((a, b) => a - b).join(), JSON.stringify(order));
+  check("saved result: heading and group cards render in ranked order", t.includes("Three groups selected for you") && t.includes("Explore these options and decide what feels right") && order.every((i) => i > 0) && order.join() === [...order].sort((a, b) => a - b).join(), JSON.stringify(order));
+  check("at most three recommendation cards", cards(r.html) === 3, `${cards(r.html)} cards`);
+  check("'Browse all groups' returns to the catalog", t.includes("Browse all groups") && r.html.includes('href="/member"'));
   check("no ranking data appears in the page or its payload", !HIDDEN.test(r.html), (r.html.match(HIDDEN) ?? [])[0]);
-  check("no 'why this fits' explanation", !/why (this|it|you)|because you|fits you because/i.test(t));
-  const again = await get("member_dana", "/member");
+  check("no 'why this fits' explanation", !/why (this|it|you)|because you|fits you because|ai chose|compatib|match score/i.test(t));
+  const again = await get("member_dana", "/member?view=recommendations");
   check("a second visit renders the same result", text(again.html).includes(names[dana[0]]));
+  const browse = await get("member_dana", "/member?page=3");
+  const stillOne = (await own.query("select count(*)::int n, bool_and(is_current) c from app.recommendation_run where person_id = $1", [P.member_dana.person_id])).rows[0];
+  check("browsing the catalog afterwards leaves the saved run in place", browse.status === 200 && stillOne.n === 1 && stillOne.c === true);
+  const cat = await get("member_dana", `/member?q=${encodeURIComponent(names[dana[0]])}`);
+  const recHtml = (await get("member_dana", "/member?view=recommendations")).html;
+  const cardOf = (html, name) => text(html.split(/<h3/).slice(1).find((c) => c.includes(name)) ?? "").split(/View (?:group|request)/)[0].replace(/Request sent · pending/, "").trim();
+  check("the recommended card and the catalog card for the same group show the same content", cardOf(cat.html, names[dana[0]]).length > 50 && cardOf(cat.html, names[dana[0]]) === cardOf(recHtml, names[dana[0]]));
 
   console.log("\nGroup detail and Ask to join");
   const gid = dana[0];
@@ -87,7 +122,7 @@ try {
   r = await get("member_dana", `/member/groups/${gid}`);
   check("detail now shows the confirmation (leader will reach out) and no form", /will reach out if it's a fit/.test(text(r.html)) && !text(r.html).includes("Ask to join"), text(r.html).slice(0, 200));
   r = await get("member_dana", "/member");
-  check("home shows the request as pending on the card and under Your requests", text(r.html).includes("Request sent · pending") && text(r.html).includes("Your requests"));
+  check("home shows the request under Your requests, and the recommended card is marked pending", text(r.html).includes("Your requests") && text((await get("member_dana", "/member?view=recommendations")).html).includes("Request sent · pending"));
 
   const post2 = await fetch(`${BASE}/member/groups/${gid}`, { method: "POST", body: form, redirect: "manual", headers: { cookie: "personaKey=member_dana" } });
   const count = (await own.query("select count(*)::int c from app.join_request where person_id = $1 and group_id = $2", [P.member_dana.person_id, gid])).rows[0].c;
@@ -95,16 +130,16 @@ try {
 
   console.log("\nOther states");
   r = await get("member_priya", "/member");
-  check("a member who has not asked yet sees the request control", text(r.html).includes("Show me groups"));
+  check("a member who has not asked yet sees the request control", text(r.html).includes("Find my best matches"));
   await persist("member_priya");
-  r = await get("member_priya", "/member");
+  r = await get("member_priya", "/member?view=recommendations");
   check("empty result is shown as the canonical empty state", text(r.html).includes("No group fits your mornings yet. We've let our groups pastor know."));
   r = await get("member_ruth", "/member");
-  check("member already in a group: no recommendations", text(r.html).includes("You're part of a group") && !text(r.html).includes("Recommended for you"));
+  check("member already in a group: no recommendations", text(r.html).includes("You're part of a group") && !r.html.includes('aria-label="Browse groups"'));
   r = await get("member_jordan", "/member");
   check("member without a profile is pointed to intake", text(r.html).includes("Let's get to know you") && r.html.includes("/member/intake"));
   r = await get("leader_tom", "/member");
-  check("a non-member persona gets the member chooser, not member data", text(r.html).includes("Continue as a member") && !text(r.html).includes("Groups that might fit you"));
+  check("a non-member persona gets the member chooser, not member data", text(r.html).includes("Continue as a member") && !r.html.includes('aria-label="Browse groups"'));
   r = await get(null, "/member");
   check("no persona selected: member chooser", text(r.html).includes("Continue as a member"));
   r = await get("manager", "/member/groups/" + gid);

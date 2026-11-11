@@ -41,7 +41,7 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ id
     <div className="min-h-screen">
       <AppHeader persona="member" name={persona.display} />
       <main className="mx-auto max-w-3xl px-5 py-10 lg:py-16">
-        <PageIntro eyebrow="A recommended group" title={group.name} description={group.description} backHref="/member" />
+        <PageIntro eyebrow="Group" title={group.name} description={group.description} backHref="/member" />
         <div className="grid gap-5 sm:grid-cols-2">
           <Card>
             <SectionLabel>At a glance</SectionLabel>

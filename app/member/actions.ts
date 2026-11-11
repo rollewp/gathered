@@ -14,7 +14,7 @@ async function memberPersona() {
 /**
  * The member explicitly asks for their recommendations. Reuses the current run when there is one
  * (zero model calls); otherwise the Slice 1 orchestrator generates and persists a run. Page
- * renders never call this.
+ * renders, catalog searches, filters and paging never call this.
  */
 export async function requestMyRecommendations() {
   const persona = await memberPersona()
@@ -25,7 +25,7 @@ export async function requestMyRecommendations() {
   } catch (e) {
     notice = e instanceof Error && e.name === 'RankingUnavailableError' ? 'unavailable' : 'error'
   }
-  redirect(notice ? `/member?notice=${notice}` : '/member')
+  redirect(notice ? `/member?notice=${notice}` : '/member?view=recommendations')
 }
 
 export type JoinFormState = { error?: string }

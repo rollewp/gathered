@@ -38,11 +38,15 @@ This is the member's-eye view of the recommendation lifecycle (architecture §5�
 
 **When a member gets recommendations**
 - Only members who opted in (they have a confirmed profile) and are **not in an active group** are eligible. A member already in a group sees their group instead (Journey 6), and a member with no profile yet is sent to intake (Journey 2).
-- The first time an eligible member asks (the home screen offers a "Show me groups" button when there is no saved result), Gathered filters the groups by what the member can actually attend (open seats, gender focus, an available and not-busy meeting time, within 5 miles of the leader's home unless the group is online), scores them, and keeps the best six. The model then picks and orders the top three from those six.
+- The first time an eligible member asks (the member home offers a **Find my best matches** button when there is no saved result), Gathered filters the groups by what the member can actually attend (open seats, gender focus, an available and not-busy meeting time, within 5 miles of the leader's home unless the group is online), scores them, and keeps the best six. The model then picks and orders the top three from those six.
 - The member sees up to three **group cards**: name, description, tags, meeting time, area, open seats, childcare. No explanation accompanies them.
 
+**Browsing never recommends**
+- A member who is looking for a group starts on **Browse Groups**, the full catalog of public group cards. Searching, filtering and paging through it never call the model, never create a recommendation run and never make a saved run out of date.
+- **Find my best matches** is the one explicit recommendation action. A saved result is reused; **Browse all groups** returns to the catalog without changing the saved result.
+
 **What a member sees on a return visit**
-- The same three groups, in the same order, instantly. Reloading, revisiting or refreshing never re-ranks anything or calls the model; the saved result is reused until something that matters changes.
+- The member home opens on Browse Groups again; where a saved result exists it offers **View my best matches** instead of asking again, and shows the same three groups, in the same order, instantly. Reloading, revisiting or refreshing never re-ranks anything or calls the model; the saved result is reused until something that matters changes.
 
 **What changes the result**
 - Anything that could change who qualifies or how groups score marks the saved result out of date. The next time the member asks, a fresh result is generated; the old one is kept for the Manager's audit. Nothing is regenerated in the background.
@@ -66,7 +70,7 @@ Next.js App Router + Tailwind + shadcn/ui, with the screens below.
 | Route | Screen | Key components |
 |---|---|---|
 | `/` | Persona picker | Persona cards (name, role badge, one-line blurb), "Continue as…" |
-| `/member` | Member home: recommendations (3 cards) or "Your group" | GroupCard (name, description, tags, slot, area, open seats, childcare), empty state for no match ("No group fits your mornings yet. We've let our groups pastor know.") |
+| `/member` | Member home. For a member looking for a group: **Browse Groups** (total group count, search, filters, 12 public group cards per page, "Find my best matches"), then the three recommendation cards with "Browse all groups". For a member already in a group: "Your group" | GroupCard (name, description, tags, slot, area, open seats, childcare), filter form, result count, pagination, empty states ("No groups match those filters"; for no recommendation: "No group fits your mornings yet. We've let our groups pastor know.") |
 | `/member/intake` | Intake → confirm | Textarea, editable chip groups (life stage, slots, preference, interests), "Looks right" |
 | `/member/groups/[id]` | Group detail + ask to join | Description, note field, "Ask to join", pending state |
 | `/leader` | Leader home | My-group summary, recent joiners, requests list with Accept/Decline |
@@ -85,26 +89,33 @@ Next.js App Router + Tailwind + shadcn/ui, with the screens below.
 
 ### Journey 1 · A member chooses a group (Dana, Marcus) · video 1:00
 **Story:**
-- **Dana:** new for six weeks, wants to start reading the Bible without being judged. She gets three groups and asks to join First Steps.
+- **Dana:** new for six weeks, wants to start reading the Bible without being judged. She sees the whole catalog of about 140 groups, asks for help, gets three groups and asks to join First Steps.
 - **Marcus:** a dad of two who serves in the preschool room at 11:00. He asks to join Sunday Lunch D-Group, which sets up Journey 4.
 
 **Screens:**
-1. **Member home (not in a group):**
-   - heading: "Groups that might fit you"
-   - 3 group cards: name, description, tags, meeting time, area, open seats, childcare
+1. **Browse Groups (member home, not in a group):**
+   - heading: "Find your group", with the real number of groups in the catalog (about 140) and a short line that groups meet throughout the week, online and across the Winter Garden area
+   - a prominent **Find my best matches** action
+   - search by group name or description, and ordinary filters: day, time of day, format (in person or online), life stage, childcare, and open to new members
+   - a page of 12 public group cards (name, description, tags, meeting time, area, open seats, childcare), a result count ("Showing 1–12 of 140 groups") and previous/next paging; even after filtering there are many credible options to read
+   - when a filter matches nothing: a calm "No groups match those filters" with a way to clear them
+   - **no explanation of why a group is shown**; the catalog is identical for every member
+2. **Three recommendations:** choosing **Find my best matches** shows "Three groups selected for you" (fewer if fewer qualify) and the same public group cards, in ranked order, with "Explore these options and decide what feels right" and **Browse all groups** to return to the catalog.
    - **no explanation of why a group was recommended**
-   - before the member has asked, or after their saved result went out of date: a calm "Ready when you are" panel with a **Show me groups** button (opening or refreshing the page never generates anything by itself)
+   - a saved result is reused: on a return visit Browse Groups offers **View my best matches**, which opens the saved cards without asking the model again (opening or refreshing the page never generates anything by itself)
+   - after a saved result goes out of date, Browse Groups offers **Find my best matches** again
    - groups the member has already asked to join show a **Request sent · pending** marker, and a "Your requests" list names the leader who will reach out
-2. **Group detail:** the full description, then "Ask to join" with an optional note (`member_note`).
-3. **Request sent:** "{Leader's first name} will reach out if it's a fit." (for example, "Tom will reach out if it's a fit.") Shown as pending on the home screen. The form is replaced by this confirmation, and a second request for the same group is not possible.
+3. **Group detail (from a catalog card or a recommendation card):** the full description, then "Ask to join" with an optional note (`member_note`).
+4. **Request sent:** "{Leader's first name} will reach out if it's a fit." (for example, "Tom will reach out if it's a fit.") Shown as pending on the home screen. The form is replaced by this confirmation, and a second request for the same group is not possible.
 
 **Rules for asking to join:** only a member who is looking for a group can ask; the group must be open or forming with a seat; a group with a gender focus accepts requests only from members it is meant for; a note is optional and limited to 500 characters; there is at most one open request per member and group. A member may ask to join a group that is not in their recommendations; the request is then simply not linked to a recommendation.
 
 **Data:**
+- **Browse Groups:** reads only the public group cards, paged and filtered in the database. No recommendation data and no model call.
 - **Recommendations:** the member's current run (see *How Recommendations Behave*). The member reads the ordered groups joined to the public group cards; score breakdown and rationale are not on that path.
 - **Join request:** `insert join_request` (`status = requested`, `rec_id`) plus an `audit_log` row. Creating a request does not invalidate any run.
 
-**Guardrail on screen:** cards are identical for every member. No reasoning appears. The member decides.
+**Guardrail on screen:** cards are identical for every member, whether they come from the catalog or from the recommendations. No reasoning appears. The member decides.
 
 **Expected outcomes:**
 - Dana's top pick is First Steps.
@@ -228,7 +239,7 @@ The video follows a story arc, which is intentionally different from the order t
 |---|---|
 | Problem | 0:30 |
 | Journey 2 (Jordan intake) | 0:45 |
-| Journey 1 (Dana's pick, Marcus's request) | 1:00 |
+| Journey 1 (about 140 groups → ordinary browsing → three recommendations → Dana asks to join First Steps; Marcus's request) | 1:00 |
 | Journey 3 (Chris accepts Sam, Jordan's ranking shifts) | 0:45 |
 | Journey 4 (Run review: conflict + unmet demand) | 1:00 |
 | Journey 5 (audit + two-role clip) | 0:45 |

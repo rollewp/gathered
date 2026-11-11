@@ -140,7 +140,7 @@ Below the cut line: do only if the items above are done.
 
 ### Journey 1: A member chooses a group
 - **Status:** Complete against the development database (2026-11-09). Not yet exercised on a deployed environment (Slice 0a) or in a real browser; the pages and server actions were driven over HTTP.
-- **Scope delivered:** member persona chooser and role-based landing; member home on the real recommendation lifecycle (ranked group cards, explicit "Show me groups" request, saved-result reuse, empty, ineligible and error states); group detail; Ask to join with an optional note; confirmation and pending states; leader first name for "will reach out".
+- **Scope delivered:** member persona chooser and role-based landing; member home on the real recommendation lifecycle (ranked group cards, explicit recommendation request, saved-result reuse, empty, ineligible and error states); group detail; Ask to join with an optional note; confirmation and pending states; leader first name for "will reach out".
 - **Acceptance (all passed):**
   1. Dana's top pick is First Steps; Marcus sees Tuesday Night Dads first with Sunday Lunch D-Group among the three (live, via the application path; 1 model call each).
   2. A saved result is reused with zero model calls on revisit and refresh.
@@ -153,10 +153,17 @@ Below the cut line: do only if the items above are done.
 - **Evidence:** `npm run test:journey1` 19 of 19 (no model calls; includes active-member, forged-identity and audit-table access checks); `npm run test:recommendations` still passes; `npm run smoke:journey1` against a running app, 21 of 21 (no model calls); `npm run verify:journey1` live, 2 calls total, both revisits reused.
 - **Notes:**
   - Migration `0006` adds `app.request_to_join()`, `app.my_join_requests()`, a partial unique index (one open request per member and group) and revokes the direct member insert on `join_request`, which previously let a member choose the request's status.
-  - Opening or refreshing the member home never generates recommendations. The first request is an explicit "Show me groups" button (architecture W14). Demo Journeys was updated to match; auto-generating on first visit would be a small change if preferred.
+  - Opening or refreshing the member home never generates recommendations. The first request is an explicit button (architecture W14; now "Find my best matches", see the Browse Groups increment below). Demo Journeys was updated to match; auto-generating on first visit would be a small change if preferred.
   - Journey 6 ("Your group") and Journey 2 (intake) were not started: a member already in a group sees a short message, and a member without a profile is pointed to the existing mock intake screen.
   - The Slice 0 debug badge and `/connection-test`, and `/recommendation-test`, remain as internal tools, linked quietly from the landing page only.
 - **Validate:** `npm run build`; `npm test` (stubbed, no external calls); with the app running, `npm run smoke:journey1`. Explicit only: `npm run verify:journey1`. Node 20 or newer.
+
+### Journey 1 increment: Hybrid Group Discovery (Browse Groups)
+- **Status:** Done (2026-11-11) against the development database. Not committed. Driven over HTTP against a production build of the running app; **not clicked in a real browser** (no browser tooling in the session). Not exercised on a deployed environment.
+- **Scope delivered:** the member home opens on a database-backed catalog (real total, search, day / time of day / format / life stage / childcare / open-to-new-members filters, 12 cards per page with stable name order, result count, previous/next paging, empty-filter, invalid-parameter, database-error and loading states), a prominent "Find my best matches" action through the existing server action and orchestrator, a recommendation view ("Three groups selected for you", "Browse all groups"), and "View my best matches" for a saved run. Catalog and recommendation cards use the same public card contract; group detail and Ask to join are unchanged.
+- **Code:** `lib/catalog-params.ts` (URL parsing and clamping), `lib/catalog.ts` (reads only `app.group_card()` as `gathered_app`, explicit public columns, bound parameters), `components/catalog-controls.tsx`, `app/member/(home)/page.tsx` (moved from `app/member/page.tsx`; same URL) with `loading.tsx`, `app/member/error.tsx`, `scripts/test_catalog.mjs`. No migration, no schema, RLS, scoring, prompt, model or seed change.
+- **Evidence:** `npm test` passed: 14 offline + 45 lifecycle/RLS/concurrency + 19 Journey 1 + 24 new catalog tests; `npm run smoke:journey1` against the running app 38 of 38; `npx tsc --noEmit` clean; `npm run build` succeeded. No OpenRouter calls were made by this work: the automated tests inject a stub model and assert zero network calls and zero audit rows from browsing.
+- **Open:** the real-browser check (including 320 px width and keyboard use) and the live "Find my best matches" click have not been done; no live ranking evaluation was run.
 
 ### Slice 1: Recommendation Lifecycle
 - **Status:** Complete against the development database (2026-11-07). Not yet exercised on a deployed environment or by clicking through the browser; the server action was driven over HTTP.
