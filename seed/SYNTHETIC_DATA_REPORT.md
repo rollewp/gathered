@@ -4,9 +4,9 @@
 
 ## 1. Generator and run metadata
 - **Report version:** V2 (semantic differentiation, controlled label model, offline Shortlist Recall@6).
-- Generator: `seed/generate_seed.py` **v2.0 (2026-11-10)**, RNG seed **516**. Repository revision: `38087d2 (working tree has uncommitted changes)`.
-- Report generated: 2026-11-10T22:27:39.030Z (report metadata, not seed content).
-- Generation duration: 6.6 s and 6.5 s (two runs, measured by the determinism check). Validation duration: 16.4 s (includes the two full regenerations).
+- Generator: `seed/generate_seed.py` **v2.0 (2026-11-10)**, RNG seed **516**. Repository revision: `76a9aa4`.
+- Report generated: 2026-11-11T13:03:49.753Z (report metadata, not seed content).
+- Generation duration: 6.6 s and 6.4 s (two runs, measured by the determinism check). Validation duration: 16.3 s (includes the two full regenerations).
 - **Lakebase and OpenRouter were not touched.** This validator reads CSV files only. It runs the generator and `git` as local processes; it opens no database connection, makes no network call and invokes no model. The development database is unchanged.
 - **Observed versus expected:** everything below is an observed offline fact about the generated CSVs unless a sentence says it is a later expectation. Nothing here is a model result (see section 19).
 - Features and shortlists below use the reference implementations in `lib/features/person-features.mjs` and `lib/ranking/reference-shortlist.mjs` on the CSVs in memory (as-of 2026-11-01). No database, no network, no model calls.
