@@ -1,5 +1,5 @@
 # Gathered: Build Tracker
-**Implementation status, sequencing, dependencies and cut decisions · last updated 2026-11-08**
+**Implementation status, sequencing, dependencies and cut decisions · last updated 2026-11-10**
 
 This is the only document that tracks what is built, what is current, what is next and what is cut. It carries no product behavior and no architecture.
 
@@ -43,7 +43,27 @@ This is the only document that tracks what is built, what is current, what is ne
 ---
 
 ## Next
-Implementation order. Items 1–2 build the remaining product screens on the finished recommendation lifecycle and Journey 1; the Databricks item is independent and can run alongside them.
+Implementation order. The synthetic data expansion gates re-testing of the finished journeys. Items 1–2 build the remaining product screens on the finished recommendation lifecycle and Journey 1; the Databricks item is independent and can run alongside them.
+
+### Synthetic data expansion (in progress)
+Specification: `Gathered - Synthetic Data Design.md`. The work is staged so the development database is untouched until the generated world has been reviewed.
+
+- **Increment 1: generator refactor and offline validation — done (2026-11-10), awaiting review.** Not committed.
+  - **Delivered:** `seed/generate_seed.py` v1.0 rebuilt around configuration, household and member archetypes, group-family templates, campus and geography, engagement patterns, named-persona overlays and evaluation overlays (RNG 516, deterministic). New `scripts/seed_validate.mjs` (identity, referential integrity, loader compatibility, schema, rules, determinism, distributions, persona and evaluation analysis through the real reference implementations), `seed/stable_ids.json` (recorded invariants) and the generated `seed/SYNTHETIC_DATA_REPORT.md`.
+  - **Result:** 2,598 households, 4,559 adults, 1,743 children, 140 groups, 1,039 active memberships, 1,571 profiles, 52 weeks of history, 29 evaluation scenarios. Every approved target passed; 191 of 191 checks passed; two regenerations are byte-identical. Dana: 24 broadly eligible groups, 11 pass every hard filter; Priya and her cohort stay at zero on purpose.
+  - **Known gaps, reported in the data report:** Dana's #1–#2 deterministic gap is about 2 points (the scoring has few continuous factors; no tuning was done); no campus column in the schema; Dana's stated group preference changed from "women" to "mixed".
+  - **Validate:** `npm run seed:generate`; `npm run seed:check` (generates twice, compares, validates, rewrites the report); `npm run seed:validate` for a quick pass. Python 3 and Node 20 or newer. None of these touch a database or call a model.
+- **Increment 1b (Synthetic Data V2): semantic differentiation, label model, evaluation tooling — done (2026-11-10), awaiting review.** Not committed. Database impact: **none**. OpenRouter calls: **zero**.
+  - **Delivered:** generator v2.0 (structure, counts and engagement byte-identical to v1.0; only text and labels changed): every template group description now states who it assumes it is talking to (new `DEPTH_TEXT`), sentences appended to 11 named groups, Dana's narrative says she feels a little behind (preference stays `mixed`). 11 ranking scenarios (including Dana) are selected for semantic differentiation, each with an expected group, at least two credible shortlisted alternatives, distinct text and a written contrast (`semantic_contrast`, `contrast_group_ids` in `eval_label.csv`).
+  - **Label model:** `outcome_type` is a controlled vocabulary (`ranking`, `empty`, `excluded`, `duplicate_pending`, `active_member`) with one execution behavior each; `expectation` (`top1`, `top1_or_alternates`, `top3`) sets how strictly a ranking scenario is judged. Shared parsing and validation in `lib/seed/eval-labels.mjs`. Five added labels (e13, e18, e19, e22, e23) were corrected from `top1_or_alternates` to `top1`; the 14 original labels are unchanged.
+  - **Tooling ready for the load, not run against a database:** `scripts/test_recommendations.mjs` reads the label set from the file (no fixed count), accounts for the 14 originals by identity and checks policy labels; `scripts/rank_eval.mjs` sends only `ranking` scenarios to the model, reports Shortlist Recall@6, LLM Top-1, Top-3, stability and fallback count and rate separately, and skips policy scenarios with a count and reason. New offline `npm run test:eval` (14 tests, no database or model) covers the label model and the metric arithmetic.
+  - **Evidence (offline):** `npm run seed:check` 209 of 209 checks, two regenerations byte-identical and equal to `seed/out`; Shortlist Recall@6 is 100% on the ranking scenarios; excluded groups are absent in every exclusion scenario; `tsc --noEmit` clean and `npm run build` succeeded. Dana: 24 broadly eligible, 11 hard-filter survivors, shortlist First Steps 56.1, Thursday Twenties 53.8, Online Thursday Study 52.5, Thursday Women in the Word 51.5, New Group: Thursday Families 48.6, Deep Roots 46.0 (close scores are acceptable; nothing was tuned).
+  - **Commands run:** `python seed/generate_seed.py`; `npm run seed:check`; `npm run test:eval`; `npx tsc --noEmit`; `npm run build`; `node --check` on the edited scripts. Report: `seed/SYNTHETIC_DATA_REPORT.md` (V2).
+  - **Unresolved:** the Journey 3 leader-persona gap (First Steps and Sunday Lunch D-Group leaders are not personas) is still open and needs your decision; the model's final order for Dana has not been observed.
+- **Increment 2: load and re-verify — not started.** Needs your go-ahead; it replaces the development data.
+  - Load with `npm run seed:reset`; recompute `person_features`.
+  - Run `npm test` (the scripts already accept the 29-label set), then the live ranking evaluation (`scripts/rank_eval.mjs`) and the Journey 1 live check, and decide whether Dana's top pick is stable.
+  - Update architecture §9 (it still states the v0.2 sizes).
 
 ### 1. Journey 3: A leader accepts, and the group changes
 - **Status:** Not started.

@@ -19,6 +19,7 @@ import fs from "node:fs";
 import path from "node:path";
 import pg from "pg";
 import { readCsv } from "../lib/seed/csv.mjs";
+import { parseLabels, partitionLabels, originalLabelMatcher } from "../lib/seed/eval-labels.mjs";
 import { buildContext, shortlistFor } from "../lib/ranking/reference-shortlist.mjs";
 import { PROMPT_VERSION } from "../lib/ranking/rank-v2.mjs";
 import { getRecommendations, peekRecommendations } from "../lib/recommendations.ts";
@@ -100,18 +101,59 @@ const ctx = buildContext({
   activeMemberships: await qq("select * from app.group_membership where status = 'active'"),
   features: await qq("select * from app.person_features"),
 });
-const labels = readCsv("eval_label.csv");
-await test("shortlist matches the reference implementation for all 14 evaluation labels (ids, order, score, breakdown)", async () => {
-  assert(labels.length === 14, `expected 14 labels, got ${labels.length}`);
-  for (const l of labels) {
-    const ref = shortlistFor(ctx, l.person_id);
-    const db = await asPerson("member", l.person_id, async (c) => (await c.query("select * from app.recommendation_shortlist()")).rows);
-    eq(db.map((r) => r.group_id), ref.map((g) => g.group_id), `${l.label_key} shortlist order`);
-    db.forEach((r, i) => {
-      assert(Math.abs(Number(r.score) - ref[i].total) < 1e-3, `${l.label_key} score ${r.score} vs ${ref[i].total}`);
-      for (const [k, v] of Object.entries(ref[i].breakdown)) assert(Math.abs(Number(r.score_breakdown[k]) - v) < 1e-3, `${l.label_key} breakdown.${k}`);
-    });
-    assert(db.length <= 6, "shortlist larger than 6");
+// The label set is read from the file (no fixed count). outcome_type decides which tests apply; the original
+// 14 labels are accounted for explicitly by identity (seed/stable_ids.json), not by position or count.
+const labels = parseLabels(readCsv("eval_label.csv"));
+const { ranking: rankingLabels, policyByType } = partitionLabels(labels);
+const { entries: originalEntries, isOriginal } = originalLabelMatcher();
+const dbShortlist = (personId) => asPerson("member", personId, async (c) => (await c.query("select * from app.recommendation_shortlist()")).rows);
+async function assertParity(l) {
+  const ref = shortlistFor(ctx, l.person_id);
+  const db = await dbShortlist(l.person_id);
+  eq(db.map((r) => r.group_id), ref.map((g) => g.group_id), `${l.label_key} shortlist order`);
+  db.forEach((r, i) => {
+    assert(Math.abs(Number(r.score) - ref[i].total) < 1e-3, `${l.label_key} score ${r.score} vs ${ref[i].total}`);
+    for (const [k, v] of Object.entries(ref[i].breakdown)) assert(Math.abs(Number(r.score_breakdown[k]) - v) < 1e-3, `${l.label_key} breakdown.${k}`);
+  });
+  assert(db.length <= 6, "shortlist larger than 6");
+  return db.map((r) => r.group_id);
+}
+await test("the label file is consistent with the V2 model and accounts for all 14 original labels", async () => {
+  assert(labels.length > 0, "no labels");
+  eq(originalEntries.length, 14, "stable_ids.json records 14 original labels");
+  for (const e of originalEntries) {
+    const hits = labels.filter((l) => l.label_key === e.key && l.person_id === e.person_id);
+    eq(hits.length, 1, `original label ${e.key} appears exactly once`);
+    assert(hits[0].outcome_type === "ranking" && hits[0].expected_group_id === e.expected_group_id && hits[0].acceptable_group_ids === e.acceptable_group_ids, `original label ${e.key} changed`);
+  }
+  assert(labels.filter(isOriginal).length === 14, "original labels not recognized");
+});
+await test("shortlist matches the reference implementation for every ranking evaluation label (ids, order, score, breakdown)", async () => {
+  assert(rankingLabels.length >= 14, `expected at least the 14 original ranking labels, got ${rankingLabels.length}`);
+  for (const l of rankingLabels) await assertParity(l);
+});
+await test("Shortlist Recall@6 in the database: the expected group is on every ranking label's shortlist; excluded groups never are", async () => {
+  for (const l of rankingLabels) {
+    const ids = await dbShortlist(l.person_id);
+    const shortIds = ids.map((r) => r.group_id);
+    assert(shortIds.includes(l.expected_group_id), `${l.label_key}: expected group missing from the shortlist`);
+    for (const x of l.excluded) assert(!shortIds.includes(x), `${l.label_key}: excluded group ${x} is on the shortlist`);
+  }
+});
+await test("policy labels: empty scenarios have no shortlist; excluded scenarios omit their groups; duplicate-pending and active-member facts hold in the database", async () => {
+  for (const l of policyByType.empty ?? []) eq(await assertParity(l), [], `${l.label_key} (empty) shortlist`);
+  for (const l of policyByType.excluded ?? []) {
+    const ids = await assertParity(l);
+    assert(ids.length > 0, `${l.label_key}: an excluded scenario should still have other candidates`);
+    for (const x of l.excluded) assert(!ids.includes(x), `${l.label_key}: excluded group ${x} is on the shortlist`);
+  }
+  for (const l of policyByType.duplicate_pending ?? []) {
+    const n = (await q("select count(*)::int c from app.join_request where person_id = $1 and group_id = $2 and status = 'requested'", [l.person_id, l.expected_group_id]))[0].c;
+    eq(n, 1, `${l.label_key}: exactly one pending request`);
+  }
+  for (const l of policyByType.active_member ?? []) {
+    const n = (await q("select count(*)::int c from app.group_membership where person_id = $1 and status = 'active'", [l.person_id]))[0].c;
+    assert(n >= 1, `${l.label_key}: expected an active membership`);
   }
 });
 await test("shortlist rows carry status and open_seats for rank-v2", async () => {

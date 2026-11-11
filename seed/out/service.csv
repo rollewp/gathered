@@ -1,79 +1,417 @@
 service_id,service_date,start_time,name,slot,livestreamed
-fabcf084-4e21-58c0-95f8-13cda8081e7b,2026-11-01,09:00:00,Sunday 9:00,sun_9,False
-3ff88cc8-e4fe-5e04-8368-841090512434,2026-11-01,11:00:00,Sunday 11:00,sun_11,True
-ca750f07-0ac8-5172-8965-a071ec17519f,2026-10-28,19:00:00,Wednesday Night,wed_eve,False
-f053ae07-7305-5ff0-bf98-9e8ff9d882a6,2026-10-25,09:00:00,Sunday 9:00,sun_9,False
-740448fa-e628-5779-a79c-5c9363ffba25,2026-10-25,11:00:00,Sunday 11:00,sun_11,True
-f0c19b53-3488-50d6-a10f-8d068cc6099a,2026-10-21,19:00:00,Wednesday Night,wed_eve,False
-3569bb1c-d637-5c14-9f18-8b05da8f408c,2026-10-18,09:00:00,Sunday 9:00,sun_9,False
-e03d6867-20c9-5066-97d9-3f04e82219c2,2026-10-18,11:00:00,Sunday 11:00,sun_11,True
-f42025f9-facb-5fce-8018-2ab5fd9ced0e,2026-10-14,19:00:00,Wednesday Night,wed_eve,False
-261d2dc7-e8fe-5f7f-8bed-4bbcb0e7aef9,2026-10-11,09:00:00,Sunday 9:00,sun_9,False
-9e21e73f-e10d-523d-ab4d-c673494dc45a,2026-10-11,11:00:00,Sunday 11:00,sun_11,True
-25c74f50-94ae-5d9c-a894-7cdb898e323f,2026-10-07,19:00:00,Wednesday Night,wed_eve,False
-5b8fe4ba-895b-5c2a-991a-5953f8a8b7ff,2026-10-04,09:00:00,Sunday 9:00,sun_9,False
-c3823cbe-c33f-52be-90f5-390e934d3204,2026-10-04,11:00:00,Sunday 11:00,sun_11,True
-f446c321-5585-55bb-99b4-5475d9a9a683,2026-09-30,19:00:00,Wednesday Night,wed_eve,False
-5ad1783e-fcdb-57d3-ae27-08d099991ae5,2026-09-27,09:00:00,Sunday 9:00,sun_9,False
-9eeecf0d-290f-570f-9b34-5b91d75efe9c,2026-09-27,11:00:00,Sunday 11:00,sun_11,True
-53b53d60-00ed-56fc-8600-8a08387bc969,2026-09-23,19:00:00,Wednesday Night,wed_eve,False
-aa8dcbc8-e328-59e0-992a-3cd8593be8af,2026-09-20,09:00:00,Sunday 9:00,sun_9,False
-8b0ed459-6b93-5e4d-bf0a-a92f505878c1,2026-09-20,11:00:00,Sunday 11:00,sun_11,True
-6a29444a-eca5-53db-98a3-722746cefe2f,2026-09-16,19:00:00,Wednesday Night,wed_eve,False
-6186e5cb-b627-5e1c-9f36-8e3b08f32f9d,2026-09-13,09:00:00,Sunday 9:00,sun_9,False
-33da0480-9213-5b42-aa97-2d118e9559bd,2026-09-13,11:00:00,Sunday 11:00,sun_11,True
-84e1b224-cf59-5e6a-a4dc-d4b31df4ebb0,2026-09-09,19:00:00,Wednesday Night,wed_eve,False
-4c50eb32-302d-58e3-8f0d-171101ea5bff,2026-09-06,09:00:00,Sunday 9:00,sun_9,False
-2a876dc4-4b5e-5b8c-8e6a-7765f064cdbf,2026-09-06,11:00:00,Sunday 11:00,sun_11,True
-984e7dd8-8bbc-5185-a440-18affbc07441,2026-09-02,19:00:00,Wednesday Night,wed_eve,False
-6145ff87-c9d0-521b-b519-bb1b099402a6,2026-08-30,09:00:00,Sunday 9:00,sun_9,False
-370685a7-d439-5bab-bd84-e729bb7ed992,2026-08-30,11:00:00,Sunday 11:00,sun_11,True
-b3e198d8-8582-5a2e-991f-f9989832d01d,2026-08-26,19:00:00,Wednesday Night,wed_eve,False
-dfd889c3-b1ae-5b5c-bbb2-2b7e56d9b26f,2026-08-23,09:00:00,Sunday 9:00,sun_9,False
-58e59af0-b63e-5cae-8f1e-2c145d1f90e8,2026-08-23,11:00:00,Sunday 11:00,sun_11,True
-d875eba8-1701-5b79-ba5c-f4ddae46cd3d,2026-08-19,19:00:00,Wednesday Night,wed_eve,False
-15556423-9603-51c1-8e21-85968a56c595,2026-08-16,09:00:00,Sunday 9:00,sun_9,False
-007a5168-c6cb-524b-8313-9c9fee56de64,2026-08-16,11:00:00,Sunday 11:00,sun_11,True
-062283c6-579c-54e3-b916-e6652823c21d,2026-08-12,19:00:00,Wednesday Night,wed_eve,False
-e06578c3-2322-5a99-a016-33487c976a74,2026-08-09,09:00:00,Sunday 9:00,sun_9,False
-52dd8de9-99d9-5b2d-8bc7-cf26d88a114d,2026-08-09,11:00:00,Sunday 11:00,sun_11,True
-ecbfef68-bd43-5247-a230-1a0627a1cda4,2026-08-05,19:00:00,Wednesday Night,wed_eve,False
-656b2cf9-7ce1-539f-8911-9db86b5fe8ac,2026-08-02,09:00:00,Sunday 9:00,sun_9,False
-656cbf91-135f-5c1a-ba17-e9dc679627f4,2026-08-02,11:00:00,Sunday 11:00,sun_11,True
-d02dbf99-e118-54ad-8344-c5f649a088b6,2026-07-29,19:00:00,Wednesday Night,wed_eve,False
-cc4627fd-9b37-5203-85c6-897ee5ff8526,2026-07-26,09:00:00,Sunday 9:00,sun_9,False
-df161a35-d5ee-5e78-ad76-c111e645b428,2026-07-26,11:00:00,Sunday 11:00,sun_11,True
-4245d1d2-37ba-50c9-857a-3c87d3e3df8c,2026-07-22,19:00:00,Wednesday Night,wed_eve,False
-da1ff60f-ef78-5f27-9323-ba0923b37379,2026-07-19,09:00:00,Sunday 9:00,sun_9,False
-75757dbc-da26-5718-bebf-706716907834,2026-07-19,11:00:00,Sunday 11:00,sun_11,True
-c26c442c-cf1e-5df5-9470-72c9be7ae15f,2026-07-15,19:00:00,Wednesday Night,wed_eve,False
-375fe281-b03a-5766-89ed-b4b4c764d836,2026-07-12,09:00:00,Sunday 9:00,sun_9,False
-5085629f-3a95-5d10-b44a-9274a0fe6e00,2026-07-12,11:00:00,Sunday 11:00,sun_11,True
-e9c6759c-1267-55c8-965c-55b05b2951f8,2026-07-08,19:00:00,Wednesday Night,wed_eve,False
-38a58e24-011a-593e-9c6e-3f1f3e2ac9b9,2026-07-05,09:00:00,Sunday 9:00,sun_9,False
-3a6008af-2abc-524a-b332-a3643247d9a1,2026-07-05,11:00:00,Sunday 11:00,sun_11,True
-e487986b-2162-50e4-9dc3-5d19693820fd,2026-07-01,19:00:00,Wednesday Night,wed_eve,False
-2d43906b-07cc-5ed9-9c8e-56394bfa257b,2026-06-28,09:00:00,Sunday 9:00,sun_9,False
-202f4569-6508-5dfd-9ab7-17a968f83c7b,2026-06-28,11:00:00,Sunday 11:00,sun_11,True
-928df22e-2a74-5e5e-9667-5cd037c89aec,2026-06-24,19:00:00,Wednesday Night,wed_eve,False
-135fb0ab-9cb1-55cc-893f-721806421af2,2026-06-21,09:00:00,Sunday 9:00,sun_9,False
-7b7b2dbd-9c07-52f7-854d-43b0832588e6,2026-06-21,11:00:00,Sunday 11:00,sun_11,True
-547933f6-09b9-50c4-bdb0-90dbd9eb331d,2026-06-17,19:00:00,Wednesday Night,wed_eve,False
-f5c1c481-d7dc-591e-be7d-001e4add8647,2026-06-14,09:00:00,Sunday 9:00,sun_9,False
-a626bd26-bc38-5776-820b-dbf4dd241e6a,2026-06-14,11:00:00,Sunday 11:00,sun_11,True
-7a9b21f1-804b-555c-8af7-6e8e62926161,2026-06-10,19:00:00,Wednesday Night,wed_eve,False
-4a33fb09-1e24-580a-9135-6f88402d9b87,2026-06-07,09:00:00,Sunday 9:00,sun_9,False
-b9aaa6b3-7e40-5127-ba16-5ded3d1a71ab,2026-06-07,11:00:00,Sunday 11:00,sun_11,True
-126c6ae1-dcee-5331-9c37-6d2f2707ed91,2026-06-03,19:00:00,Wednesday Night,wed_eve,False
-9c4d017c-36e8-501d-bd4c-ce675883035c,2026-05-31,09:00:00,Sunday 9:00,sun_9,False
-0481ae24-c6db-5438-aa2e-1d4c905a138c,2026-05-31,11:00:00,Sunday 11:00,sun_11,True
-031408da-9ad0-5691-8363-68d700769444,2026-05-27,19:00:00,Wednesday Night,wed_eve,False
-9bdc0ae0-95a5-5a6f-b3cd-83d56e2347d7,2026-05-24,09:00:00,Sunday 9:00,sun_9,False
-a16cd960-5ad0-5c48-9a6c-234326e06940,2026-05-24,11:00:00,Sunday 11:00,sun_11,True
-2ce54225-8871-5848-bec7-1962fa9fc18f,2026-05-20,19:00:00,Wednesday Night,wed_eve,False
-0c5432d9-6afa-59b6-8e24-91a5124e2791,2026-05-17,09:00:00,Sunday 9:00,sun_9,False
-b1f66141-1b06-5abd-9510-3565c632b8f3,2026-05-17,11:00:00,Sunday 11:00,sun_11,True
-9c2af585-4dfb-5e3e-a321-7038b4869743,2026-05-13,19:00:00,Wednesday Night,wed_eve,False
-73763c0f-49df-5f81-aa7b-7e4da6dd01bf,2026-05-10,09:00:00,Sunday 9:00,sun_9,False
-627056d2-a010-57e3-8364-8421f3ac7bbf,2026-05-10,11:00:00,Sunday 11:00,sun_11,True
-a71827d9-0f49-5cf2-afc8-75b937193a5d,2026-05-06,19:00:00,Wednesday Night,wed_eve,False
+70805213-d3f1-5d7e-b9d3-c7e8dfceba0e,2026-11-01,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+5b9e636b-3e4a-54e0-bb5a-78e12331d7e3,2026-11-01,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+fbad72a7-bbec-5a5d-8bcb-76917c8c05f3,2026-11-01,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+3014640c-5756-5df8-b981-03723e19d85a,2026-11-01,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+797b909d-419f-5148-9fdc-633dece4bd03,2026-11-01,10:00:00,Windermere · Sunday 10:00,sun_9,False
+488fb2d4-1ade-58a6-b90a-4330c99f48e8,2026-11-01,09:30:00,Clermont · Sunday 9:30,sun_9,False
+ed447d69-ce7e-5e21-9eee-3bb70a68ad34,2026-10-28,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+92c9f382-1134-5cec-a021-56f813181198,2026-11-01,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+9cc2abc7-8c5b-5e3f-b9c5-21d7e8d0d23a,2026-10-25,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+1f0528c6-4fcb-51f0-99ea-3aaeb9a44df1,2026-10-25,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+2361dc7c-a2c6-5601-8df7-6755e969cec6,2026-10-25,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+490c932a-8180-5aff-b32a-8bfaa64e435a,2026-10-25,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+d4427253-3973-5aa5-852d-ccb26c0604fc,2026-10-25,10:00:00,Windermere · Sunday 10:00,sun_9,False
+66b3968b-364f-540f-94be-84b7a7868ab4,2026-10-25,09:30:00,Clermont · Sunday 9:30,sun_9,False
+905c1857-3c95-54d3-9180-7c895f132181,2026-10-21,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+8e00a757-fd1e-5602-a165-4be0d7d379bd,2026-10-25,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+413c01bc-92d3-5af9-b105-3f69ec483f7d,2026-10-18,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+5a080cf3-8cd9-52ef-977a-086ef7b672d2,2026-10-18,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+c555fff1-25b0-5f56-804b-f7b559195cec,2026-10-18,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+12e92b66-7f95-557e-866f-2d5c34789a6d,2026-10-18,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+afd388d0-2235-51a4-956f-c0e3b257ed05,2026-10-18,10:00:00,Windermere · Sunday 10:00,sun_9,False
+128c9f03-77a5-5a1b-abb0-475a32eb5aa1,2026-10-18,09:30:00,Clermont · Sunday 9:30,sun_9,False
+03af35cc-66d9-5f11-a95b-7f0f616e620e,2026-10-14,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+ad33be92-5a06-59b7-82d8-00f95c8966fb,2026-10-18,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+f2ae7377-206b-55cf-8a2f-ba0553c0784d,2026-10-11,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+7d0a8784-beb7-59db-8dc9-db73ea3f1906,2026-10-11,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+18569b6b-1d74-5890-aa12-a84f5762313d,2026-10-11,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+6a41d896-8b5d-580a-b590-b7ed8b03a5e2,2026-10-11,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+90f7b501-1fb8-5711-88fc-7f8908a3b243,2026-10-11,10:00:00,Windermere · Sunday 10:00,sun_9,False
+0e5787c6-0d40-528d-a28d-9d2088b356ea,2026-10-11,09:30:00,Clermont · Sunday 9:30,sun_9,False
+519ac11a-2b83-5ad5-af83-39520ba99517,2026-10-07,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+2e7ba57f-6497-597e-be3a-2e2ca22031ae,2026-10-11,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+01d9211d-93db-535d-b9a2-57c97f862a52,2026-10-04,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+070ce60f-7a52-59c5-8525-96029de34c8d,2026-10-04,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+ac18f38c-ecba-5829-8b02-6298571692b2,2026-10-04,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+ac90758d-5231-5a9b-a601-34cff77fff8a,2026-10-04,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+0fe9a33a-86d0-5f31-b979-3b2bc8b33899,2026-10-04,10:00:00,Windermere · Sunday 10:00,sun_9,False
+1bf7c11f-231e-554e-97bc-5fe52d8daef9,2026-10-04,09:30:00,Clermont · Sunday 9:30,sun_9,False
+d610ed0f-3ad2-5207-868c-90b73f9db576,2026-09-30,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+4dd456d7-92e9-53c0-9da9-0fa559214c8e,2026-10-04,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+b4fd8da2-de83-518a-94a7-67c2c31f3bdb,2026-09-27,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+7644167f-aca6-53b1-9392-e3b736fa7ee8,2026-09-27,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+aada7f12-71a9-5160-8de6-3fab4b93cf53,2026-09-27,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+33fe8b97-bb5c-50d1-b00a-f7902a1e052e,2026-09-27,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+44e68c68-362b-53e2-a714-9e594e5721a5,2026-09-27,10:00:00,Windermere · Sunday 10:00,sun_9,False
+0db1b361-2fb1-5684-a25b-c344cff00875,2026-09-27,09:30:00,Clermont · Sunday 9:30,sun_9,False
+49ab8cf0-a179-5999-bf49-7139cc74d883,2026-09-23,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+acc24b5f-79de-525b-aaa6-378201973779,2026-09-27,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+36f103d3-d1f1-54c4-a9ca-070a2a0f8149,2026-09-20,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+c06aa1e2-4168-5752-bbfb-5295c378165a,2026-09-20,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+128b631d-43a3-588e-aefa-8cd57183d3b7,2026-09-20,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+ee8acbe0-d64b-5e59-83dc-0282e823bf37,2026-09-20,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+f8a1d507-785d-518d-aa68-ed4e8fe4951c,2026-09-20,10:00:00,Windermere · Sunday 10:00,sun_9,False
+3146bd05-33d5-5342-977e-8c42621cf06d,2026-09-20,09:30:00,Clermont · Sunday 9:30,sun_9,False
+5801d90d-cf23-56b8-9de5-e5c5373b5d23,2026-09-16,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+a6ad71d3-178f-578a-a883-8c772c229a6c,2026-09-20,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+dc07e5cc-1bb1-5dcf-85db-8d1e80e5c1ff,2026-09-13,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+2c83def4-819c-59bb-80a5-dcf941f29572,2026-09-13,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+f5afb0ef-6cf5-58b5-9f00-80327706dd94,2026-09-13,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+e67cda2d-b53e-5495-a94e-879ccbef5446,2026-09-13,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+82da78e3-c268-50dd-aae8-bcf3da4b8495,2026-09-13,10:00:00,Windermere · Sunday 10:00,sun_9,False
+770a8356-2adc-50d1-87ef-d5b2bca03877,2026-09-13,09:30:00,Clermont · Sunday 9:30,sun_9,False
+7ba3a3a0-1aaf-5717-a4d2-94b81a432e36,2026-09-09,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+2cebbb11-d9aa-50d5-a542-3cd8fc4c1c9e,2026-09-13,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+802e496f-0bbf-50fe-80c4-e3baac989686,2026-09-06,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+585be1e5-9778-5b25-b009-bded2e4f3795,2026-09-06,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+464e5928-7786-5944-bec3-2e850c926521,2026-09-06,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+4f196c54-bc3b-5e31-b328-12b2535718ea,2026-09-06,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+cbe6d8dd-1710-5236-818b-5df325eeeec4,2026-09-06,10:00:00,Windermere · Sunday 10:00,sun_9,False
+583c36bc-244d-55d2-916d-7c469f2ef70e,2026-09-06,09:30:00,Clermont · Sunday 9:30,sun_9,False
+f80ae3f4-6078-509b-9e64-bc91bc367249,2026-09-02,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+8a1d9b9f-af71-55a5-8d86-1f56f7fef950,2026-09-06,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+181a54c1-9ba4-5327-b4ee-7ba06ccb27f5,2026-08-30,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+a4d015c0-3a2d-55aa-8559-130916171510,2026-08-30,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+905d6f47-97d5-53cb-88e3-055c7f8bb465,2026-08-30,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+b055898b-9ddf-5326-b8f5-adf2c1ad2ced,2026-08-30,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+67542346-ebca-51ec-bd85-5cdf521a34a6,2026-08-30,10:00:00,Windermere · Sunday 10:00,sun_9,False
+0b997422-071f-5962-a920-abb227f16bc6,2026-08-30,09:30:00,Clermont · Sunday 9:30,sun_9,False
+f34f3629-c212-58be-b322-410c06d072c9,2026-08-26,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+670e9351-15a3-50a5-a2a3-6286acc27574,2026-08-30,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+95a71d4c-8015-508d-a153-d198e8daaddc,2026-08-23,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+7109624c-33b1-55c1-8595-9794feea9feb,2026-08-23,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+aaa2cece-0991-5cfb-b979-1cf8da3e9c45,2026-08-23,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+1e9dcddd-1bdf-5c90-a906-03a896739eb5,2026-08-23,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+9b170dc7-97ca-5b1b-838b-79b24f69dbd0,2026-08-23,10:00:00,Windermere · Sunday 10:00,sun_9,False
+0480a3fa-724f-5d2c-8338-f14cea661e77,2026-08-23,09:30:00,Clermont · Sunday 9:30,sun_9,False
+78022b5a-deed-5b68-8223-f36e5e329759,2026-08-19,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+c325b12a-0d62-5814-9e72-2137e21d0492,2026-08-23,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+f1c88c00-f083-52ed-9376-28583ae906dc,2026-08-16,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+3b98e139-fa7b-5f5b-b388-0bd68a630926,2026-08-16,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+0bce5689-31c1-558c-aa37-73d53c6bf61b,2026-08-16,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+5271e435-b58b-5da0-a870-7f3077a73911,2026-08-16,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+107bad7a-ff76-5904-b46d-5f2c01fa4e03,2026-08-16,10:00:00,Windermere · Sunday 10:00,sun_9,False
+16cc2723-2a36-5fbf-8987-faf820020f7b,2026-08-16,09:30:00,Clermont · Sunday 9:30,sun_9,False
+d6797feb-3518-5a21-8080-4471b6169744,2026-08-12,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+843ce5b3-3ede-587e-9dec-188974158709,2026-08-16,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+67f81c71-d496-5931-a265-c7338c215417,2026-08-09,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+9cb8401d-0781-552d-b022-68a32aec1053,2026-08-09,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+5aa72754-1e2e-59d8-a404-6fc1d85d0e9a,2026-08-09,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+3a9b80e0-4deb-5c63-845a-5a0f7863f4a5,2026-08-09,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+22736077-2018-5487-b8cb-003643d5b304,2026-08-09,10:00:00,Windermere · Sunday 10:00,sun_9,False
+1920a084-eade-5769-baee-c32109ef46cd,2026-08-09,09:30:00,Clermont · Sunday 9:30,sun_9,False
+13a7a971-92f6-5262-8283-aaeedc76700f,2026-08-05,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+b70259d2-ed14-5bb9-9c63-ebe40f54fb38,2026-08-09,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+3283e00c-8a48-56bd-a00d-73fa48b26f5d,2026-08-02,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+0f968001-65da-52af-9516-8fa801fdb493,2026-08-02,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+2eb79a2a-e798-55d3-b49c-30c170504fdd,2026-08-02,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+fb448d24-1483-568c-8897-c2083d2c3c7f,2026-08-02,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+cfe16f5e-8fd9-51e6-800c-2af5fd077c2c,2026-08-02,10:00:00,Windermere · Sunday 10:00,sun_9,False
+9c8ee4c3-3397-5973-91cc-9dc44036076c,2026-08-02,09:30:00,Clermont · Sunday 9:30,sun_9,False
+a77e4b96-5810-5fcd-8173-bfacdda99777,2026-07-29,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+1f504ed2-3824-5a29-89a7-51641f9c71bb,2026-08-02,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+58200826-3698-597a-946d-103a1d07b33e,2026-07-26,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+7234959f-65a1-546c-816b-f2dff6ea7fa0,2026-07-26,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+7d19a3cf-4d9f-543b-91bd-78a11fe1f1c1,2026-07-26,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+fd8a3fe4-de6a-58c3-b460-4b479daa41e2,2026-07-26,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+d923235f-c7f1-5f38-a55a-a521b4136d73,2026-07-26,10:00:00,Windermere · Sunday 10:00,sun_9,False
+f30d448a-cb48-5118-98f8-2111593d3f2b,2026-07-26,09:30:00,Clermont · Sunday 9:30,sun_9,False
+7647480a-d639-50b7-8ec2-7d66e4e81c5f,2026-07-22,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+ad71527f-6ac5-554e-8a7a-f78a67d3a22e,2026-07-26,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+ada6330a-5bef-5a53-9c29-3d5ae2fd37ed,2026-07-19,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+e9304ad5-2712-5922-873f-15566f4a5c90,2026-07-19,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+94472858-dfc0-5ba5-9e71-ed69a9846184,2026-07-19,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+2f6c5ce4-3fab-5c65-b35c-ef0b3cee4bb9,2026-07-19,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+c490e7db-1ea7-523c-b1a5-e41374734208,2026-07-19,10:00:00,Windermere · Sunday 10:00,sun_9,False
+33725723-f069-5c64-82db-340852b4b42b,2026-07-19,09:30:00,Clermont · Sunday 9:30,sun_9,False
+f7b45e87-d086-5a4f-be0d-5d2ca5cba91f,2026-07-15,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+e7528c69-b7c4-5d51-a436-c280fc39b674,2026-07-19,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+aecea2da-8b33-5942-ada4-1793847b2d1f,2026-07-12,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+a19a582c-9ccf-510c-a4ad-aaaa90697a9a,2026-07-12,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+6447d6a8-7a90-5d8c-bb95-0747c225416a,2026-07-12,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+01198a34-266c-54e0-8918-c6415af3f968,2026-07-12,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+f75b4793-10b5-5071-8f36-b46ba67b64a3,2026-07-12,10:00:00,Windermere · Sunday 10:00,sun_9,False
+c3935123-7317-54a9-9461-087955cb6c1b,2026-07-12,09:30:00,Clermont · Sunday 9:30,sun_9,False
+d6e243f6-2b37-5790-94e7-03d34703a0c4,2026-07-08,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+5bad5464-c435-5d7e-9776-3ea79d21a22d,2026-07-12,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+f1ff1a7d-0cdd-51ec-ac47-f492e175875c,2026-07-05,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+bd4e6e54-97d6-5068-b41b-160b2b6bfe23,2026-07-05,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+bcd72462-4521-54b6-90e9-7f7d3a6291b8,2026-07-05,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+8a738e3e-7ec4-5ed6-ac2e-5711e09ffa60,2026-07-05,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+b28ca401-0afb-5b03-970f-fb62fe7139fd,2026-07-05,10:00:00,Windermere · Sunday 10:00,sun_9,False
+6b6e509f-3b27-5f98-ba20-948e299c551a,2026-07-05,09:30:00,Clermont · Sunday 9:30,sun_9,False
+fd70dd35-8fca-5619-9454-b414ef019135,2026-07-01,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+e87a2bed-c78b-5aaf-807b-946c1e048f16,2026-07-05,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+75e949e7-e34c-5f08-a250-25570bb20b28,2026-06-28,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+089dc12c-8c38-5a55-9303-e12349635c29,2026-06-28,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+3e16aa6b-768e-59b5-bd6e-10b7f7402c43,2026-06-28,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+6deb2280-af25-5996-8f20-08ad614d8db8,2026-06-28,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+2c372f40-3882-5eee-a612-fb884bfd384c,2026-06-28,10:00:00,Windermere · Sunday 10:00,sun_9,False
+88e137d0-7181-5413-9c18-50fd21473282,2026-06-28,09:30:00,Clermont · Sunday 9:30,sun_9,False
+f2e62f1c-9e08-5bc5-a6a1-b31bbd649ddb,2026-06-24,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+e7826482-416a-5e13-ba14-74ec7b71fca3,2026-06-28,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+6eafec2e-84b0-558a-8caf-4e809ab1df9f,2026-06-21,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+427cfca2-16ca-5c63-85e8-0b9471c1b4c9,2026-06-21,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+cbe90f98-2209-5c16-9a16-9e9b4c93c585,2026-06-21,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+30606d42-ad5b-5f13-a361-3730e9e3baa7,2026-06-21,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+73ec9f43-fb7d-509d-beaf-54d60d766349,2026-06-21,10:00:00,Windermere · Sunday 10:00,sun_9,False
+f49a554f-4a7f-5f0a-be0f-6138123a9cd0,2026-06-21,09:30:00,Clermont · Sunday 9:30,sun_9,False
+f9e32c60-4471-5dd5-90ab-7716d771974c,2026-06-17,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+94673dee-0c51-5318-bc60-c8479ef8daf2,2026-06-21,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+1f7d7eb0-2ca0-5379-95cc-0686d84aaff2,2026-06-14,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+c8efff31-393d-5443-bf49-b7be05f12d0e,2026-06-14,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+88b443ae-11ef-5900-8fc1-87341fd187d8,2026-06-14,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+0bc1c026-d7db-57d9-9fb4-a132709a98ec,2026-06-14,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+44eb0165-6af5-552f-9a6e-541a2b0afafc,2026-06-14,10:00:00,Windermere · Sunday 10:00,sun_9,False
+9d190e2b-9664-5456-9710-5774ae9163f9,2026-06-14,09:30:00,Clermont · Sunday 9:30,sun_9,False
+20cafe19-fdc0-5451-a6e2-11115d6c2730,2026-06-10,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+11028a3d-bca3-5b8e-b7c3-77706cb588ed,2026-06-14,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+61f50b8f-ecef-589c-ab88-2669cef93b91,2026-06-07,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+325298b7-612f-55ec-a90c-c60ff965a737,2026-06-07,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+2880798b-2dc1-5106-999f-dc0eba6d928a,2026-06-07,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+980f0e25-0a4b-547f-8122-e60d0f76bacd,2026-06-07,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+c1f7606c-bfe1-5e47-b02c-2a6f8cfeb5be,2026-06-07,10:00:00,Windermere · Sunday 10:00,sun_9,False
+8317cdfc-d7d5-543a-8e6f-a9f6346aa731,2026-06-07,09:30:00,Clermont · Sunday 9:30,sun_9,False
+a175e03d-d0c1-5ec9-9f41-5b7ae03fabcd,2026-06-03,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+974cf02c-c93a-56b1-89da-dc2d99701f62,2026-06-07,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+f9f89f73-dad6-5bcf-9d49-3e148b4635f0,2026-05-31,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+8f538431-da6b-57ae-b8e3-e96999a5254b,2026-05-31,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+e956ecc8-a1c3-5c04-a664-3c4b39d99299,2026-05-31,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+1ae59886-4e0f-5096-aafb-643ad969079a,2026-05-31,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+9378de54-bb1b-50fe-aaec-3c4844941f0f,2026-05-31,10:00:00,Windermere · Sunday 10:00,sun_9,False
+f7df46ff-a03f-5016-80a9-e6ac4ac9a8a6,2026-05-31,09:30:00,Clermont · Sunday 9:30,sun_9,False
+03b75d48-82f2-52fa-9998-ed70b2a0d7eb,2026-05-27,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+9776fb5b-af30-5a78-b1e3-d751fb14ef43,2026-05-31,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+81940a60-6886-5418-a118-32893e5508ac,2026-05-24,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+0e85d871-ce7d-5dee-b899-10dacfc44fbf,2026-05-24,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+630e77e3-1e95-5426-9bde-a4ef2256d06d,2026-05-24,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+f29c880d-3588-5ffc-8661-185380427b14,2026-05-24,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+85608c7f-18a3-52f7-a113-df65c0a02620,2026-05-24,10:00:00,Windermere · Sunday 10:00,sun_9,False
+475ec124-6005-5181-9e2b-5d60922f5ef3,2026-05-24,09:30:00,Clermont · Sunday 9:30,sun_9,False
+57a2949c-cae0-5e2d-8185-3be077b75d97,2026-05-20,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+fb264425-691a-55f1-9361-e960c4e021f4,2026-05-24,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+49337548-0264-535f-99d4-897767c5363e,2026-05-17,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+ca743f89-7676-5e58-97ac-68ecc1d642cb,2026-05-17,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+70d8aa0e-6747-5328-9854-1a70a1dab66b,2026-05-17,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+8c1a6585-1713-5ce4-bfa1-74080e74598b,2026-05-17,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+c22d29ea-16cb-5e4f-8281-902def3a37f5,2026-05-17,10:00:00,Windermere · Sunday 10:00,sun_9,False
+01a7043e-8d0e-5040-a641-16446da4bd9d,2026-05-17,09:30:00,Clermont · Sunday 9:30,sun_9,False
+73e61ef7-8952-5170-99d2-a747e4c10989,2026-05-13,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+763524ce-15d5-50a4-8de1-ab0777d832b5,2026-05-17,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+5d35a970-d49c-5bb2-88a7-66de1c66b879,2026-05-10,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+6dc43db1-5cd2-5f76-a7e0-81497933d424,2026-05-10,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+066c8609-ed35-5df6-81e8-d04047b55339,2026-05-10,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+d3050717-4be1-5bec-a870-12b48bb42d2b,2026-05-10,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+06f6fed7-87d2-5864-b797-c11f19599b30,2026-05-10,10:00:00,Windermere · Sunday 10:00,sun_9,False
+4866bbf4-1558-55e4-af0c-2d1cc982990a,2026-05-10,09:30:00,Clermont · Sunday 9:30,sun_9,False
+a6b285c6-5605-51f4-bae3-6f09af29f17f,2026-05-06,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+51f2c3c8-4a25-5311-afad-1469c8bc8d07,2026-05-10,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+b51aa28e-5b19-57f0-b455-bd6c959886ff,2026-05-03,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+5e93b92b-548e-5131-a97f-e9aa7078cbe4,2026-05-03,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+4139189b-e70b-5c16-a51f-b60ba5b087b3,2026-05-03,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+7ec20620-ce6c-53d0-b10e-fdbad01f8289,2026-05-03,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+e1910442-a720-5f73-a5ef-5ff015770f18,2026-05-03,10:00:00,Windermere · Sunday 10:00,sun_9,False
+cbc83038-adee-59b8-83be-40ed0a0c2a25,2026-05-03,09:30:00,Clermont · Sunday 9:30,sun_9,False
+743ea8ca-1188-5893-ae09-12095fbb646f,2026-04-29,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+3659c51f-671b-5cfd-a7ff-e86a27d8ad7b,2026-05-03,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+bcae7a09-43ef-5b74-8af5-598d835ad2dc,2026-04-26,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+2bfc0d55-2898-58db-9bef-34b327304f82,2026-04-26,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+6b344c02-a2fd-548e-bbd7-435fe56b796d,2026-04-26,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+f7e1eb66-46a0-515d-ac63-7b8e4ad2d881,2026-04-26,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+90cfc118-a8d9-5172-91e6-0fdc18b12b09,2026-04-26,10:00:00,Windermere · Sunday 10:00,sun_9,False
+bc33a89f-a658-57f2-82a7-05c64befc26a,2026-04-26,09:30:00,Clermont · Sunday 9:30,sun_9,False
+6ce24834-65d1-5ed4-952c-09d4d5f9ce4a,2026-04-22,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+d4195767-5ddb-58b0-9dd8-0ea616db860f,2026-04-26,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+637f3634-e21f-5e84-9b89-03b4308e6490,2026-04-19,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+a49ccc43-22fa-5040-825c-e83b0f3e878b,2026-04-19,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+0410bea2-1b53-563d-8392-17959f17dd61,2026-04-19,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+42848cad-925e-5bfb-997e-6e09d9559733,2026-04-19,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+2c379972-432a-5173-bab2-57a0c2219d2c,2026-04-19,10:00:00,Windermere · Sunday 10:00,sun_9,False
+ed77a823-c54b-5628-bcd1-16d93d46a3e2,2026-04-19,09:30:00,Clermont · Sunday 9:30,sun_9,False
+0a0df162-1a75-51f1-bd89-1d89d7fed6e0,2026-04-15,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+0290bfc6-1a56-50a6-8989-ca51fc5406e5,2026-04-19,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+bf3e82a6-f42c-5296-aa8b-95b74e9b9fba,2026-04-12,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+0c7f57f9-bcfe-5907-95db-e5798ecb1883,2026-04-12,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+9632ffcf-ec74-5ee3-ba7c-5620360b753d,2026-04-12,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+41b79abb-8faa-56a1-848b-a790d2216aa9,2026-04-12,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+31036a23-a315-5140-8931-ffc639fe4184,2026-04-12,10:00:00,Windermere · Sunday 10:00,sun_9,False
+f39e101d-8f53-5b2b-ad5e-13873d690ee0,2026-04-12,09:30:00,Clermont · Sunday 9:30,sun_9,False
+7b2bfc9d-a8f4-5527-aa17-3809a9d180c1,2026-04-08,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+ad6cf5af-a42b-5efe-bfbb-5b69cf10e2f4,2026-04-12,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+f407f528-8eb7-5e45-8b30-f9b12b863cbe,2026-04-05,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+0ce3e54d-f6ae-542d-9cae-624ef2494daf,2026-04-05,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+17d70f6a-5c20-5548-897c-6ca838ccd58a,2026-04-05,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+fbc64117-779a-5ef9-85a4-b18524e8bd69,2026-04-05,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+bb8755e6-90b8-59e7-83ee-51b3f33494d2,2026-04-05,10:00:00,Windermere · Sunday 10:00,sun_9,False
+0d020355-e193-53f9-a1b6-674c2d23ae69,2026-04-05,09:30:00,Clermont · Sunday 9:30,sun_9,False
+371f3648-0ca4-511b-8863-300e129be81d,2026-04-01,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+79ed2dac-8202-52d9-8ce9-d0d59adaa389,2026-04-05,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+9dfb3de0-94bf-5994-8b55-4f3293408b97,2026-03-29,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+a2d12d9d-4550-5106-beef-50ad0ac73662,2026-03-29,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+4b0934e4-6603-5042-8871-df8e374d3d32,2026-03-29,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+cd0d15cc-30f1-5ac1-929b-ebf8088731d2,2026-03-29,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+ba76eacd-9a76-556e-b6f7-b316830f4a65,2026-03-29,10:00:00,Windermere · Sunday 10:00,sun_9,False
+e70474c6-9b84-5da2-877a-8d0c6a8a92c7,2026-03-29,09:30:00,Clermont · Sunday 9:30,sun_9,False
+fcfe5ed2-10a7-57e8-9d78-2f400089765b,2026-03-25,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+8ef7a6ba-d3bf-5e5e-9b5c-77496804567d,2026-03-29,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+b91a6e96-dc9c-55b1-bccb-c0878e03b598,2026-03-22,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+88a49b94-b9c9-558b-b3a1-3ba812497066,2026-03-22,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+c1d27ec5-93fe-5a13-af4b-545acd45b522,2026-03-22,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+48b9a64f-daf6-584d-bfc4-f859b74eaa4b,2026-03-22,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+54d80a40-2985-5c7c-bf3c-f5838a243f67,2026-03-22,10:00:00,Windermere · Sunday 10:00,sun_9,False
+e9050905-3f7b-5899-9023-bf5cfbf01768,2026-03-22,09:30:00,Clermont · Sunday 9:30,sun_9,False
+89247f38-444e-5a49-b9e9-01a959483ba9,2026-03-18,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+1af285a2-1110-5ae6-98b1-6a8fa0b3b3dd,2026-03-22,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+1c989caa-013a-5522-a2ea-cd0945cb67c9,2026-03-15,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+f07cf7eb-0a9a-5d3f-a250-eab851c35bf4,2026-03-15,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+0aae5dd5-2e20-52ec-94c8-25ddc72abad0,2026-03-15,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+1f8eff27-33f2-583d-936e-f3ebcea2441e,2026-03-15,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+b298caf3-6442-50a9-bcce-b47f75586e1c,2026-03-15,10:00:00,Windermere · Sunday 10:00,sun_9,False
+b5438628-d5ef-5ba4-9173-8ab1dcd4e69f,2026-03-15,09:30:00,Clermont · Sunday 9:30,sun_9,False
+1233dd0d-3bda-594f-8092-ed5f6988a12f,2026-03-11,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+4f33c871-542b-5e54-adee-914afa01f466,2026-03-15,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+e5dfea4d-79b0-5149-8110-4a3a304ac184,2026-03-08,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+523651d9-2486-512c-8392-a836b3f36295,2026-03-08,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+d76d2209-48a9-5945-beae-8c3e7fbb52f9,2026-03-08,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+163f102a-ccea-5340-b767-efc348082910,2026-03-08,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+ea5aa023-651f-5930-8bb8-af441794a5ff,2026-03-08,10:00:00,Windermere · Sunday 10:00,sun_9,False
+8377197c-5717-5361-822b-72b3a16f6cd9,2026-03-08,09:30:00,Clermont · Sunday 9:30,sun_9,False
+b8052e6f-9bd9-57d3-af3b-46a9bb63a5de,2026-03-04,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+9369d414-16a5-5781-bc17-c2014f14f2b2,2026-03-08,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+4888bf06-f272-5339-ba72-d3beda142e69,2026-03-01,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+a42ec20f-1d9d-5fa2-baab-3880efb8bbd6,2026-03-01,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+0d0cabc6-fcb9-549a-afce-025a31123015,2026-03-01,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+8e503935-5041-56f1-a686-2b53908d1925,2026-03-01,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+6915fffa-1b92-51a0-81e1-9dc7e571549c,2026-03-01,10:00:00,Windermere · Sunday 10:00,sun_9,False
+4d241bd4-b713-5d2b-b5b0-c89a7a60c777,2026-03-01,09:30:00,Clermont · Sunday 9:30,sun_9,False
+26e5ed7d-0cbd-55f3-a6c6-507ee8923492,2026-02-25,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+4471a46a-f05b-5824-9c72-f9cb7d58ba15,2026-03-01,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+6b010e54-5df5-546d-bb8b-1c65c9103b09,2026-02-22,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+1e2d5607-21a4-534a-87a7-b48742e8febb,2026-02-22,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+1013e010-6569-59fb-b845-d40d53f97c95,2026-02-22,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+cf443f70-4417-54a1-b6fc-eaf729d69b06,2026-02-22,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+41f16b8c-5bd7-5b73-8fc4-ae9145112341,2026-02-22,10:00:00,Windermere · Sunday 10:00,sun_9,False
+c2e90774-7d96-56f9-8af3-b9e9694f2397,2026-02-22,09:30:00,Clermont · Sunday 9:30,sun_9,False
+70b362b0-cd59-54a4-b395-68f71d48a061,2026-02-18,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+affb2800-9e39-5647-bb2f-fb279b286703,2026-02-22,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+61a52e97-5381-5e12-a2b8-0e168152ecdd,2026-02-15,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+5d06d692-74bc-5036-8e3e-732da543b584,2026-02-15,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+55053801-2fc4-5c0d-9b2b-4cf726cf4bda,2026-02-15,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+692b1bc7-bf56-5222-b05f-03579883b547,2026-02-15,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+d69d9026-d116-525b-87b1-39c15ae51731,2026-02-15,10:00:00,Windermere · Sunday 10:00,sun_9,False
+1bb2ccac-a290-5481-b0af-dc626e4412bb,2026-02-15,09:30:00,Clermont · Sunday 9:30,sun_9,False
+29feaf4c-f305-5ad5-ae9b-83aff8e7a3e7,2026-02-11,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+65c99cb6-a7b0-5362-b85d-f422fe36e57d,2026-02-15,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+fa085914-4101-5b89-b2de-9e8aaaceb686,2026-02-08,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+98f726d4-7ac0-569e-ac90-17ed42e76166,2026-02-08,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+331be745-632e-5fc3-855e-5e95e6bb2448,2026-02-08,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+5e0980a0-d4be-5521-a168-53827b2729f1,2026-02-08,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+d1e110cb-17af-54e0-ba7c-56acef1c8b02,2026-02-08,10:00:00,Windermere · Sunday 10:00,sun_9,False
+1f8f5851-74ea-5ef5-addc-8b42e5f92936,2026-02-08,09:30:00,Clermont · Sunday 9:30,sun_9,False
+e563ba0a-130b-5e09-ace0-75548e33bd7f,2026-02-04,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+e3a579ad-0643-58d3-9b8b-3420487d5fa2,2026-02-08,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+4afa697a-1ddf-5391-95d5-e86036d82a37,2026-02-01,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+8a1bdb9c-3ef7-5164-a83d-247b910cf73a,2026-02-01,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+c85cf509-1b3f-5cc3-9385-cb9c5b57998b,2026-02-01,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+2b687714-6cde-5420-8d36-429c46da927e,2026-02-01,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+45c2c0a5-f00f-56f4-b014-740473b557e8,2026-02-01,10:00:00,Windermere · Sunday 10:00,sun_9,False
+2b3b6142-a8da-5f3c-b028-20a34510ce5a,2026-02-01,09:30:00,Clermont · Sunday 9:30,sun_9,False
+467695f7-1bf5-5940-a6f9-aa4ef01e1c1a,2026-01-28,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+51a3823f-bb56-5cc8-9a93-d16098ca4930,2026-02-01,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+7b2ce529-60db-547a-9e76-779de0b5c65f,2026-01-25,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+9d0d64ae-486c-5997-a406-3c882e4d95ea,2026-01-25,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+41408e6e-4145-59db-960c-35e190da4b17,2026-01-25,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+8579546d-7573-5ff2-8b72-d919577afc8c,2026-01-25,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+8f977011-ef2b-51e7-acfb-4a11642326a4,2026-01-25,10:00:00,Windermere · Sunday 10:00,sun_9,False
+2e8e4cea-d440-5cfa-9871-5ae05cd949cc,2026-01-25,09:30:00,Clermont · Sunday 9:30,sun_9,False
+00214fbf-cb00-5a8e-8c70-1176a67179cf,2026-01-21,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+4207d7b2-a86c-54c5-9232-b056614c6802,2026-01-25,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+86e0f6d4-9570-5911-a14e-a37cbe21f8a7,2026-01-18,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+7d6510e7-2fea-5e84-8db5-0af0f7f1e7c7,2026-01-18,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+aec8f5a7-38ca-5949-a91a-da0008760647,2026-01-18,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+95c05ffd-df34-5991-b0ed-8014b614a4c1,2026-01-18,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+07ca63f2-cfc9-50af-8999-237884a09cb7,2026-01-18,10:00:00,Windermere · Sunday 10:00,sun_9,False
+2cd9503a-c606-5ce2-b3a3-350264c7dba8,2026-01-18,09:30:00,Clermont · Sunday 9:30,sun_9,False
+2eb51249-04a9-52fe-af84-1bbc8fc3485c,2026-01-14,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+f6117fc0-5a98-56df-9526-d82c360ff233,2026-01-18,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+8dcf2f8a-c5dd-5cab-9058-212e7c22d338,2026-01-11,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+6b9c26e9-caa5-5ac0-a302-e43b2f09072d,2026-01-11,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+73d7f66a-7be8-5781-a935-972d414355a5,2026-01-11,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+fe87040a-6870-564c-912b-35530ef26a1d,2026-01-11,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+f923fd14-bdc2-5813-aee3-1d83bf2631eb,2026-01-11,10:00:00,Windermere · Sunday 10:00,sun_9,False
+85f48c75-579f-5ff8-aebd-de2833b84dfc,2026-01-11,09:30:00,Clermont · Sunday 9:30,sun_9,False
+a322330f-ba3d-5bfe-aeb2-32733fdcf9f9,2026-01-07,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+a3d5b0f5-0bd9-54db-8b2b-29ddd6b419d5,2026-01-11,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+00795f26-9408-5e3c-965d-140b5bbda4d6,2026-01-04,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+14ad0167-399b-5943-a388-d5c1fde5b38d,2026-01-04,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+2255ef0c-6d05-5a41-94de-3b4a650919c7,2026-01-04,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+a9761f3f-f93d-565d-b7cf-3793dfd81662,2026-01-04,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+9cb70a49-b41c-53cb-85dd-7890f3775111,2026-01-04,10:00:00,Windermere · Sunday 10:00,sun_9,False
+c80729ca-e183-5f53-98f6-1064aeec416e,2026-01-04,09:30:00,Clermont · Sunday 9:30,sun_9,False
+267f05f5-f58d-5b7e-b67c-903bc0e68140,2025-12-31,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+a1f62d82-6453-53bb-89ff-be358b4b6367,2026-01-04,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+ea29e6ec-82cc-5130-96f5-56a4acb40caf,2025-12-28,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+80d7e06d-4419-5856-a53e-7db3ae0dc313,2025-12-28,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+3c229896-9ece-5cb1-9355-82c58062956c,2025-12-28,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+291b5dc8-6170-5ac9-9239-71ff4d2a8741,2025-12-28,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+166b258a-bff3-5121-857f-45d638cbcd60,2025-12-28,10:00:00,Windermere · Sunday 10:00,sun_9,False
+91c14ef2-f100-5699-98a8-d2d51b929f02,2025-12-28,09:30:00,Clermont · Sunday 9:30,sun_9,False
+8ba85d67-9327-52fe-b48a-60d741624bc5,2025-12-24,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+2c9ef8dd-4f27-5e97-bd22-b4e173649d11,2025-12-28,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+a74f7ba9-85d2-58f6-bda2-0cdcc174b886,2025-12-21,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+d72f8cde-0644-5e23-9549-1c22b4702741,2025-12-21,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+4a930784-2e89-521b-a478-f1be488aa072,2025-12-21,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+427e902f-3440-5bae-b660-f6c325d7610d,2025-12-21,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+d075a6b4-460d-5ad6-b5e8-02053fc2ddf2,2025-12-21,10:00:00,Windermere · Sunday 10:00,sun_9,False
+c424fba0-ede7-51eb-aa08-7bd46a0f3592,2025-12-21,09:30:00,Clermont · Sunday 9:30,sun_9,False
+623013aa-2b18-5fc0-93c3-fbdccd5c616d,2025-12-17,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+02c73fc7-1c9a-58ee-bd87-a4452f8f8784,2025-12-21,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+47526e0b-a8e7-505b-a3d4-367f0b8bc4a0,2025-12-14,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+902ad0b1-4e5f-5eda-96f8-facd6cc8730a,2025-12-14,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+43c95030-f81e-5216-b66f-39513dd7c80f,2025-12-14,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+30aebfa0-4b02-5dc8-9165-fec0f67ef5a5,2025-12-14,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+34a24710-0193-5cd7-ab37-f192e3622095,2025-12-14,10:00:00,Windermere · Sunday 10:00,sun_9,False
+b06cddc2-d445-56da-a818-0b9a2cb6174b,2025-12-14,09:30:00,Clermont · Sunday 9:30,sun_9,False
+aba552a4-20ad-5f21-9487-0b7934f93751,2025-12-10,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+4dc5e72b-ab95-5d5d-a148-669f1b1feaa1,2025-12-14,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+9a923480-de11-59f8-8439-8a4641bb93dd,2025-12-07,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+8b6de8a9-975c-5c40-85c2-7cdcc2be0e63,2025-12-07,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+e41512ac-7955-5c0e-ae5c-0965336a2383,2025-12-07,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+84305314-0ec4-5259-bdb2-a4f6c5725138,2025-12-07,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+4b2d0bb9-7876-5d8b-b439-9248327ec231,2025-12-07,10:00:00,Windermere · Sunday 10:00,sun_9,False
+2a032bc4-80c2-59c5-8b59-86224dad876e,2025-12-07,09:30:00,Clermont · Sunday 9:30,sun_9,False
+3dd90380-f574-5d23-af4e-3d802a86be33,2025-12-03,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+1594ec46-7349-543c-b949-c2b22ef3a422,2025-12-07,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+6baf6c65-4e0d-546f-95ed-cc2c1d860a10,2025-11-30,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+47513851-6953-5a28-96a4-9f8154779995,2025-11-30,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+39c2b123-1a7c-5845-b732-f3293efb1661,2025-11-30,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+10ba1e18-e0a3-5247-848e-fb1fc4151f1c,2025-11-30,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+50eae434-063b-5595-af6f-342e52b82b4f,2025-11-30,10:00:00,Windermere · Sunday 10:00,sun_9,False
+35fe1301-23a2-5d77-9c67-e67749e945bd,2025-11-30,09:30:00,Clermont · Sunday 9:30,sun_9,False
+093e22f0-61a8-5cae-8e25-1b375da93834,2025-11-26,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+2d191e43-0ffe-5c7f-bbbd-bc96417613ac,2025-11-30,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+3023fdb5-d435-5bd4-930a-b8e35ecabfc7,2025-11-23,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+c0a373f2-6dcf-5432-9812-15f6ce4d4224,2025-11-23,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+2b0024c5-f0bc-5b17-b12c-7e3911225702,2025-11-23,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+7f864a8a-3f17-5426-a99d-0881f79bf664,2025-11-23,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+12c970f7-f861-565b-84f0-3f1eb263dcb6,2025-11-23,10:00:00,Windermere · Sunday 10:00,sun_9,False
+08c245ae-e613-5768-890d-cfa05cab5669,2025-11-23,09:30:00,Clermont · Sunday 9:30,sun_9,False
+a5ed76b3-3ad5-597d-ade1-c76b345917c0,2025-11-19,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+3fee55b5-158b-5242-acd6-89f627d0a675,2025-11-23,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+014023e8-4f70-5abd-893f-2cc185bd1fa4,2025-11-16,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+11ec5445-c0c3-529d-962f-2f7a170cc16e,2025-11-16,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+90225239-5ed9-5a58-8147-26dc36430a93,2025-11-16,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+87b5d21c-0fa2-5c9e-917e-66cee98b9a6e,2025-11-16,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+5c71ec36-16f2-5a67-ae49-0491ef98365f,2025-11-16,10:00:00,Windermere · Sunday 10:00,sun_9,False
+9ac53f8e-c58f-5bbb-857d-81fc13d96cd1,2025-11-16,09:30:00,Clermont · Sunday 9:30,sun_9,False
+be53e342-fbc6-5c47-bbc4-4ab5086a881a,2025-11-12,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+6f955e32-8b4f-5437-b3ca-3f0dbc88ae67,2025-11-16,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True
+9bb3631d-6555-5fc2-9135-ebad5cb85cf4,2025-11-09,09:00:00,Winter Garden · Sunday 9:00,sun_9,False
+dd0fc1fe-f2ea-5d73-ae36-eb7abf0de6df,2025-11-09,11:00:00,Winter Garden · Sunday 11:00,sun_11,True
+d743f56a-c4d6-5e8e-bab0-37986d783855,2025-11-09,09:30:00,Ocoee · Sunday 9:30,sun_9,False
+979dcc92-9cd8-5244-bd5f-86c685885785,2025-11-09,11:15:00,Ocoee · Sunday 11:15,sun_11,False
+43cb5037-60ba-54ff-8742-397c3aec7cf3,2025-11-09,10:00:00,Windermere · Sunday 10:00,sun_9,False
+dbaebe77-1947-506f-bf36-fcaa8e657c40,2025-11-09,09:30:00,Clermont · Sunday 9:30,sun_9,False
+039b25db-e712-51d9-ba52-9faaf24894f9,2025-11-05,19:00:00,Winter Garden · Wednesday Night,wed_eve,False
+2553138e-f53e-595b-aaf2-9e257d8ff592,2025-11-09,18:00:00,Online Gathering · Sunday 18:00,sun_pm,True

@@ -9,12 +9,20 @@
 // deterministic stage is lib/ranking/reference-shortlist.mjs and the prompt contract is
 // lib/ranking/rank-v2.mjs, the same modules the app is tested against and uses.
 //
+// Only labels with outcome_type "ranking" are sent to the model. The policy labels (empty, excluded,
+// duplicate_pending, active_member) are skipped and reported with a count and reason; their checks live in
+// scripts/seed_validate.mjs (offline) and scripts/test_recommendations.mjs (after the load).
+//
+// Reported separately: Shortlist Recall@6, LLM Top-1, LLM Top-3, stability, fallback count and rate.
+//
 // Writes: eval/out/rank_eval-<timestamp>.json (gitignored). No writes to Lakebase.
 import fs from "node:fs";
 import path from "node:path";
 import pg from "pg";
 import OpenAI from "openai";
 import { readCsv } from "../lib/seed/csv.mjs";
+import { parseLabels, partitionLabels, originalLabelMatcher } from "../lib/seed/eval-labels.mjs";
+import { emptyStats, recordRun, judgeRun, computeStability, passMark, rate } from "../lib/ranking/eval-metrics.mjs";
 import { buildContext, shortlistFor, groupMix, SHORTLIST_SIZE } from "../lib/ranking/reference-shortlist.mjs";
 import {
   PROMPT_VERSION, SYSTEM_PROMPT, memberPayload, shortlistPayload, parseRanking, scoreOrderFallback,
@@ -61,10 +69,12 @@ if (ctx.featuresByPerson && Object.keys(ctx.featuresByPerson).length === 0) {
 }
 const groupName = (id) => ctx.groups.find((g) => g.group_id === id)?.name ?? id;
 
-const evalLabels = readCsv("eval_label.csv").map((r) => ({
-  ...r,
-  acceptable_group_ids: r.acceptable_group_ids ? r.acceptable_group_ids.split("|").filter(Boolean) : [],
-}));
+// Only "ranking" labels are evaluated; policy labels are skipped with a count and reason.
+const allLabels = parseLabels(readCsv("eval_label.csv"));
+const { ranking: evalLabels, policy: skippedLabels, policyByType } = partitionLabels(allLabels);
+const { isOriginal } = originalLabelMatcher();
+console.log(`labels: ${allLabels.length} total; ${evalLabels.length} ranking scenarios evaluated; ${skippedLabels.length} policy scenarios skipped ` +
+  `(${Object.entries(policyByType).map(([t, ls]) => `${t} ${ls.length}`).join(", ")}): they never reach the ranking model`);
 
 // ---------------------------------------------------------------- shortlist items for the prompt
 
@@ -110,30 +120,14 @@ async function rankWithRetry(payload, shortlistIdList, n) {
   }
 }
 
-// ---------------------------------------------------------------- stats
-
-function emptyStats() {
-  return { runs: 0, top1: 0, top3: 0, fallback: 0, latencyTotal: 0, promptTokens: 0, completionTokens: 0, totalTokens: 0, costUsd: 0 };
-}
-function recordRun(stats, { top1, top3, fallback, latency = 0, usage }) {
-  stats.runs++;
-  if (top1) stats.top1++;
-  if (top3) stats.top3++;
-  if (fallback) stats.fallback++;
-  stats.latencyTotal += latency;
-  if (usage) {
-    stats.promptTokens += usage.prompt_tokens ?? 0;
-    stats.completionTokens += usage.completion_tokens ?? 0;
-    stats.totalTokens += usage.total_tokens ?? 0;
-    stats.costUsd += usage.cost ?? 0;
-  }
-}
-
 // ---------------------------------------------------------------- main loop
 
-const stats = { A: emptyStats(), B: emptyStats(), C: emptyStats() };
+// "core" = the 14 original labels (the original pass mark); "all" = every ranking scenario.
+const mkScope = () => ({ A: emptyStats(), B: emptyStats(), C: emptyStats() });
+const stats = { core: mkScope(), all: mkScope() };
+const record = (label, variant, run) => { recordRun(stats.all[variant], run); if (isOriginal(label)) recordRun(stats.core[variant], run); };
 const results = [];
-let shortlistRecallHits = 0;
+let recallExpected = 0, recallExpectedOrAccepted = 0, excludedViolations = 0;
 
 for (const label of evalLabels) {
   const profile = ctx.profilesByPerson[label.person_id];
@@ -144,23 +138,25 @@ for (const label of evalLabels) {
   const shortlist = shortlistFor(ctx, label.person_id);
   const items = toItems(shortlist);
   const idList = shortlist.map((g) => g.group_id);
-  const expectedOrAlt = new Set([label.expected_group_id, ...label.acceptable_group_ids]);
-  const recall = idList.some((id) => expectedOrAlt.has(id));
-  if (recall) shortlistRecallHits++;
+  const recallStrict = idList.includes(label.expected_group_id);
+  const recall = idList.some((id) => label.acceptableOrExpected.includes(id));
+  if (recallStrict) recallExpected++;
+  if (recall) recallExpectedOrAccepted++;
+  const excludedPresent = label.excluded.filter((id) => idList.includes(id));
+  excludedViolations += excludedPresent.length;
   const n = Math.min(3, shortlist.length);
 
   const cRanked = scoreOrderFallback(idList, n);
-  const cTop1 = cRanked[0] === label.expected_group_id;
-  const cTop3 = cRanked.some((id) => expectedOrAlt.has(id));
-  recordRun(stats.C, { top1: cTop1, top3: cTop3, fallback: false });
+  const cJudge = judgeRun(label, cRanked);
+  record(label, "C", cJudge);
 
   const labelRecord = {
-    label_key: label.label_key, person_id: label.person_id,
+    label_key: label.label_key, person_id: label.person_id, expectation: label.expectation, original: isOriginal(label),
     expected_group_id: label.expected_group_id, expected_group_name: label.expected_group_name,
-    acceptable_group_ids: label.acceptable_group_ids, cue: label.cue,
+    acceptable_group_ids: label.acceptable, excluded_group_ids: label.excluded, cue: label.cue,
     shortlist: shortlist.map((g) => ({ group_id: g.group_id, name: g.name, score: Math.round(g.total * 10) / 10, breakdown: g.breakdown })),
-    shortlist_recall: recall,
-    variants: { A: { runs: [] }, B: { runs: [] }, C: { ranked: cRanked, top1_hit: cTop1, top3_hit: cTop3 } },
+    shortlist_recall: recallStrict, shortlist_recall_expected_or_accepted: recall, excluded_present: excludedPresent,
+    variants: { A: { runs: [] }, B: { runs: [] }, C: { ranked: cRanked, top1_hit: cJudge.top1, top3_hit: cJudge.top3 } },
   };
   if (n === 0) { console.warn(`${label.label_key}: empty shortlist, nothing to rank`); results.push(labelRecord); continue; }
 
@@ -171,78 +167,82 @@ for (const label of evalLabels) {
     };
     for (let run = 1; run <= RUNS_PER_VARIANT; run++) {
       const out = await rankWithRetry(payload, idList, n);
-      const top1 = out.ordered[0] === label.expected_group_id;
-      const top3 = out.ordered.some((id) => expectedOrAlt.has(id));
-      recordRun(stats[variant], { top1, top3, fallback: out.fallback, latency: out.latency, usage: out.usage });
+      const j = judgeRun(label, out.ordered);
+      record(label, variant, { ...j, fallback: out.fallback, latency: out.latency, usage: out.usage });
       labelRecord.variants[variant].runs.push({
         run, ranked: out.ordered, internal_rationale: out.internal_rationale, confidence: out.confidence,
         fallback: out.fallback, attempts: out.attempts, latency_ms: out.latency, usage: out.usage,
-        top1_hit: top1, top3_hit: top3,
+        top1_hit: j.top1, top3_hit: j.top3,
       });
     }
   }
   results.push(labelRecord);
 
-  console.log(`\n${label.label_key}  expected=${label.expected_group_name}  shortlist_recall=${recall ? "yes" : "NO"}`);
+  console.log(`\n${label.label_key} [${label.expectation}] expected=${label.expected_group_name}  shortlist_recall=${recallStrict ? "yes" : "NO"}`);
   console.log(`  shortlist: ${shortlist.map((g) => `${g.name} (${g.total.toFixed(1)})`).join(", ")}`);
   for (const variant of ["A", "B"]) {
     for (const r of labelRecord.variants[variant].runs) {
       console.log(`  [${variant}${r.run}] ${r.top1_hit ? "HIT " : r.top3_hit ? "top3" : "miss"}  ${r.ranked.map(groupName).join(" > ")}  (${r.confidence}${r.fallback ? ", FALLBACK" : ""})`);
     }
   }
-  console.log(`  [C]  ${cTop1 ? "HIT " : cTop3 ? "top3" : "miss"}  ${cRanked.map(groupName).join(" > ")}`);
+  console.log(`  [C]  ${cJudge.top1 ? "HIT " : cJudge.top3 ? "top3" : "miss"}  ${cRanked.map(groupName).join(" > ")}`);
 }
 
-// ---------------------------------------------------------------- stability, summary, pass mark
+// ---------------------------------------------------------------- summary (metrics reported separately)
 
-function computeStability(variant) {
-  let stable = 0, total = 0;
-  for (const rec of results) {
-    const picks = rec.variants[variant].runs.map((r) => r.ranked[0]);
-    if (picks.length === 0) continue;
-    total++;
-    const counts = {};
-    for (const p of picks) counts[p] = (counts[p] ?? 0) + 1;
-    if (Math.max(...Object.values(counts)) >= 2) stable++;
+const coreRecords = results.filter((r) => r.original);
+const stability = {
+  core: { A: computeStability(coreRecords, "A"), B: computeStability(coreRecords, "B") },
+  all: { A: computeStability(results, "A"), B: computeStability(results, "B") },
+};
+const N = results.length;
+const pc = (n, d) => `${n}/${d} (${(rate(n, d) * 100).toFixed(0)}%)`;
+
+console.log("\n" + "=".repeat(70) + `\nSUMMARY (${PROMPT_VERSION}, model ${MODEL})\n` + "=".repeat(70));
+console.log(`ranking scenarios evaluated: ${N}; policy scenarios skipped: ${skippedLabels.length}`);
+console.log(`\nShortlist Recall@${SHORTLIST_SIZE} (deterministic stage): expected on shortlist ${pc(recallExpected, N)}; expected or accepted ${pc(recallExpectedOrAccepted, N)}`);
+console.log(`Excluded groups present on a shortlist: ${excludedViolations} (must be 0)`);
+
+function printScope(scopeName, title) {
+  console.log(`\n--- ${title} ---`);
+  for (const variant of ["A", "B"]) {
+    const s = stats[scopeName][variant], st = stability[scopeName][variant];
+    const label = variant === "A" ? "A (scored shortlist)" : "B (shuffled, no scores)";
+    console.log(`Variant ${label}: ${s.runs} runs`);
+    console.log(`  LLM Top-1:          ${pc(s.top1, s.top1Runs)}   (accepted alternates counted: ${pc(s.top1Accepted, s.top1Runs)})`);
+    console.log(`  LLM Top-3:          ${pc(s.top3, s.runs)}`);
+    console.log(`  stability:          ${st.stable}/${st.total} labels (>=2 of ${RUNS_PER_VARIANT} runs agree on the first group)`);
+    console.log(`  fallbacks:          ${s.fallback}/${s.runs} (${(rate(s.fallback, s.runs) * 100).toFixed(1)}%)`);
+    console.log(`  avg latency:        ${s.runs ? (s.latencyTotal / s.runs).toFixed(0) : 0} ms; avg tokens prompt ${s.runs ? (s.promptTokens / s.runs).toFixed(0) : 0}, completion ${s.runs ? (s.completionTokens / s.runs).toFixed(0) : 0}; cost $${s.costUsd.toFixed(4)}`);
   }
-  return { stable, total };
+  const c = stats[scopeName].C;
+  console.log(`Variant C (score order, no LLM): Top-1 ${pc(c.top1, c.top1Runs)}, Top-3 ${pc(c.top3, c.runs)}`);
 }
-const stabilityA = computeStability("A");
-const stabilityB = computeStability("B");
-const N_LABELS = evalLabels.length;
+printScope("core", `the ${coreRecords.length} original labels (the original pass mark)`);
+printScope("all", `all ${N} ranking scenarios (informational; same proportional thresholds)`);
 
-console.log("\n" + "=".repeat(70) + `\nSUMMARY (${PROMPT_VERSION})\n` + "=".repeat(70));
-console.log(`shortlist recall: ${shortlistRecallHits}/${N_LABELS}`);
-function printVariantSummary(name, s, stability) {
-  console.log(`\nVariant ${name} (${s.runs} runs over ${s.runs / RUNS_PER_VARIANT} labels):`);
-  console.log(`  top-1 hits:   ${s.top1}/${s.runs}  (${(s.top1 / s.runs * 100).toFixed(0)}%)`);
-  console.log(`  top-3 hits:   ${s.top3}/${s.runs}  (${(s.top3 / s.runs * 100).toFixed(0)}%)`);
-  console.log(`  fallbacks:    ${s.fallback}/${s.runs}`);
-  console.log(`  avg latency:  ${(s.latencyTotal / s.runs).toFixed(0)} ms`);
-  console.log(`  avg tokens:   prompt ${(s.promptTokens / s.runs).toFixed(0)}, completion ${(s.completionTokens / s.runs).toFixed(0)}`);
-  console.log(`  cost:         total $${s.costUsd.toFixed(4)}`);
-  console.log(`  stable top-1: ${stability.stable}/${stability.total} labels (>=2 of ${RUNS_PER_VARIANT} runs agree)`);
+const passes = {};
+for (const scope of ["core", "all"]) {
+  passes[scope] = {};
+  for (const variant of ["A", "B"]) {
+    const m = passMark(stats[scope][variant], stability[scope][variant]);
+    passes[scope][variant] = m;
+    console.log(`Pass mark, ${scope === "core" ? "original 14" : "all ranking"}, variant ${variant}: ${m.ok ? "PASS" : "FAIL"}  (Top-1 ${(m.top1Rate * 100).toFixed(0)}% >= 71%, Top-3 ${(m.top3Rate * 100).toFixed(0)}% >= 93%, fallbacks ${(m.fallbackRate * 100).toFixed(1)}%, every label stable)`);
+  }
 }
-printVariantSummary("A (scored shortlist)", stats.A, stabilityA);
-printVariantSummary("B (shuffled, no scores)", stats.B, stabilityB);
-console.log(`\nVariant C (score order, no LLM): top-1 ${stats.C.top1}/${N_LABELS}  top-3 ${stats.C.top3}/${N_LABELS}`);
-
-function passMark(name, s, stability) {
-  const top1 = (s.top1 / s.runs) * N_LABELS, top3 = (s.top3 / s.runs) * N_LABELS;
-  const ok = top1 >= 10 && top3 >= 13 && s.fallback === 0 && stability.stable === stability.total;
-  console.log(`\nPass mark, variant ${name}: ${ok ? "PASS" : "FAIL"}  (top-1 ${top1.toFixed(1)}/14 >=10, top-3 ${top3.toFixed(1)}/14 >=13, fallbacks ${s.fallback}, stable ${stability.stable}/${stability.total})`);
-  return ok;
-}
-const passA = passMark("A", stats.A, stabilityA);
-const passB = passMark("B", stats.B, stabilityB);
 
 const outDir = path.join(ROOT, "eval", "out");
 fs.mkdirSync(outDir, { recursive: true });
 const outPath = path.join(outDir, `rank_eval-${new Date().toISOString().replace(/[:.]/g, "-")}.json`);
 fs.writeFileSync(outPath, JSON.stringify({
-  generated_at: new Date().toISOString(), model: MODEL, prompt_version: PROMPT_VERSION, n_labels: N_LABELS,
-  shortlist_recall: { hits: shortlistRecallHits, of: N_LABELS },
-  summary: { A: stats.A, B: stats.B, C: stats.C, stability: { A: stabilityA, B: stabilityB } },
-  pass_mark: { A: passA, B: passB }, labels: results,
+  generated_at: new Date().toISOString(), model: MODEL, prompt_version: PROMPT_VERSION,
+  n_labels_total: allLabels.length, n_ranking: N,
+  skipped_policy: {
+    count: skippedLabels.length, reason: "outcome_type is not ranking; these scenarios never reach the ranking model",
+    by_type: Object.fromEntries(Object.entries(policyByType).map(([t, ls]) => [t, ls.map((l) => l.label_key)])),
+  },
+  shortlist_recall: { at: SHORTLIST_SIZE, expected_on_shortlist: recallExpected, expected_or_accepted: recallExpectedOrAccepted, of: N, excluded_present: excludedViolations },
+  summary: { core: { ...stats.core, stability: stability.core }, all: { ...stats.all, stability: stability.all } },
+  pass_mark: passes, labels: results,
 }, null, 2));
 console.log(`\nFull results written to ${path.relative(ROOT, outPath)}`);

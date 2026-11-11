@@ -8,7 +8,8 @@ AI for Church Hackathon entry (build window Oct 30 – Nov 27, 2026; **submit by
 - [`docs/Gathered - Demo Journeys.md`](docs/Gathered%20-%20Demo%20Journeys.md): **canonical product behavior.** User journeys (stable numbers, not build order), personas and stories, screens, data effects, guardrails, scope boundaries, and the demo video narrative. It is not a status or sequencing document.
 - [`docs/Gathered - Build Tracker.md`](docs/Gathered%20-%20Build%20Tracker.md): **implementation status.** Current and next work, dependencies, sequencing, completed work, and cut decisions. Update it when work starts, finishes or is cut; do not put status in the other documents.
 - [`docs/AI for Church Hackathon - Submission Deliverables.md`](docs/AI%20for%20Church%20Hackathon%20-%20Submission%20Deliverables.md): submission requirements and the safeguards that must be built and shown.
-- [`seed/generate_seed.py`](seed/generate_seed.py) → `seed/out/*.csv`: synthetic Winter Garden, FL church (deterministic, RNG 516).
+- [`docs/Gathered - Synthetic Data Design.md`](docs/Gathered%20-%20Synthetic%20Data%20Design.md): **canonical synthetic-world specification** (scale, population, group catalog, engagement, personas, evaluation scenarios). Technical architecture still wins on any conflict.
+- [`seed/generate_seed.py`](seed/generate_seed.py) → `seed/out/*.csv`: synthetic Winter Garden, FL church (deterministic, RNG 516). `seed/SYNTHETIC_DATA_REPORT.md` is generated; `seed/stable_ids.json` records the ids that must never change.
 
 ## Stack
 - **Operational store:** Lakebase Postgres 17, project `gathered-demo`, schema `app`.
@@ -46,12 +47,13 @@ AI for Church Hackathon entry (build window Oct 30 – Nov 27, 2026; **submit by
 ## Working rules
 - Propose a short plan, then implement in small steps. Run SQL against Lakebase with the owner URL only for migrations and seeds.
 - Re-run `node --env-file=.env.local pgtest.mjs pg`-style persona checks after any RLS change.
-- Tests: `npm test` (recommendation lifecycle + Journey 1, stubbed, no external LLM calls, needs Node 20+) and `npm run build` are routine; `npm run smoke:journey1` drives a running app over HTTP. `npm run verify:openrouter`, `npm run verify:journey1` and `scripts/rank_eval.mjs` make real OpenRouter calls and are run explicitly only.
+- Tests: `npm test` (offline label/metric tests via `npm run test:eval`, then recommendation lifecycle + Journey 1, stubbed, no external LLM calls, needs Node 20+) and `npm run build` are routine; `npm run smoke:journey1` drives a running app over HTTP. `npm run verify:openrouter`, `npm run verify:journey1` and `scripts/rank_eval.mjs` make real OpenRouter calls and are run explicitly only.
+- `npm run seed:generate` regenerates `seed/out` (Python 3, offline); `npm run seed:check` regenerates twice, compares, validates and rewrites the report; `npm run seed:validate` is the quick pass. None of them touch a database or call a model.
 - `npm run seed:reset` reloads the seed and recomputes `person_features` (returns the demo database to a known state, with no recommendation runs).
 - `scripts/compute_person_features.mjs` is a local bootstrap producer; Databricks is the intended deployed producer of `person_features`.
 - Drop schema `spike` once `app` exists.
 
 ## Repo layout
 - `docs/`: architecture (canonical), product behavior (Demo Journeys), Build Tracker, submission deliverables, application text, ER diagram.
-- `seed/`: `generate_seed.py` and its output CSVs (`seed/out`). Regenerate rather than hand-edit CSVs.
+- `seed/`: `generate_seed.py`, its output CSVs (`seed/out`), `stable_ids.json` and the generated `SYNTHETIC_DATA_REPORT.md`. Regenerate rather than hand-edit CSVs.
 - `spike/` and `pgtest.mjs`: the Postgres validation test (passed 2026-11-02). Delete once the `app` schema is in.

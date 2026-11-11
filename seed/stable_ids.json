@@ -1,0 +1,125 @@
+{
+ "_comment": "Invariants recorded from generator v0.2 (2026-11-03). seed_validate asserts every generator version still produces these ids. Edit only when an id is deliberately retired.",
+ "personas": {
+  "manager": "f017cdc0-a09c-50fe-be72-3c964ccb5227",
+  "leader_tom": "a610aff4-084a-53a3-8b27-29133ab424b9",
+  "leader_grace": "de492182-aea3-53d0-b440-b990701bee3b",
+  "leader_chris": "d82ec3d1-56a9-5ce1-90c2-39f18e82880c",
+  "member_marcus": "511b34cf-b4c7-5f80-ae2d-ac1da01a2612",
+  "member_dana": "0bd3f98c-40c7-5ea7-a870-d32c9ef7ac5d",
+  "member_ruth": "4014ea76-f9fa-506f-84b9-45983a78c1d9",
+  "member_priya": "058a6b1b-1f87-5420-89fe-6c87341c132b",
+  "member_jordan": "ee0b516c-cec8-515d-8259-89a854e66be9",
+  "sam": "816071ae-288c-5a47-bb0a-8b9b1b04f65b"
+ },
+ "portal_users": {
+  "manager@demo.gathered.invalid": "27a5d684-ef07-5eca-98f2-1f6018433474",
+  "leader_tom@demo.gathered.invalid": "974b269f-6d3e-5de6-8587-313bd2136d79",
+  "leader_grace@demo.gathered.invalid": "6444ce29-9494-5c44-a9d7-d48467152225",
+  "leader_chris@demo.gathered.invalid": "ae51a814-5c6d-5a38-8079-ae8831ed223c",
+  "member_marcus@demo.gathered.invalid": "ed9a0b00-1943-5c52-b543-86d27930bed9",
+  "member_dana@demo.gathered.invalid": "677cff8c-c36c-5f7f-af1d-bbbe785c98dc",
+  "member_ruth@demo.gathered.invalid": "4d8b9317-bdca-52f5-af97-780f562f1397",
+  "member_priya@demo.gathered.invalid": "6e6c5534-6aaa-5060-a28a-59799e36bbad",
+  "member_jordan@demo.gathered.invalid": "ad7e2d1d-52a9-5ecd-a224-e03d82bcb561"
+ },
+ "groups": {
+  "Tuesday Night Dads": "fda8d3ab-c227-50cf-bdf4-2bd1030b36af",
+  "Sunday Lunch D-Group": "a8a6a43a-4a3f-53eb-91e8-f55bb2bf0011",
+  "Women of the Word": "1af6c396-9234-58bd-8017-d3e2f966da25",
+  "First Steps": "9d19f232-5363-53c4-94ca-bf7bb4c2a3c8",
+  "Young Couples": "8731ba9a-66f9-5bb7-a5c2-41a526c9efe2",
+  "Second Half": "651f7a29-8408-5f2f-bd58-6a3baea9e69c",
+  "Saturday Men's Breakfast": "ea66310f-3d2e-5868-84d1-51a9c5912314",
+  "Parents of Teens": "0b224176-24d8-5570-86d2-47b9407b42ec",
+  "Thursday Twenties": "a5e11f0d-fa66-58e2-83c3-b91a70003b3a",
+  "Lakeside Women": "2b155fd3-cb16-5ea2-9ec5-13ca9f0492fa",
+  "New Men's D-Group (forming)": "41fe7a3f-0947-52ae-8582-1330d0ff5785",
+  "New Women's D-Group (forming)": "7a6fe6bf-456b-5860-917a-e9ebbae0c6f0",
+  "Deep Roots": "bc84aba9-e583-5856-b5f6-fdecde941014",
+  "Thursday Women in the Word": "2818aefa-e083-51be-b405-7c78ebf79341",
+  "Midweek Prayer & Worship": "efdd496c-34ca-50c3-9711-f6f5fa08c551",
+  "Tuesday Men's Accountability": "8367e63f-c5e6-568c-8a17-57a38cee0d5b",
+  "Men of Iron": "5dfc3bc9-43e6-515a-a50b-cc351f4c3b6a",
+  "Sunday Supper Families": "9b923707-67ad-53dc-92c3-1ab476ee3bb8",
+  "Clermont Moms Morning": "3519197b-7d34-5e8f-8aad-b97bdd35ee7b",
+  "Online Thursday Study": "8a50cdc3-9e93-5be1-bc84-424bb4e9d4dd"
+ },
+ "eval_labels": {
+  "e01": {
+   "person_id": "76f5ee2a-5ed2-53d1-b09e-1de237ed2205",
+   "expected_group_id": "bc84aba9-e583-5856-b5f6-fdecde941014",
+   "acceptable_group_ids": ""
+  },
+  "e02": {
+   "person_id": "8acb0091-bf6e-5ec2-8321-a0db06db3e8b",
+   "expected_group_id": "2818aefa-e083-51be-b405-7c78ebf79341",
+   "acceptable_group_ids": ""
+  },
+  "e03": {
+   "person_id": "bc3a3917-756d-5444-9b3f-8313d6af3ed1",
+   "expected_group_id": "efdd496c-34ca-50c3-9711-f6f5fa08c551",
+   "acceptable_group_ids": ""
+  },
+  "e04": {
+   "person_id": "93557a6c-e118-54ed-8172-211c79dac2f8",
+   "expected_group_id": "9d19f232-5363-53c4-94ca-bf7bb4c2a3c8",
+   "acceptable_group_ids": ""
+  },
+  "e05": {
+   "person_id": "f517407c-8631-5eb0-95d3-ac59bbbda1ae",
+   "expected_group_id": "8a50cdc3-9e93-5be1-bc84-424bb4e9d4dd",
+   "acceptable_group_ids": ""
+  },
+  "e06": {
+   "person_id": "fccc7419-052e-579a-aaa9-c912380f947a",
+   "expected_group_id": "9b923707-67ad-53dc-92c3-1ab476ee3bb8",
+   "acceptable_group_ids": ""
+  },
+  "e07": {
+   "person_id": "eb24570a-7928-5fcd-b43f-6014d58f823c",
+   "expected_group_id": "5dfc3bc9-43e6-515a-a50b-cc351f4c3b6a",
+   "acceptable_group_ids": ""
+  },
+  "e08": {
+   "person_id": "1f153470-8225-5f03-a50d-2dd9550455a2",
+   "expected_group_id": "8367e63f-c5e6-568c-8a17-57a38cee0d5b",
+   "acceptable_group_ids": ""
+  },
+  "e09": {
+   "person_id": "58708276-b258-576d-946b-a9da4af81d11",
+   "expected_group_id": "fda8d3ab-c227-50cf-bdf4-2bd1030b36af",
+   "acceptable_group_ids": "9b923707-67ad-53dc-92c3-1ab476ee3bb8"
+  },
+  "e10": {
+   "person_id": "e5c8416d-52c2-54aa-86d2-5815f745ed21",
+   "expected_group_id": "a8a6a43a-4a3f-53eb-91e8-f55bb2bf0011",
+   "acceptable_group_ids": ""
+  },
+  "e11": {
+   "person_id": "bfece1d7-bfbd-50c1-a1aa-94b72cad57a5",
+   "expected_group_id": "41fe7a3f-0947-52ae-8582-1330d0ff5785",
+   "acceptable_group_ids": "fda8d3ab-c227-50cf-bdf4-2bd1030b36af"
+  },
+  "e12": {
+   "person_id": "9c22f039-e25f-52f2-b8bc-b81d8ff467df",
+   "expected_group_id": "bc84aba9-e583-5856-b5f6-fdecde941014",
+   "acceptable_group_ids": ""
+  },
+  "persona|511b34cf-b4c7-5f80-ae2d-ac1da01a2612": {
+   "person_id": "511b34cf-b4c7-5f80-ae2d-ac1da01a2612",
+   "expected_group_id": "fda8d3ab-c227-50cf-bdf4-2bd1030b36af",
+   "acceptable_group_ids": ""
+  },
+  "persona|0bd3f98c-40c7-5ea7-a870-d32c9ef7ac5d": {
+   "person_id": "0bd3f98c-40c7-5ea7-a870-d32c9ef7ac5d",
+   "expected_group_id": "9d19f232-5363-53c4-94ca-bf7bb4c2a3c8",
+   "acceptable_group_ids": ""
+  }
+ },
+ "join_requests": [
+  "a8497c1f-4f5a-544b-be82-9d8cf68bfd19",
+  "aeecdb3f-4969-5418-8102-9e9c9c7fd58b",
+  "0a848022-fc51-514b-9d79-fd4d97e8f830"
+ ]
+}
