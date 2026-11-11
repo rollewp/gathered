@@ -199,7 +199,9 @@ await test("persist rejects: group off the shortlist, duplicates, wrong count, s
     c.query("select app.persist_recommendation_run($1::uuid[], $2::uuid[], $3, 'low', 'x', 'm', $4, '{}')", [shortlist, ranked, outcome, PROMPT_VERSION]));
   await throws(() => call([ids[0], ids[1], outside]), /not on the shortlist/, "off-shortlist group");
   await throws(() => call([ids[0], ids[0], ids[1]]), /duplicate/, "duplicates");
-  await throws(() => call([ids[0], ids[1]]), /expected 3 ranked/, "wrong count");
+  await throws(() => call([]), /expected 1 to 3 ranked/, "an llm ranking of zero groups");
+  await throws(() => call(ids.slice(0, 4)), /expected 1 to 3 ranked/, "an llm ranking of four groups");
+  await throws(() => call(ids.slice(0, 2), "score_fallback"), /score order/, "a score fallback must be the full top 3, not fewer");
   await throws(() => call(ids.slice(0, 3), "llm", ids.slice(1)), /shortlist_changed/, "stale shortlist");
   await throws(() => call([ids[1], ids[0], ids[2]], "score_fallback"), /score order/, "fallback not in score order");
   await throws(() => call([], "no_candidates"), /empty shortlist|no_candidates/, "empty outcome on non-empty shortlist");
@@ -421,7 +423,8 @@ function stubModel(kind = "valid") {
     s.calls++;
     if (kind === "error") throw new Error("simulated network failure");
     const ids = payload.shortlist.map((g) => g.group_id);
-    const good = JSON.stringify({ ranked: ids.slice(0, 3).map((g, i) => ({ group_id: g, rank: i + 1 })), internal_rationale: "stub rationale", confidence: "high" });
+    const count = { one: 1, two: 2, zero: 0, four: 4 }[kind] ?? 3; // how many groups this stub "positively supports"
+    const good = JSON.stringify({ ranked: ids.slice(0, count).map((g, i) => ({ group_id: g, rank: i + 1 })), internal_rationale: "stub rationale", confidence: "high" });
     const raw = kind === "invalid" || (kind === "invalid-then-valid" && attempt === 1) ? "not json at all" : good;
     return { raw, usage: { prompt_tokens: 100, completion_tokens: 20, total_tokens: 120 }, latencyMs: 5, model: "stub-model" };
   };
@@ -504,6 +507,51 @@ await test("fallback: two invalid answers -> deterministic score order, failed a
   const sl = (await q("select group_id from app.recommendation_run_candidate where run_id = $1 order by shortlist_position", [r.runId])).map((x) => x.group_id);
   eq(r.groups.map((g) => g.group_id), sl.slice(0, 3), "score order");
   eq((await llmAuditRows()) - before, 2, "both failed attempts audited, none duplicated by the run");
+});
+await test("1 to 3 groups: a model that supports only one or two is persisted as returned, not padded; reused with zero calls", async () => {
+  for (const [kind, k] of [["one", 1], ["two", 2], ["valid", 3]]) {
+    await resetRuns();
+    const s = stubModel(kind);
+    const r = await getRecommendations("member_dana", { callModel: s.fn });
+    assert(r.status === "ok" && r.source === "generated" && r.groups.length === k, `${kind}: ${r.groups.length} groups`);
+    eq(r.groups.map((g) => g.rank), Array.from({ length: k }, (_, i) => i + 1), `${kind}: ranks`);
+    const run = (await q("select * from app.recommendation_run where run_id = $1", [r.runId]))[0];
+    assert(run.is_current && run.outcome === "llm", `${kind}: outcome ${run.outcome}`);
+    eq((await q("select count(*)::int c from app.recommendation where run_id = $1", [r.runId]))[0].c, k, `${kind}: stored rows`);
+    assert((await q("select count(*)::int c from app.recommendation_run_candidate where run_id = $1", [r.runId]))[0].c >= 3, `${kind}: the full shortlist is still kept`);
+    eq(s.calls, 1);
+    const again = await getRecommendations("member_dana", { callModel: s.fn });
+    assert(again.source === "reused" && again.llmAttempts === 0 && again.groups.length === k && s.calls === 1, `${kind}: reused with zero calls`);
+    const peek = await peekRecommendations("member_dana");
+    eq(peek.groups.length, k, `${kind}: the member read path returns the same number`);
+  }
+});
+await test("an answer with zero groups or more than three is invalid (retry, then the score fallback of three)", async () => {
+  for (const kind of ["zero", "four"]) {
+    await resetRuns(); const before = await llmAuditRows();
+    const s = stubModel(kind);
+    const r = await getRecommendations("member_dana", { callModel: s.fn });
+    eq(s.calls, 2, `${kind}: retried once`);
+    const run = (await q("select * from app.recommendation_run where run_id = $1", [r.runId]))[0];
+    eq([run.outcome, run.confidence], ["score_fallback", "low"], `${kind}: fell back`);
+    const sl = (await q("select group_id from app.recommendation_run_candidate where run_id = $1 order by shortlist_position", [r.runId])).map((x) => x.group_id);
+    eq(r.groups.map((g) => g.group_id), sl.slice(0, 3), `${kind}: fallback is the top three by score`);
+    eq((await llmAuditRows()) - before, 2, `${kind}: both attempts audited`);
+    eq((await q("select detail->>'outcome' o from app.audit_log where action = 'llm_rank_attempt' order by id desc limit 2")).map((x) => x.o), ["invalid_output", "invalid_output"]);
+  }
+});
+await test("persist accepts 1, 2 and 3 llm-ranked groups and rejects 0 and 4; a score fallback must still be the full top three", async () => {
+  await resetRuns();
+  const ids = await as("member_dana", async (c) => (await c.query("select group_id from app.recommendation_shortlist() order by shortlist_position")).rows.map((r) => r.group_id));
+  const call = (ranked, outcome = "llm") => as("member_dana", (c) =>
+    c.query("select app.persist_recommendation_run($1::uuid[], $2::uuid[], $3, 'low', 'x', 'm', $4, '{}') as run_id", [ids, ranked, outcome, PROMPT_VERSION]));
+  for (const k of [1, 2, 3]) {
+    const runId = (await call(ids.slice(0, k))).rows[0].run_id;
+    eq((await q("select group_id from app.recommendation where run_id = $1 order by rank", [runId])).map((x) => x.group_id), ids.slice(0, k), `${k} groups stored in order`);
+  }
+  await throws(() => call([]), /expected 1 to 3/); await throws(() => call(ids.slice(0, 4)), /expected 1 to 3/);
+  await throws(() => call(ids.slice(0, 1), "score_fallback"), /score order/);
+  eq((await currentRuns("member_dana")).length, 1, "rejected writes leave exactly the last good run current");
 });
 await test("model unreachable on both attempts: nothing persisted (next request retries), attempts audited", async () => {
   await resetRuns(); const before = await llmAuditRows();

@@ -35,7 +35,7 @@ AI for Church Hackathon entry (build window Oct 30 – Nov 27, 2026; **submit by
   - Members see public group cards, identical for everyone. **No reasoning about a person is ever surfaced** (no "why you fit").
 - **Matching:**
   - Hard filters first: opt-in, seats, gender focus, schedule (available and not busy), **≤5 miles from the leader's home**.
-  - Then a weighted score to a shortlist of ~6. Then the LLM returns the top 3 group IDs and an internal rationale.
+  - Then a weighted score to a shortlist of ~6. Then the LLM returns 1 to 3 group IDs (only groups it can positively support; never padded to three) and an internal rationale.
   - The LLM never adds a group that wasn't on the shortlist.
   - Only opted-in members with no active group membership get recommendations.
   - Score, score breakdown, shortlist and internal rationale are Manager-only, enforced by grants and `SECURITY DEFINER` functions, not the UI. Members read ordered groups and public group cards only.

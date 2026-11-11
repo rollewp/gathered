@@ -25,13 +25,13 @@ const check = (name, ok, extra = "") => { console.log(`  ${ok ? "PASS" : "FAIL"}
 const text = (h) => h.replace(/<!--[\s\S]*?-->/g, "").replace(/<script[\s\S]*?<\/script>/g, " ").replace(/<[^>]+>/g, " ").replace(/&#x27;|&#39;/g, "'").replace(/&amp;/g, "&").replace(/\s+/g, " ");
 const get = async (key, url) => { const r = await fetch(BASE + url, { headers: { cookie: key ? `personaKey=${key}` : "" }, redirect: "manual" }); return { status: r.status, html: await r.text(), loc: r.headers.get("location") }; };
 
-async function persist(personKey) {
+async function persist(personKey, max = 3) {
   const c = await app.connect();
   try {
     await c.query("begin");
     await c.query("select set_config('app.role', $1, true), set_config('app.person_id', $2, true)", [P[personKey].role, P[personKey].person_id]);
     const ids = (await c.query("select group_id from app.recommendation_shortlist() order by shortlist_position")).rows.map((r) => r.group_id);
-    const n = Math.min(3, ids.length);
+    const n = Math.min(max, ids.length);
     await c.query("select app.persist_recommendation_run($1::uuid[], $2::uuid[], $3, 'medium', 'smoke', 'stub-model', 'rank-v2', '{}'::jsonb)",
       [ids, ids.slice(0, n), n === 0 ? "no_candidates" : "llm"]);
     await c.query("commit");
@@ -85,13 +85,19 @@ try {
   const order = dana.map((id) => t.indexOf(names[id]));
   check("saved result: heading and group cards render in ranked order", t.includes("Three groups selected for you") && t.includes("Explore these options and decide what feels right") && order.every((i) => i > 0) && order.join() === [...order].sort((a, b) => a - b).join(), JSON.stringify(order));
   check("at most three recommendation cards", cards(r.html) === 3, `${cards(r.html)} cards`);
+  for (const [k, heading] of [[1, "One group selected for you"], [2, "Two groups selected for you"]]) {
+    await persist("member_dana", k);
+    const rk = await get("member_dana", "/member?view=recommendations");
+    check(`a run with ${k} group${k > 1 ? "s" : ""} renders "${heading}" with ${k} card${k > 1 ? "s" : ""}, nothing padded`, text(rk.html).includes(heading) && cards(rk.html) === k && !HIDDEN.test(rk.html), `${cards(rk.html)} cards`);
+  }
+  await persist("member_dana", 3);
   check("'Browse all groups' returns to the catalog", t.includes("Browse all groups") && r.html.includes('href="/member"'));
   check("no ranking data appears in the page or its payload", !HIDDEN.test(r.html), (r.html.match(HIDDEN) ?? [])[0]);
   check("no 'why this fits' explanation", !/why (this|it|you)|because you|fits you because|ai chose|compatib|match score/i.test(t));
   const again = await get("member_dana", "/member?view=recommendations");
   check("a second visit renders the same result", text(again.html).includes(names[dana[0]]));
   const browse = await get("member_dana", "/member?page=3");
-  const stillOne = (await own.query("select count(*)::int n, bool_and(is_current) c from app.recommendation_run where person_id = $1", [P.member_dana.person_id])).rows[0];
+  const stillOne = (await own.query("select count(*)::int n, bool_and(is_current) c from app.recommendation_run where person_id = $1 and is_current", [P.member_dana.person_id])).rows[0];
   check("browsing the catalog afterwards leaves the saved run in place", browse.status === 200 && stillOne.n === 1 && stillOne.c === true);
   const cat = await get("member_dana", `/member?q=${encodeURIComponent(names[dana[0]])}`);
   const recHtml = (await get("member_dana", "/member?view=recommendations")).html;

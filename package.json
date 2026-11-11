@@ -8,7 +8,7 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "npm run test:eval && npm run test:recommendations && npm run test:journey1 && npm run test:catalog",
-    "test:eval": "node scripts/test_eval_metrics.mjs",
+    "test:eval": "node scripts/test_eval_metrics.mjs && node scripts/test_rank_contract.mjs",
     "test:catalog": "node --import tsx --conditions=react-server --env-file=.env.local scripts/test_catalog.mjs",
     "test:journey1": "node --import tsx --conditions=react-server --env-file=.env.local scripts/test_journey1.mjs",
     "test:recommendations": "node --import tsx --conditions=react-server --env-file=.env.local scripts/test_recommendations.mjs",

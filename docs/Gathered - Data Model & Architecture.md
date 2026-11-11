@@ -24,7 +24,7 @@
 | W6 | **Three views.** Manager: group data and escalations. Leader: their own groups, recent joiners, open requests. Member: not in a group → recommendations; in an active group → that group's details only. |
 | W7 | **Hosting:** Vercel free tier. **Data platform:** Databricks Free Edition. **Operational store:** Lakebase Postgres (chosen after the validation spike in §10.1). |
 | W8 | **Escalations in the demo:** #1 hidden schedule conflict and #3 unmet demand / start a group. #2 and #4 are out of demo scope (§8). |
-| W9 | **Recommendation matching is hybrid.** Deterministic hard filters, then a deterministic weighted score, reduce the eligible groups to a shortlist of up to about 6. **Claude Haiku via OpenRouter** then selects and orders the final top 3 from that shortlist by comparing the member's own words and stated preferences with each group's description and tags. The LLM returns group IDs plus an **internal rationale**. It can never add a group that is not on the shortlist. See §5. |
+| W9 | **Recommendation matching is hybrid.** Deterministic hard filters, then a deterministic weighted score, reduce the eligible groups to a shortlist of up to about 6. **Claude Haiku via OpenRouter** then selects and orders **between 1 and 3** groups from that shortlist (only those it can positively support, never padded to three) by comparing the member's own words and stated preferences with each group's description and tags. The LLM returns group IDs plus an **internal rationale**. It can never add a group that is not on the shortlist. See §5. |
 | W10 | **The internal rationale is Manager-audit only.** It never reaches a Leader or a Member. Leaders see only what the member chose to submit with a request. *Example of what must never surface to a leader:* "Joey would be great here; he's recently divorced and lonely." The ranking prompt is told to reference group facts and the member's stated preferences only, and the Manager's audit view shows the rationale so the demo can open the hood. |
 | W11 | **Groups meet at the leader's home** (business rule). Group location = the leader's household location. **Hard filter: the member's household is within 5 miles** (haversine on approximate coordinates), unless the group is online. Members see the general area, never an address. |
 | W12 | **Seed geography: Winter Garden, FL (west of Orlando)**, using zips 34787, 34786, 34761, 34734 and 34711. Households get the zip centroid plus random jitter. No real addresses. |
@@ -237,7 +237,7 @@ The demo proves this with a Leader-vs-Manager comparison of the same group page 
 
 ## 5 · Matching v1 (hybrid, constrained, auditable)
 
-The pipeline: **eligibility → hard filters → weighted score → shortlist (up to ~6) → LLM top 3 → validate → persist.** Everything before the LLM is deterministic. The LLM only chooses and orders within the shortlist.
+The pipeline: **eligibility → hard filters → weighted score → shortlist (up to ~6) → LLM picks 1 to 3 → validate → persist.** Everything before the LLM is deterministic. The LLM only chooses and orders within the shortlist.
 
 ### 5.1 · Eligibility (W15)
 A member is eligible for recommendations only if:
@@ -273,7 +273,7 @@ The top groups by score, **up to 6**, go to the LLM. If fewer than 6 pass the fi
 ### 5.5 · LLM ranking (Claude Haiku via OpenRouter)
 - **Input:** the member's `life_stage`, `group_pref`, `interests` and `about_me` (no name, attendance or address), and for each shortlisted group its public facts, an aggregated member mix (counts only) and its score. Full prompt contract: §10.2.
 - **Output** (zod-validated): `ranked[]` of `{group_id, rank}`, an `internal_rationale` of 60 words or fewer, and a `confidence` of `high` · `medium` · `low`.
-- **Validation:** every `group_id` must come from the shortlist, with no duplicates and exactly `min(3, n)` items. On failure, retry once. If the retry also fails, fall back to the score order and record that the fallback was used.
+- **Validation:** every `group_id` must come from the shortlist, with no duplicates and between 1 and `min(3, n)` items, with ranks 1..k and no gaps. Fewer than three is valid and is stored as returned; the model is told not to add a group merely to fill a slot. On failure, retry once. If the retry also fails, fall back to the top `min(3, n)` by score order (deterministic, not a judgement of fit) and record that the fallback was used. Migration `0007` enforces the same range in `persist_recommendation_run`.
 - **Prompt rules:** base the choice on the member's own words and stated preferences compared with group descriptions and tags. Never infer or mention anything about the member's spiritual state, marriage, health or struggles. The rationale refers to group facts and stated preferences only (W10).
 - **Prompt versions:** `rank-v1` is evaluated (§10.2). **The current version is `rank-v2`**, which adds each group's `status` and `open_seats` to the shortlist input (the fix suggested by the `rank-v1` evaluation); it was re-evaluated (§10.2). A change of prompt version invalidates runs created under the previous one (W17).
 
@@ -300,7 +300,7 @@ valid current run stored? ──yes──► return the stored run (0 ranking LL
 hard filters → score → shortlist (deterministic, §5.1–5.4)
         │
         ▼
-Haiku ranks top 3 within the shortlist → validate (retry / score fallback)
+Haiku picks 1 to 3 within the shortlist → validate (retry / score fallback)
         │
         ▼
 persist the run and its ranked rows + audit_log row → return it
@@ -508,6 +508,7 @@ Goal: decide where the operational store lives, testing Lakebase first with Neon
   - "Do not infer or mention anything about the member's spiritual state, marriage, health or struggles beyond what they wrote, and never describe the member's personal circumstances."
   - "The rationale is an internal audit note for the groups pastor: refer to group facts and the member's stated preferences."
   - `rank-v2` adds that each group shows its status (forming or open) and its open seats.
+  - Output size (rank-v2, amended 2026-11-11): "The ranked array holds between 1 and 3 items, best first. Include a group only if you can positively support it from the member's own words and stated preferences together with that group's public facts. Do not add a group just to reach three: returning fewer than three is correct when fewer fit. Always return at least the single best-supported group." This replaces the earlier instruction to always return a third choice. The version label stays `rank-v2` (a requested in-place amendment); runs already saved under it remain valid and show the number of groups they were given.
 - **Input (JSON):**
   - `member`: `life_stage`, `group_pref`, `interests[]`, `about_me`. No names, no attendance, no address.
   - `shortlist[]`: `group_id`, `name`, `description`, `tags[]`, `meeting_slot`, `gender_focus`, `life_stage_focus`, `childcare`, `is_online`, `group_mix` (aggregated counts only, e.g. `{"young_kids": 3}`), and in variant A `score`. `rank-v2` adds `status` and `open_seats`.
@@ -571,6 +572,7 @@ Goal: decide where the operational store lives, testing Lakebase first with Neon
 ---
 
 ## Revision history
+- **v0.9 (2026-11-11):** ranking output is 1 to 3 groups instead of exactly `min(3, n)` (prompt sentence, validation, migration `0007`); the score fallback is unchanged. The model evaluation in §10.2 predates this change and has not been re-run.
 - **v0.8 (2026-11-09):** Journey 1: member join requests moved behind `app.request_to_join()` / `app.my_join_requests()` (migration `0006`); direct member insert on `join_request` revoked.
 - **v0.7 (2026-11-08):** documentation boundaries: project status and build sequencing moved out to the Build Tracker; the recommendation model evaluation (method, prompt contract, results) moved here from Demo Journeys. No architecture decisions changed.
 - **v0.6 (2026-11-07):** Slice 1 implemented: migrations `0004` (recommendation runs) and `0005` (audit-log sequence grant), local `person_features` bootstrap, per-attempt LLM audit ownership.

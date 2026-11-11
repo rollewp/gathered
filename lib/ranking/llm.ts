@@ -99,8 +99,9 @@ async function logAttempt(
 }
 
 /**
- * Rank a non-empty shortlist: up to two model attempts, each validated against the shortlist.
- * Both invalid -> deterministic score-order fallback. Both unreachable -> RankingUnavailableError.
+ * Rank a non-empty shortlist: up to two model attempts, each validated against the shortlist
+ * (1 to min(3, shortlist size) groups, no padding). Both invalid -> deterministic score-order
+ * fallback, which is the top min(3, shortlist size) by score (it is not a judgement of fit). Both unreachable -> RankingUnavailableError.
  */
 export async function rankShortlist(
   personKey: string,
@@ -109,7 +110,7 @@ export async function rankShortlist(
 ): Promise<RankResult> {
   const idList = input.shortlist.map((g) => g.group_id)
   const ids = new Set(idList)
-  const n = Math.min(3, idList.length)
+  const max = Math.min(3, idList.length) // the model may return 1..max groups; it is never padded
   const payload = {
     member: memberPayload(input.member),
     shortlist: shortlistPayload(input.shortlist, { includeScore: true }),
@@ -138,7 +139,7 @@ export async function rankShortlist(
     total.cost_usd += resp.usage?.cost ?? 0
     total.latency_ms += resp.latencyMs
     try {
-      const parsed = parseRanking(resp.raw, ids, n)
+      const parsed = parseRanking(resp.raw, ids, max)
       await logAttempt(personKey, { attempt, outcome: 'ok', model, latencyMs: resp.latencyMs, usage: resp.usage })
       return {
         orderedIds: parsed.orderedIds,
@@ -155,7 +156,7 @@ export async function rankShortlist(
 
   if (!responded) throw new RankingUnavailableError(`ranking model unreachable: ${lastError}`)
   return {
-    orderedIds: scoreOrderFallback(idList, n),
+    orderedIds: scoreOrderFallback(idList, max),
     outcome: 'score_fallback',
     confidence: 'low',
     internalRationale: `Fallback to score order: model output invalid after retry (${lastError.slice(0, 120)})`,

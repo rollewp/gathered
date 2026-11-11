@@ -165,6 +165,12 @@ Below the cut line: do only if the items above are done.
 - **Evidence:** `npm test` passed: 14 offline + 45 lifecycle/RLS/concurrency + 19 Journey 1 + 24 new catalog tests; `npm run smoke:journey1` against the running app 38 of 38; `npx tsc --noEmit` clean; `npm run build` succeeded. No OpenRouter calls were made by this work: the automated tests inject a stub model and assert zero network calls and zero audit rows from browsing.
 - **Open:** the real-browser check (including 320 px width and keyboard use) and the live "Find my best matches" click have not been done; no live ranking evaluation was run.
 
+### Ranking output: 1 to 3 groups
+- **Status:** Done (2026-11-11) against the development database. Not committed. Prompt label stays `rank-v2` (in-place amendment, as requested).
+- **Change:** the ranking model returns only groups it can positively support, between 1 and `min(3, shortlist)`, and is told not to fill slots. Validation (`lib/ranking/rank-v2.mjs`), migration `0007` (`persist_recommendation_run` accepts 1..min(3,n) for model outcomes), tests and docs updated. Unchanged: shortlist, scoring, Haiku model, seed data, security boundaries, lifecycle, and the score fallback (still the top `min(3, n)` by score). The member page already rendered 1 to 3 cards ("One group selected for you", "Two groups…").
+- **Evidence:** `npm test` 120 passed (14 + 15 + 48 + 19 + 24; the 15 are the new offline contract tests); `npm run smoke:journey1` 40 of 40 including 1- and 2-group pages; `npx tsc --noEmit` and `npm run build` clean. One live Dana call (Haiku, 1 attempt, about 2.6k tokens): returned 2 groups, First Steps then New Group: Thursday Families, outcome `llm`.
+- **Caveats:** runs saved under `rank-v2` before this change stay valid (same label) and may hold a padded third group until they are superseded. The §10.2 model evaluation predates this contract and has not been re-run.
+
 ### Slice 1: Recommendation Lifecycle
 - **Status:** Complete against the development database (2026-11-07). Not yet exercised on a deployed environment or by clicking through the browser; the server action was driven over HTTP.
 - **Goal:** prove `eligible request → current run? → reuse | shortlist → Haiku → persist → reuse`, with invalidation on material change (architecture §5–§6, W9, W14–W17).

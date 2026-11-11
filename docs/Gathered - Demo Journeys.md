@@ -38,7 +38,7 @@ This is the member's-eye view of the recommendation lifecycle (architecture ยง5โ
 
 **When a member gets recommendations**
 - Only members who opted in (they have a confirmed profile) and are **not in an active group** are eligible. A member already in a group sees their group instead (Journey 6), and a member with no profile yet is sent to intake (Journey 2).
-- The first time an eligible member asks (the member home offers a **Find my best matches** button when there is no saved result), Gathered filters the groups by what the member can actually attend (open seats, gender focus, an available and not-busy meeting time, within 5 miles of the leader's home unless the group is online), scores them, and keeps the best six. The model then picks and orders the top three from those six.
+- The first time an eligible member asks (the member home offers a **Find my best matches** button when there is no saved result), Gathered filters the groups by what the member can actually attend (open seats, gender focus, an available and not-busy meeting time, within 5 miles of the leader's home unless the group is online), scores them, and keeps the best six. The model then picks and orders **up to three** from those six: only groups it can support from the member's own words and preferences, so a member may see one, two or three, and the model is not asked to fill a slot.
 - The member sees up to three **group cards**: name, description, tags, meeting time, area, open seats, childcare. No explanation accompanies them.
 
 **Browsing never recommends**
