@@ -47,7 +47,7 @@ AI for Church Hackathon entry (build window Oct 30 – Nov 27, 2026; **submit by
 ## Working rules
 - Propose a short plan, then implement in small steps. Run SQL against Lakebase with the owner URL only for migrations and seeds.
 - Re-run `node --env-file=.env.local pgtest.mjs pg`-style persona checks after any RLS change.
-- Tests: `npm test` (offline label/metric tests via `npm run test:eval`, then recommendation lifecycle + Journey 1 + Browse Groups catalog, stubbed, no external LLM calls, needs Node 20+) and `npm run build` are routine; `npm run smoke:journey1` drives a running app over HTTP. `npm run verify:openrouter`, `npm run verify:journey1` and `scripts/rank_eval.mjs` make real OpenRouter calls and are run explicitly only.
+- Tests: `npm test` (offline label/metric tests via `npm run test:eval`, then recommendation lifecycle + Journey 1 + Browse Groups catalog + member profile edit, stubbed, no external LLM calls, needs Node 20+) and `npm run build` are routine; `npm run smoke:journey1` and `npm run smoke:profile` drive a running app over HTTP. `npm run verify:openrouter`, `npm run verify:journey1` and `scripts/rank_eval.mjs` make real OpenRouter calls and are run explicitly only.
 - `npm run seed:generate` regenerates `seed/out` (Python 3, offline); `npm run seed:check` regenerates twice, compares, validates and rewrites the report; `npm run seed:validate` is the quick pass. None of them touch a database or call a model.
 - `npm run seed:reset` reloads the seed and recomputes `person_features` (returns the demo database to a known state, with no recommendation runs).
 - `scripts/compute_person_features.mjs` is a local bootstrap producer; Databricks is the intended deployed producer of `person_features`.

@@ -1,8 +1,59 @@
-'use client'
-import { useState } from 'react'
 import Link from 'next/link'
-import { Check, Plus, Sparkles } from 'lucide-react'
-import { AppHeader, PageIntro, SectionLabel, Tag } from '@/components/app-shell'
-import { Button } from '@/components/ui/button'
-const options = { 'Life stage': ['Parents of young children'], 'Best times': ['Tuesday mornings', 'Wednesday evenings'], Preference: ['Conversation and prayer'], Interests: ['Parenting', 'Making friends'] }
-export default function IntakePage() { const [confirmed,setConfirmed]=useState(false); return <div className="min-h-screen"><AppHeader persona="member" /><main className="mx-auto max-w-3xl px-5 py-10 lg:py-16"><PageIntro eyebrow="Member intake · 2 of 2" title="A little more about you." description="There’s no perfect answer here. A few honest details help us look for a good fit." backHref="/member" /><div className="rounded-2xl border border-[#e1e8df] bg-white p-5 sm:p-8"><SectionLabel>Anything else you’d like us to know?</SectionLabel><textarea className="min-h-28 w-full resize-y rounded-xl border border-[#dce5da] bg-[#fbfcf8] p-4 text-sm leading-6 text-[#26382b] outline-none ring-[#9eb99f] placeholder:text-[#98a49a] focus:ring-2" placeholder="For example, what would make a group feel welcoming to you?" defaultValue="I’m hoping to find a steady rhythm with people who are also in a full season of life." /><div className="mt-8"><SectionLabel>What we heard</SectionLabel><div className="flex flex-col gap-5">{Object.entries(options).map(([key,values]) => <div key={key}><p className="mb-2 text-sm font-medium text-[#36463b]">{key}</p><div className="flex flex-wrap gap-2">{values.map(value => <Tag key={value}>{value} <button className="ml-1 text-[#789277]" aria-label={`Remove ${value}`}>×</button></Tag>)}<button className="flex items-center gap-1 rounded-full border border-dashed border-[#b8c9b7] px-2.5 py-1 text-xs text-[#718b70] hover:bg-[#f0f6ee]"><Plus className="size-3" /> Add</button></div></div>)}</div></div><div className="mt-8 border-t border-[#e6e8e2] pt-6"><Button onClick={()=>setConfirmed(true)} className="w-full bg-[#3e644b] hover:bg-[#315239] sm:w-auto">{confirmed ? <><Check data-icon="inline-start" /> Looks right</> : 'Looks right'}</Button>{confirmed && <div className="mt-4 flex items-center gap-3 rounded-xl bg-[#eef4ed] p-3 text-sm text-[#54705b]"><Sparkles className="size-4" /> Your recommendations are ready to explore. <Link href="/member" className="font-semibold underline underline-offset-4">See groups</Link></div>}</div></div></main></div> }
+import { cookies } from 'next/headers'
+import { AppHeader, PageIntro } from '@/components/app-shell'
+import { PersonaChooser } from '@/components/persona-chooser'
+import { PreferencesForm } from '@/components/preferences-form'
+import { getMyPreferences, type MyPreferences } from '@/lib/member'
+import { findPersona, PERSONA_COOKIE } from '@/lib/personas'
+
+export const dynamic = 'force-dynamic'
+
+/**
+ * /member/intake. A member with a confirmed profile edits it here ("Your preferences"). The route
+ * is kept for Journey 2: a member with no profile will describe themselves in free text here and
+ * confirm what is proposed. That AI-assisted step is not built yet, so nothing is faked.
+ */
+export default async function IntakePage() {
+  const persona = findPersona((await cookies()).get(PERSONA_COOKIE)?.value)
+  if (!persona || persona.role !== 'member') return <PersonaChooser role="member" label="Member" currentName={persona?.display} />
+
+  let prefs: MyPreferences | null = null
+  let failed = false
+  try { prefs = await getMyPreferences(persona.key) } catch { failed = true }
+
+  const shell = (children: React.ReactNode) => (
+    <div className="min-h-screen">
+      <AppHeader persona="member" name={persona.display} />
+      <main className="mx-auto max-w-3xl px-5 py-10 lg:py-16">{children}</main>
+    </div>
+  )
+
+  if (failed) {
+    return shell(<>
+      <PageIntro eyebrow="Member home" title="Your preferences" backHref="/member" />
+      <p role="alert" className="rounded-xl border border-[#ecd9d4] bg-[#fbf3f1] px-4 py-3 text-sm text-[#8a3b2e]">We couldn't load your preferences just now. Nothing was changed. Please try again in a moment.</p>
+    </>)
+  }
+
+  if (!prefs) {
+    return shell(<>
+      <PageIntro eyebrow="Member intake" title="A little about you" description="Describing yourself in your own words is the next step we are building. It is not available in this demo yet." backHref="/member" />
+      <div className="rounded-2xl border border-[#e1e8df] bg-white p-6 text-sm leading-6 text-[#69736b] sm:p-8">
+        Nothing has been saved. <Link href="/member" className="font-semibold text-[#55745c] underline underline-offset-4">Back to your home page</Link>
+      </div>
+    </>)
+  }
+
+  return shell(<>
+    <PageIntro
+      eyebrow="Member home"
+      title="Your preferences"
+      description="These help Gathered narrow the catalog and compare group descriptions. Nothing changes until you save."
+      backHref="/member"
+    />
+    <PreferencesForm initial={{
+      life_stage: prefs.life_stage, available_slots: prefs.available_slots ?? [], group_pref: prefs.group_pref,
+      interests: prefs.interests ?? [], about_me: prefs.about_me,
+    }} />
+  </>)
+}

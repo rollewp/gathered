@@ -29,7 +29,7 @@ export type GroupView = {
 const DAYS: Record<string, string> = {
   mon: 'Mondays', tue: 'Tuesdays', wed: 'Wednesdays', thu: 'Thursdays', fri: 'Fridays', sat: 'Saturdays', sun: 'Sundays',
 }
-const PARTS: Record<string, string> = { am: 'mornings', pm: 'afternoons', eve: 'evenings' }
+const PARTS: Record<string, string> = { am: 'mornings', pm: 'afternoons', eve: 'evenings', '9': '9:00 am' }
 
 /** 'tue_am' -> 'Tuesdays · mornings'. Unknown values are shown as-is rather than hidden. */
 export function slotLabel(slot: string | null | undefined): string {

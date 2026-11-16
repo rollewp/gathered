@@ -21,6 +21,11 @@ const NOTICES: Record<string, string> = {
   error: 'Something went wrong finding groups for you. Please try again.',
 }
 
+const GOOD_NOTICES: Record<string, string> = {
+  preferences_updated: 'Preferences updated.',
+  preferences_unchanged: 'Nothing changed, so your preferences and saved matches stay as they were.',
+}
+
 const COUNT_WORDS = ['No', 'One', 'Two', 'Three']
 
 function Panel({ children }: { children: React.ReactNode }) {
@@ -69,15 +74,18 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
     </>)
   }
 
-  const noticeBox = notice && NOTICES[notice] && (
+  const noticeBox = notice && (NOTICES[notice] ? (
     <p role="alert" className="mb-6 rounded-xl border border-[#ecd9d4] bg-[#fbf3f1] px-4 py-3 text-sm text-[#8a3b2e]">{NOTICES[notice]}</p>
-  )
+  ) : GOOD_NOTICES[notice] ? (
+    <p role="status" className="mb-6 rounded-xl border border-[#dfebdc] bg-[#f0f6ee] px-4 py-3 text-sm text-[#3e644b]">{GOOD_NOTICES[notice]}</p>
+  ) : null)
 
-  const prefLine = prefs
-    ? [lifeStageLabel(prefs.life_stage), prefs.group_pref ? `${groupPrefLabel(prefs.group_pref)} group` : null,
-       prefs.available_slots?.length ? prefs.available_slots.map(slotLabel).join(', ') : null,
-       prefs.interests?.length ? prefs.interests.map(tagLabel).join(', ') : null].filter(Boolean).join(' · ')
-    : ''
+  const prefRows: [string, string][] = prefs ? ([
+    ['Life stage', lifeStageLabel(prefs.life_stage) ?? 'Prefer not to say'],
+    ['Times you could meet', prefs.available_slots?.length ? prefs.available_slots.map(slotLabel).join(', ') : 'None chosen'],
+    ['Group', prefs.group_pref ? groupPrefLabel(prefs.group_pref) : 'No preference'],
+    ['Interests', prefs.interests?.length ? prefs.interests.map(tagLabel).join(', ') : 'None added'],
+  ] as [string, string | null][]).map(([k, v]) => [k, v ?? ''] as [string, string]) : []
 
   const aside = (
     <aside className="flex h-fit flex-col gap-5">
@@ -98,8 +106,16 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
         <div className="rounded-2xl border border-[#e1e8df] bg-white p-5">
           <ClipboardList className="size-5 text-[#789277]" />
           <h2 className="mt-4 font-serif text-xl text-[#26382b]">Your preferences</h2>
-          <p className="mt-2 text-sm leading-6 text-[#69736b]">{prefLine || 'None added yet.'}</p>
-          <Link href="/member/intake" className="mt-5 inline-block text-sm font-semibold text-[#55745c] underline underline-offset-4">Edit intake</Link>
+          <dl className="mt-3 flex flex-col gap-3 text-sm">
+            {prefRows.map(([k, v]) => (
+              <div key={k}><dt className="text-xs font-semibold uppercase tracking-[0.12em] text-[#718b70]">{k}</dt><dd className="mt-0.5 leading-6 text-[#36463b]">{v}</dd></div>
+            ))}
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-[#718b70]">What you told Gathered</dt>
+              <dd className="mt-0.5 whitespace-pre-line leading-6 text-[#69736b]">{prefs.about_me || 'Nothing added.'}</dd>
+            </div>
+          </dl>
+          <Link href="/member/intake" className="mt-5 inline-block text-sm font-semibold text-[#55745c] underline underline-offset-4">Edit preferences</Link>
         </div>
       )}
     </aside>
