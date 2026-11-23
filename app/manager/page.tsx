@@ -1,8 +1,105 @@
-'use client'
-import { useState } from 'react'
-import Link from 'next/link'
-import { AlertCircle, ArrowRight, BarChart3, CheckCircle2, MoreHorizontal, Search, Users } from 'lucide-react'
+import { cookies } from 'next/headers'
+import { AlertCircle, Sparkles } from 'lucide-react'
 import { AppHeader, PageIntro, RoleBadge, SectionLabel } from '@/components/app-shell'
-import { Button } from '@/components/ui/button'
-import { escalations, groups } from '@/lib/demo-data'
-export default function ManagerPage() { const [selected,setSelected]=useState<typeof escalations[number] | null>(null); return <div className="min-h-screen"><AppHeader persona="manager" /><main className="mx-auto max-w-6xl px-5 py-10 lg:px-8 lg:py-16"><PageIntro eyebrow="Manager dashboard" title="The health of the whole picture." description="A clear, compassionate view of group connection and the places that need a little attention." /><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"><div className="rounded-2xl border border-[#e1e8df] bg-white p-5"><Users className="size-5 text-[#789277]" /><p className="mt-4 text-3xl font-semibold text-[#26382b]">42</p><p className="mt-1 text-sm text-[#69736b]">Active members</p><p className="mt-3 text-xs text-[#55745c]">+8% this season</p></div><div className="rounded-2xl border border-[#e1e8df] bg-white p-5"><BarChart3 className="size-5 text-[#789277]" /><p className="mt-4 text-3xl font-semibold text-[#26382b]">87%</p><p className="mt-1 text-sm text-[#69736b]">Strong matches</p><p className="mt-3 text-xs text-[#55745c]">Across 31 reviews</p></div><div className="rounded-2xl border border-[#e1e8df] bg-white p-5"><CheckCircle2 className="size-5 text-[#789277]" /><p className="mt-4 text-3xl font-semibold text-[#26382b]">12</p><p className="mt-1 text-sm text-[#69736b]">Groups running</p><p className="mt-3 text-xs text-[#69736b]">3 with open seats</p></div><div className="rounded-2xl border border-[#eadfcf] bg-[#f8f2e8] p-5"><AlertCircle className="size-5 text-[#9a7c4b]" /><p className="mt-4 text-3xl font-semibold text-[#26382b]">2</p><p className="mt-1 text-sm text-[#69736b]">Need attention</p><p className="mt-3 text-xs text-[#876f46]">Review escalations</p></div></div><div className="mt-12 grid gap-10 lg:grid-cols-[1.35fr_1fr]"><section><div className="mb-3 flex items-center justify-between"><SectionLabel>Groups</SectionLabel><button className="flex items-center gap-1 text-sm text-[#55745c]"><Search className="size-4" /> Filter</button></div><div className="overflow-hidden rounded-2xl border border-[#e1e8df] bg-white"><table className="w-full text-left text-sm"><thead className="bg-[#f5f7f2] text-xs uppercase tracking-wider text-[#849087]"><tr><th className="px-5 py-4 font-medium">Group</th><th className="px-5 py-4 font-medium">Leader</th><th className="px-5 py-4 font-medium">Members</th><th className="px-5 py-4 font-medium">Status</th><th className="px-5 py-4"></th></tr></thead><tbody className="divide-y divide-[#edf0eb]">{groups.map((g,i)=><tr key={g.id}><td className="px-5 py-4 font-medium text-[#36463b]">{g.name}</td><td className="px-5 py-4 text-[#69736b]">{['Amelia R.','Marcus T.','Nadia S.'][i]}</td><td className="px-5 py-4 text-[#69736b]">{6+i}</td><td className="px-5 py-4"><RoleBadge>{i===2?'Open seats':'Healthy'}</RoleBadge></td><td className="px-5 py-4"><MoreHorizontal className="size-4 text-[#849087]" /></td></tr>)}</tbody></table></div></section><section><SectionLabel>Escalations</SectionLabel><div className="flex flex-col gap-3">{escalations.map(e=><button key={e.id} onClick={()=>setSelected(e)} className="rounded-2xl border border-[#eadfcf] bg-[#fffdf9] p-5 text-left transition hover:border-[#cdbb99]"><div className="flex items-start justify-between"><div><p className="font-medium text-[#36463b]">{e.name}</p><p className="mt-1 text-sm text-[#69736b]">{e.issue}</p></div><AlertCircle className="size-4 text-[#9a7c4b]" /></div><div className="mt-4 flex items-center justify-between text-xs text-[#849087]"><span>{e.updated}</span><span className="font-semibold text-[#876f46]">{e.status}</span></div></button>)}</div><Link href="/manager/members/taylor/audit" className="mt-4 flex items-center gap-2 text-sm font-semibold text-[#55745c]">View a recommendation audit <ArrowRight className="size-4" /></Link></section></div></main>{selected && <div className="fixed inset-0 z-10 bg-[#26382b]/15" onClick={()=>setSelected(null)}><aside className="absolute right-0 top-0 h-full w-full max-w-md bg-[#fbfcf8] p-7 shadow-2xl" onClick={e=>e.stopPropagation()}><button onClick={()=>setSelected(null)} className="float-right text-sm text-[#69736b]">Close</button><p className="mt-12 text-xs font-semibold uppercase tracking-wider text-[#9a7c4b]">Escalation {selected.id}</p><h2 className="mt-3 font-serif text-3xl text-[#26382b]">{selected.name}</h2><p className="mt-3 leading-7 text-[#69736b]">{selected.issue}. This member has not found a strong fit after three recommendation reviews.</p><div className="mt-8 rounded-2xl border border-[#eadfcf] bg-[#fffdf9] p-5"><p className="text-sm font-semibold text-[#36463b]">Suggested next step</p><p className="mt-2 text-sm leading-6 text-[#69736b]">Reach out personally to learn what “a good fit” would feel like, then review their preferences together.</p></div><Button className="mt-6 w-full bg-[#3e644b] hover:bg-[#315239]" onClick={()=>setSelected(null)}>Mark as reviewed</Button></aside></div>}</div> }
+import { PersonaChooser } from '@/components/persona-chooser'
+import { SubmitButton } from '@/components/submit-button'
+import { findPersona, PERSONA_COOKIE } from '@/lib/personas'
+import { listInsights, type InsightRow } from '@/lib/review/schedule-review'
+import { runAiReview } from './actions'
+
+export const dynamic = 'force-dynamic'
+
+type SearchParams = Record<string, string | string[] | undefined>
+const one = (v: string | string[] | undefined) => (typeof v === 'string' ? v : undefined)
+const num = (v: string | string[] | undefined) => Math.max(0, Math.min(999, Number.parseInt(one(v) ?? '0', 10) || 0))
+
+function resultLine(sp: SearchParams): { tone: 'ok' | 'bad'; text: string } | null {
+  const r = one(sp.review)
+  if (r === 'unavailable') return { tone: 'bad', text: "We couldn't reach the review assistant just now. Nothing was changed. Please try again in a moment." }
+  if (r === 'error') return { tone: 'bad', text: 'Something went wrong running the review. Nothing was changed. Please try again.' }
+  if (r !== 'done') return null
+  const [c, raised, already, notRaised, invalid] = [num(sp.c), num(sp.r), num(sp.a), num(sp.n), num(sp.i)]
+  if (c === 0) return { tone: 'ok', text: 'Reviewed: there are no pending requests with a possible schedule overlap.' }
+  const parts = [`${c} pending ${c === 1 ? 'request' : 'requests'} checked`]
+  if (raised) parts.push(`${raised} new ${raised === 1 ? 'insight' : 'insights'}`)
+  if (already) parts.push(`${already} already on this page`)
+  if (notRaised) parts.push(`${notRaised} with no conflict found`)
+  if (invalid) parts.push(`${invalid} the assistant could not answer reliably`)
+  return { tone: 'ok', text: `Review finished: ${parts.join(', ')}.` }
+}
+
+function Insight({ i }: { i: InsightRow }) {
+  const evidence = i.evidence?.model_evidence ?? []
+  const status = i.status === 'open' ? 'Needs review' : 'Acknowledged'
+  return (
+    <article className="rounded-2xl border border-[#eadfcf] bg-[#fffdf9] p-6" aria-label="Potential schedule conflict">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#9a7c4b]">Potential schedule conflict</p>
+          <h3 className="mt-2 font-serif text-2xl text-[#26382b]">{i.first_name} {i.last_name} · {i.group_name}</h3>
+        </div>
+        <AlertCircle className="mt-1 size-5 shrink-0 text-[#9a7c4b]" aria-hidden />
+      </div>
+      <p className="mt-3 text-sm leading-6 text-[#4a5a4e]">{i.summary}</p>
+      <h4 className="mt-5 text-xs font-semibold uppercase tracking-[0.16em] text-[#718b70]">Evidence</h4>
+      <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-[#4a5a4e]">
+        {evidence.map((e, k) => <li key={k}>{e}</li>)}
+      </ul>
+      <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#69736b]">
+        <span className="font-semibold text-[#876f46]">Status: {status}</span>
+        {i.request_status && <span>Join request: {i.request_status === 'requested' ? 'still pending' : i.request_status}</span>}
+        <span>Advisory only. You decide; nothing has been sent to anyone.</span>
+      </div>
+    </article>
+  )
+}
+
+export default async function ManagerPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const persona = findPersona((await cookies()).get(PERSONA_COOKIE)?.value)
+  if (!persona || persona.role !== 'manager') return <PersonaChooser role="manager" label="Manager" currentName={persona?.display} />
+  const sp = await searchParams
+  const line = resultLine(sp)
+
+  let insights: InsightRow[] = []
+  let failed = false
+  try { insights = await listInsights(persona.key) } catch { failed = true } // never show a database error to the Manager
+
+  return (
+    <div className="min-h-screen">
+      <AppHeader persona="manager" name={persona.display} />
+      <main className="mx-auto max-w-4xl px-5 py-10 lg:px-8 lg:py-16">
+        <PageIntro eyebrow="Manager" title="Insights requiring review"
+          description="Run a review and Gathered checks pending group requests for practical conflicts that the structured data alone does not show. It only suggests; you decide." />
+
+        <div className="mb-8 flex flex-col gap-5 rounded-2xl border border-[#dfebdc] bg-[#f0f6ee] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div className="flex gap-4">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-[#55745c]"><Sparkles className="size-5" aria-hidden /></span>
+            <div>
+              <p className="font-medium text-[#3e644b]">AI review</p>
+              <p className="mt-1 text-sm leading-6 text-[#69736b]">Reviews run only when you ask. Nothing changes for members or leaders, and nobody is contacted.</p>
+            </div>
+          </div>
+          <form action={runAiReview}>
+            <SubmitButton pendingText="Reviewing requests…" className="w-full sm:w-auto">Run AI review</SubmitButton>
+          </form>
+        </div>
+
+        {line && (
+          <p role={line.tone === 'bad' ? 'alert' : 'status'}
+            className={`mb-6 rounded-xl border px-4 py-3 text-sm ${line.tone === 'bad' ? 'border-[#ecd9d4] bg-[#fbf3f1] text-[#8a3b2e]' : 'border-[#dfebdc] bg-[#f0f6ee] text-[#3e644b]'}`}>{line.text}</p>
+        )}
+
+        <section aria-label="Insights">
+          <div className="mb-3 flex items-center gap-3"><SectionLabel>Insights requiring review</SectionLabel><RoleBadge>{insights.length}</RoleBadge></div>
+          {failed ? (
+            <p role="alert" className="rounded-xl border border-[#ecd9d4] bg-[#fbf3f1] px-4 py-3 text-sm text-[#8a3b2e]">We couldn't load the insights just now. Please try again in a moment.</p>
+          ) : insights.length === 0 ? (
+            <div className="rounded-2xl border border-[#e1e8df] bg-white p-6 text-sm leading-6 text-[#69736b]">No insights yet. Choose <strong>Run AI review</strong> to check the pending requests.</div>
+          ) : (
+            <div className="flex flex-col gap-4">{insights.map((i) => <Insight key={i.escalation_id} i={i} />)}</div>
+          )}
+        </section>
+      </main>
+    </div>
+  )
+}

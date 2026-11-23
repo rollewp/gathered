@@ -195,6 +195,7 @@ The recommendation run, its shortlist candidates and the slimmed `recommendation
 - **join_request:** `status` = `requested` · `accepted` · `declined` · `withdrawn` · `expired`. Members create requests only through `app.request_to_join()` (migration `0006`), a `SECURITY DEFINER` function that requires an eligible member (§5.1), a group that is `open` or `forming` with a seat and compatible with its gender focus, and no other open request for the same group (also enforced by a partial unique index). The status is always `requested`, one `audit_log` row is written (never the note text), and `gathered_app` has no direct insert grant. `app.my_join_requests()` returns the caller's own requests plus the leader's first name. `rec_id` links a request to the recommendation row it came from, if any. Accepting a request inserts the membership in the same transaction.
 - **escalation:** `source` = `rule` | `ai`; `status` = `open` · `acknowledged` · `resolved`.
   - `evidence` stores the facts the escalation was built from. AI escalations also store the model and prompt version.
+  - Row-level security (migration 0008): an `ai` escalation can be inserted and read only by the Manager role; `rule` escalations may be inserted (open) by any role and read by the leaders of the group concerned; only a manager updates.
 - **audit_log:** every accept, decline, profile confirmation, escalation acknowledge or resolve, and every LLM call (§7).
 
 ### 3e · Derived group profile
@@ -223,7 +224,7 @@ This is what lets a group's makeup affect matching. When the first dad of toddle
 | Any `member_profile` other than one's own | ✖ | ✖ (never, not even for a pending requester) | ✔ |
 | Engagement history, service attendance, `person_features`, **group meeting attendance** | ✖ | ✖ | ✔ |
 | Recommendation score, score breakdown, shortlist, internal rationale, model, prompt version, confidence, invalidation history | ✖ | ✖ | ✔ audit only, via `app.manager_recommendation_audit()` |
-| Escalations | ✖ | about own groups | ✔ all |
+| Escalations | ✖ | rule escalations about own groups only (AI escalations are Manager-only) | ✔ all |
 
 **How it's enforced** (`migrations/0002_rls_policies.sql`, `0003_security_definer_functions.sql`):
 - Row policies key on `app._role()` and `app._person()`, which read the per-transaction settings.
@@ -407,6 +408,8 @@ Two simultaneous first requests may both reach the LLM. The per-member lock in `
 | **Recommendation ranking** | Haiku | An eligible member requests recommendations and no valid run exists (§6) | Member preferences and own words + the deterministic shortlist (§5.5) | Top `min(3, n)` group IDs from the shortlist, internal rationale, confidence | Shortlist-only, validated, retry then score fallback. Rationale is Manager-only. Never runs on a plain page view |
 | **Escalation review** | Sonnet | Manager runs the review (Journey 4) | Structured facts + group description + the member's request note and `about_me` | `{raise, kind, severity, summary, evidence[]}` | Advisory only; the Manager decides |
 
+**Schedule-conflict review contract (prompt `schedule-conflict-v1`, implemented 2026-11-23).** The model is called from `OPENROUTER_MODEL_REVIEW` only when the Manager chooses **Run AI review**, once per pending join request whose requester serves (`person_features.busy_slots`) on the same day the group meets. It is shown only: the requester's first name and the request note, the group's name, description and meeting slot, and the requester's serving slots, serving areas and own `about_me`. Output: `{raise: boolean, kind: "schedule_conflict", severity: "low"|"medium"|"high", summary ≤ 300 chars, evidence: 0 to 4 statements ≤ 240 chars}`; a raise needs at least one evidence statement and a non-raise none; any number in the output that is not in the supplied facts is rejected (no invented times). At most two attempts (an invalid reply is retried once, then dropped); nothing is stored for an invalid or non-raised result. A valid raise inserts one `escalation` (source `ai`, status `open`) whose `evidence` jsonb holds `supplied_facts`, `model_evidence`, `request_id`, `model` and `prompt_version`; an open or acknowledged escalation for the same kind, person and group suppresses a new one (serialised by an advisory lock). Audit: one `llm_review_attempt` row per attempt (never the prompt, facts or `about_me`) and one `escalation_created` row. Known gap: the raw `serving_assignment`, `ministry` and `service` tables are Databricks-side (D1) and are not in Lakebase, so serving facts reach the review through `person_features` and the member's own words.
+
 - **Every model attempt** goes to OpenRouter from server code (the key never reaches the browser) and writes one `audit_log` row with purpose, model, prompt version, attempt, outcome, latency and token counts (§6.4).
 - **Library:** the OpenAI-compatible SDK pointed at OpenRouter, with zod schemas for structured output. **No LangChain:** these are single-shot structured calls with no agent loop.
 
@@ -572,6 +575,8 @@ Goal: decide where the operational store lives, testing Lakebase first with Neon
 ---
 
 ## Revision history
+- **v0.10 (2026-11-23):** schedule-conflict escalation review contract recorded in §7 (prompt `schedule-conflict-v1`; no schema change).
+- **v0.11 (2026-11-23):** migration 0008 hardens escalation RLS: AI escalations are Manager-only to insert and read; rule escalations unchanged.
 - **v0.9 (2026-11-11):** ranking output is 1 to 3 groups instead of exactly `min(3, n)` (prompt sentence, validation, migration `0007`); the score fallback is unchanged. The model evaluation in §10.2 predates this change and has not been re-run.
 - **v0.8 (2026-11-09):** Journey 1: member join requests moved behind `app.request_to_join()` / `app.my_join_requests()` (migration `0006`); direct member insert on `join_request` revoked.
 - **v0.7 (2026-11-08):** documentation boundaries: project status and build sequencing moved out to the Build Tracker; the recommendation model evaluation (method, prompt contract, results) moved here from Demo Journeys. No architecture decisions changed.

@@ -1,11 +1,15 @@
 # Gathered: Build Tracker
-**Implementation status, sequencing, dependencies and cut decisions · last updated 2026-11-10**
+**Implementation status, sequencing, dependencies and cut decisions · last updated 2026-11-23**
 
 This is the only document that tracks what is built, what is current, what is next and what is cut. It carries no product behavior and no architecture.
 
 - Product behavior, screens and demo scenarios: `Gathered - Demo Journeys.md`
 - Architecture, schema, security and decisions: `Gathered - Data Model & Architecture.md`
 - Submission requirements and safeguards: `AI for Church Hackathon - Submission Deliverables.md`
+
+**Required scope (reduced 2026-11-23, deadline-driven).** The submission proves two LLM capabilities: **Dana's recommendation** (Journey 1) and **the Manager's schedule-conflict insight** (Journey 4, Marcus / Sunday Lunch D-Group). A real **Databricks analytics** increment follows. Everything else is Optional / Post-submission / Cut below: those ideas are kept, but they are not required to prove the thesis.
+
+**Operational stack as built (do not read more into it).** Lakebase PostgreSQL is the operational store. `person_features` is produced by the **local** deterministic bootstrap script (`scripts/compute_person_features.mjs`). The Databricks analytical job, the Delta engagement tables, the parity check and the cutover are **not implemented**; being on a Databricks-hosted Postgres is not lakehouse analytics.
 
 **Dates:** build window Oct 30 – Nov 27, 2026. **Submit by Tue Nov 24**; hard deadline Nov 27, 11:59 PM ET.
 
@@ -17,6 +21,18 @@ This is the only document that tracks what is built, what is current, what is ne
 ---
 
 ## Current
+
+### Manager AI schedule-conflict review: Marcus / Sunday Lunch D-Group
+- **Status:** Implemented and verified against the development database (2026-11-23). Awaiting review. Not committed. Driven over HTTP against a production build (real pages and the real Manager server action); **not clicked in a real browser** (no browser tooling in the session).
+- **Behavior:** the Manager chooses **Run AI review** on `/manager` ("Insights requiring review"). For each pending join request whose requester serves on the same day the group meets, the review model (Sonnet via `OPENROUTER_MODEL_REVIEW`, prompt `schedule-conflict-v1`) is asked one narrow question. A validated `raise: true` saves one escalation (source `ai`, kind `schedule_conflict`, severity from the allowed set, status `open`) whose evidence holds the model's evidence statements, the exact facts it was shown, the request id, and the model and prompt version. The card shows "Potential schedule conflict", the summary, the evidence list, "Status: Needs review", and that the join request is still pending. It never changes the request, membership or recommendation runs and contacts no one.
+- **Review input (only these):** first name, the request's own note, the group's name, description and meeting slot, the requester's serving slots (`person_features.busy_slots`), serving areas, and their own `about_me`. No other member, no last name, no ids, no attendance, scores, rationale or profile fields.
+- **Safeguards:** Manager-only (the library refuses any other persona before reading anything, and row-level security hides the inputs from members and leaders); explicit action only; at most two attempts per candidate (an invalid reply is retried once, then dropped); the model may not state a number that was not supplied (rejects invented times); one audit row per attempt (`llm_review_attempt`: model, prompt version, attempt, outcome, latency, tokens, cost; never the prompt, facts or `about_me`) and one `escalation_created` row; an open or acknowledged insight for the same person and group is not raised again and costs no model call; concurrent reviews are serialised so a double click cannot duplicate.
+- **Code:** `lib/review/schedule-conflict.mjs` (contract, prompt, schema, grounding check), `lib/review/schedule-review.ts` (candidates, attempts, audit, dedup, persistence, insights read), `app/manager/actions.ts`, `app/manager/page.tsx` (replaces the static KPI mock), `scripts/test_schedule_contract.mjs`, `scripts/test_schedule_review.mjs`, `scripts/smoke_manager_review.mjs`. **No schema change; RLS hardened afterward by migration 0008 (see the escalation RLS item below).**
+- **Evidence:** `npm test` 187 passed (14 + 15 + 12 + 48 + 19 + 24 + 30 + 25; the new ones are 12 offline contract tests and 25 database tests with a stubbed model and a fetch spy); `npm run smoke:manager` 15 of 15 without a model call; `npx tsc --noEmit` and `npm run build` clean. **One controlled live verification** (`LIVE=1 npm run smoke:manager`, 26 of 26): 1 model attempt, `anthropic/claude-sonnet-5.5`, prompt `schedule-conflict-v1`, outcome ok, about 4.9 s, 1,210 tokens, about $0.006; `raise: true`, severity medium; one open escalation saved (evidence: serving slot Sunday second service 11:00 in the kids area; his own words about the preschool room; the group's "right after second service"; the group's Sunday-afternoon slot); the second press of **Run AI review** made no model call and added no duplicate; Marcus's request stayed one unchanged pending row. The test data was removed afterwards.
+- **Marcus setup:** the seed has no Marcus request. He creates it through the ordinary member path: Marcus, open Sunday Lunch D-Group, **Ask to join**. Demo recording therefore needs that one step first (about ten seconds).
+- **Gaps and decisions for review (see the report):** the `serving_assignment`, `ministry` and `service` tables are not in Lakebase (they are Databricks-side per architecture D1), so the "preschool room" detail reaches the model only through Marcus's own `about_me`, and the slot codes (`sun_11` = Sunday second service, 11:00) come from a small legend in the contract module; the escalation RLS gap found here is closed by migration 0008 (AI escalations are Manager-only to read and insert; rule escalations unchanged); acknowledged insights also block re-raising; Acknowledge/Resolve is not built.
+- **Escalation RLS hardening (migration 0008, applied 2026-11-23):** `select_escalation` now lets group leaders read only `rule` escalations; `insert_escalation` allows `ai` rows only from the manager role (and only as `open`), while `rule` inserts stay open to any role. Update stays manager-only. No feature or UI change; the Manager review server action already runs as the manager. Evidence: 4 new database tests in `scripts/test_schedule_review.mjs` (the group's own leader cannot read the AI insight; member, leader and no-role inserts of an AI row are refused; manager insert works and must be open; rule escalations behave as before).
+- **Open:** a real-browser pass (including 320 px width and keyboard use).
 
 ### Slice 0: Application & Data Connection — Complete
 
@@ -36,14 +52,10 @@ This is the only document that tracks what is built, what is current, what is ne
 
 **Acceptance criteria:** Complete when the local application successfully exercises the full path from UI → application/server action → `withPersona` → Lakebase PostgreSQL and returns successfully under the expected persona permissions.
 
-### Slice 0a: Vercel Deployment Validation
-
-- When Vercel deployment access is restored, deploy the existing application and verify the same application → `withPersona` → Lakebase path from the deployed environment.
-
 ---
 
 ## Next
-Implementation order. The synthetic data expansion gates re-testing of the finished journeys. Items 1–2 build the remaining product screens on the finished recommendation lifecycle and Journey 1; the Databricks item is independent and can run alongside them.
+Required work, in order. The synthetic data expansion block records what was done and what remains open.
 
 ### Synthetic data expansion (in progress)
 Specification: `Gathered - Synthetic Data Design.md`. The work is staged so the development database is untouched until the generated world has been reviewed.
@@ -67,70 +79,49 @@ Specification: `Gathered - Synthetic Data Design.md`. The work is staged so the 
   - **Tests:** `npm test` passed: 14 offline label/metric tests, 45 lifecycle, RLS and concurrency tests, 19 Journey 1 tests (1m40s). `npx tsc --noEmit` clean; `npm run build` succeeded. The suite leaves the database clean (0 runs, 0 audit rows).
   - **Remaining:** live ranking evaluation with `scripts/rank_eval.mjs` (real OpenRouter calls, explicit approval), the Journey 1 live check, and the leader-persona decision. The overall synthetic-data expansion is not complete until those finish.
 
-### 1. Journey 3: A leader accepts, and the group changes
-- **Status:** Not started.
-- **Depends on:** Journey 1 (Completed: requests exist); Slice 1 invalidation (Completed).
-- **Scope:** leader home (my group, recent joiners, requests waiting with name and the requester's own note only), Accept/Decline, the single transaction (`join_request` update + `group_membership` insert + `audit_log`).
-- **Acceptance:** after Chris accepts Sam, Sam appears under recent joiners and the count goes 0/8 → 1/8; Jordan's current result is out of date and his next visit generates a new one in which New Men's D-Group scores higher; the leader sees no profile, attendance or rationale.
-- **Notes:** the invalidation mechanism already exists and is tested for the leader-accept path at the database level; this item adds the screens and the real accept transaction.
-- **Validate:** `npm run build`; `npm run test:recommendations`; manual run as Chris and Jordan.
-
-### 2. Journey 2: New attender intake
-- **Status:** Not started.
-- **Depends on:** Journey 1 (Completed: member home screen).
-- **Scope:** intake textarea, LLM-proposed chips, confirmation, `insert member_profile` (`llm_confirmed`), zod-validated allowed values; then the member home generates Jordan's first recommendations.
-- **Acceptance:** nothing is saved without confirmation; `about_me` is saved verbatim; Jordan's three groups are the forming New Men's D-Group, Tuesday Night Dads and Men's Accountability (order to be verified).
-- **Notes:** uses the Haiku model through the same server-side OpenRouter path; each call is audited.
-- **Validate:** `npm run build`; a manual run as Jordan using `demo_intake_text` from `personas.json`.
-
-### Databricks `person_features` (independent track)
-- **Status:** Not started. Tracked as work still to do; the local bootstrap producer covers development until this lands.
-- **Depends on:** nothing in the journeys. Not a prerequisite for any journey. A Databricks workspace that stays available through judging (Dec 1).
-- **Steps:**
-  1. Create the Databricks job that reads the engagement tables (attendance events, serving assignments, services, ministries) and writes `person_features` into Lakebase, using the existing output contract (architecture §3b) and the owner-role write path.
-  2. Compare its output to the local bootstrap producer for the synthetic dataset.
-  3. Require schema and value parity: the same columns and types, and identical values for every adult, including the attendance-derived columns whose definitions are in the header of `lib/features/person-features.mjs`. Resolve any definition difference in the architecture (§3b) first, then in whichever side is wrong.
-  4. Switch the deployed/demo feature refresh path to Databricks. The writer is idempotent and the invalidation triggers fire only on changed values, so a parity run on unchanged data invalidates no recommendation run.
-  5. Keep the local script for deterministic development and recovery. Do not present it as the deployed analytical architecture.
-- **Acceptance:** column and value parity on the synthetic dataset; a rerun on unchanged data reports zero changed rows; the deployed refresh path uses Databricks.
+### Databricks analytics increment (required next, after the Manager review)
+- **Status:** Not started. **Not implemented:** the Databricks analytical `person_features` job, Delta engagement tables, parity check and cutover. Gathered currently uses Lakebase PostgreSQL as the operational store and the local deterministic bootstrap producer for `person_features`. Its detailed scope is decided separately; the intended direction is below.
+- **Depends on:** a Databricks workspace and Lakebase endpoint that stay available through judging (Dec 1); both are available now (see the operational note under Submission stabilization). Not a prerequisite for the two proofs.
+- **Intended direction:**
+  1. Load or represent the expanded V2 engagement history (attendance events, serving assignments, services, ministries) in Delta tables.
+  2. Use Databricks compute to derive the behavioral and member features at population scale.
+  3. Prove schema and value parity with the local bootstrap producer (the same columns and types and identical values for every adult, including the attendance-derived columns defined in the header of `lib/features/person-features.mjs`; resolve any definition difference in architecture §3b first).
+  4. Write the approved `person_features` output into Lakebase through the owner-role write path. The writer is idempotent and the invalidation triggers fire only on changed values, so a parity run on unchanged data invalidates no recommendation run.
+  5. If time permits, expose one real population-level analytical insight, for example unmatched demand by life stage and time slot, online-first cohorts, or group capacity versus member demand.
+  6. Keep the local script for deterministic development and recovery. Do not present it as the deployed analytical architecture.
+- **Acceptance:** column and value parity on the synthetic dataset; a rerun on unchanged data reports zero changed rows; the demo refresh path uses Databricks.
 - **Validate:** compare the two outputs row by row; `npm run test:recommendations` after the switch; `npm run seed:reset` returns to the local bootstrap state.
 
 ---
 
 ## Later
 
-### Journey 4: Manager oversight and escalations (rule items + AI hidden schedule conflict)
-- **Status:** Not started.
-- **Depends on:** Journey 1 (Completed: Marcus's request to Sunday Lunch can be made); Journey 3 (Tom's waiting requests).
-- **Scope:** dashboard tiles, groups table with 12-week meeting attendance, escalations list with "Run review", rule items (First Steps and Young Couples below the minimum, Tom's 9-day-old request), the AI schedule-conflict review (Sonnet), escalation detail with Acknowledge and Resolve, duplicate suppression.
-- **Acceptance:** see Demo Journeys, Journey 4.
-- **Validate:** `npm run build`; a manual run as Alan.
-
-### Journey 5: Audit and the two-role proof
-- **Status:** Not started.
-- **Depends on:** Journey 3 (Jordan's before and after); the Manager audit function (Completed in Slice 1).
-- **Scope:** recommendation audit screen for a member (all runs including out-of-date ones, score breakdown, rank, confidence, rationale, model and prompt version, before/after compare); the Tom-versus-Alan group page with the "Not available for your role" panel.
-- **Acceptance:** see Demo Journeys, Journey 5. Both views screenshotted for the write-up.
-- **Validate:** `npm run build`; `npm run test:recommendations`; manual run as Tom and Alan.
-
-### Pre-submission checks
+### Submission stabilization (after the Databricks analytics increment)
 - **Status:** Not started.
 - **Items:**
-  - Deployed verification of the finished app signed out; keep it warm through judging (Nov 28–30) and the Dec 1 showcase.
-  - Add 6–10 harder evaluation labels, written by someone other than the author, before quoting the match-quality number publicly (the current 14 labels are a designed set; architecture §10.2).
+  - Validate Dana's journey and the Manager insight end to end, including a real-browser pass (320 px width, keyboard use).
   - Reconcile `AI for Church Hackathon - Submission Deliverables.md` and `AI for Church Hackathon - Application.md` with the built system. Both still describe an earlier plan (deterministic matching with the LLM only writing explanations, a different data platform and surface, giving data "masked") that W1, W3 and W9 supersede.
-  - Screenshots and the demo video, per the Submission Deliverables checklist.
+  - Screenshots and the demo video, per the Submission Deliverables checklist and the reduced Video Run Order in Demo Journeys.
+  - Add 6–10 harder evaluation labels, written by someone other than the author, before quoting the match-quality number publicly (architecture §10.2); the live ranking evaluation has not been re-run under the 1–3 contract.
+  - **Lakebase re-enable operational note.** Databricks/Lakebase access is currently available. On 2026-11-16 the Lakebase compute endpoint was found disabled ("The endpoint has been disabled"), alongside a Databricks budget message that resets Dec 1; the database was reachable again by 2026-11-23. To re-enable it: `PATCH /api/2.0/postgres/projects/{project}/branches/{branch}/endpoints/{endpoint}?update_mask=spec.disabled` with body `{"spec": {"disabled": false}}` and a workspace bearer token; `scripts/lakebase-enable-endpoint.postman_collection.json` has the requests. Check it before recording and before judging, and keep test and seed runs against the hosted database to a minimum.
+  - Vercel access is available now: deploy (see Slice 0a below) and keep the deployment warm through judging (Nov 28–30) and the Dec 1 showcase.
 - **Validate:** the Submission Deliverables checklist.
 
 ---
 
-## Optional / Cut
-Below the cut line: do only if the items above are done.
+## Optional / Post-submission / Cut
+Not required to prove the hackathon thesis (Dana's recommendation and the Manager's schedule-conflict insight). Kept as ideas, not deleted. Do these only after the required work above.
 
-1. **Journey 4: AI unmet-demand review** (Priya's cluster, Clermont outside the radius, leader candidate Ruth Abbott). Depends on Journey 4 (base).
-2. **Journey 6: a member already in a group.** The eligibility rule behind it (members in a group get no recommendations) is already built and tested in Slice 1; only the "Your group" screen remains. Optional 0:10 demo clip.
-3. **Dashboard tile: online-first households within 5 miles of an in-person group.** Depends on the Databricks `person_features` track for real `online_share_12w` values.
-4. **Consistency factor in the score.** Neutral (7.5) today. Turning it on is a new scoring version and a new evaluation, not part of the Databricks cutover. Depends on Databricks parity.
+1. **Journey 3: a leader accepts, and the group changes.** Not started. Scope: leader home (my group, recent joiners, requests with name and the requester's own note only), Accept/Decline, the single transaction (`join_request` update + `group_membership` insert + `audit_log`). The invalidation mechanism for the leader-accept path already exists at the database level. Open decision: the leaders of First Steps and Sunday Lunch D-Group are not portal personas.
+2. **Journey 2: new attender intake (Jordan AI intake).** Not started. Scope: intake textarea, LLM-proposed chips, confirmation, `insert member_profile` (`llm_confirmed`). `/member/intake` already serves the existing-profile editor and shows an honest "not available yet" page for a member with no profile.
+3. **Full Manager KPI dashboard and groups-health table; rule alerts** (groups below minimum, requests waiting more than seven days, full groups, leaders with too many groups). Replaced for now by the Manager insights page.
+4. **Unmet-demand clustering and the "start a group" AI feature** (Priya's cluster, Clermont outside the radius, leader candidate Ruth Abbott), including a candidate-leader recommendation.
+5. **Broad escalation management** (Acknowledge and Resolve with audit).
+6. **Journey 5: full audit UI and the two-role proof.** Not started beyond the Manager audit database function. Scope: a recommendation audit screen for a member (all runs including out-of-date ones, score breakdown, rank, confidence, rationale, model and prompt version, before/after compare) and the Tom-versus-Alan "Not available for your role" panel. Show it in the video only if it is already easy.
+7. **Journey 6: a member already in a group.** The eligibility rule behind it is built and tested; only the "Your group" screen remains. Optional 0:10 clip.
+8. **Slice 0a: Vercel deployment validation.** Vercel deployment access is available. Deploy the existing application and verify the same application → `withPersona` → Lakebase path from the deployed environment.
+9. **Dashboard tile: online-first households near an in-person group.** Depends on the Databricks analytics increment for real `online_share_12w` values.
+10. **Consistency factor in the score.** Neutral (7.5) today. Turning it on is a new scoring version and a new evaluation, not part of the Databricks cutover. Depends on Databricks parity.
 
 **Cut by decision (W8):** escalation "needs care" and escalation "group drift" are out of demo scope.
 

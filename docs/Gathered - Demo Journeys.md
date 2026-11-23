@@ -1,6 +1,6 @@
 ## Gathered: Demo Journeys
 
-**Product behavior reference · Version 0.4 · 2026-11-11**  
+**Product behavior reference · Version 0.5 · 2026-11-23**  
 **What this document is:** the reference for what users experience and how the product behaves: the personas and their stories, the screens, the data effects of each action, the guardrails, and the demo narrative. Journey numbers identify stable product and demo scenarios; they are **not** a build sequence.  
 **What it is not:** it does not track implementation status, sequencing, dependencies, or cut decisions. Those live in `Gathered - Build Tracker.md`. Technical design lives in `Gathered - Data Model & Architecture.md`, which is canonical if the documents conflict.
 
@@ -9,6 +9,11 @@
 - `Gathered - Synthetic Data Design.md`: synthetic population, group catalog, personas, and evaluation scenarios.
 - `Gathered - Build Tracker.md`: implementation status, dependencies, sequencing, and cut decisions.
 - `AI for Church Hackathon - Submission Deliverables.md`: submission requirements and safeguards checklist.
+
+**Required demo scope (reduced for the submission deadline).** The demo proves two LLM capabilities. Everything else in this document is supporting or later behavior and is not required to prove the thesis.
+
+1. **Journey 1: Dana's recommendation.** A member faces a large catalog; ordinary filters only partly help; deterministic rules decide who and what is eligible; the LLM reasons over unstructured member and group text to reduce the search to one to three useful groups.
+2. **Journey 4: the Manager's schedule-conflict insight.** Operational facts alone do not explain the issue; the LLM connects a pending request, a serving schedule and a group's schedule and description; the Manager receives evidence and decides.
 
 **Contents**
 - Product Principles
@@ -84,7 +89,7 @@ Journey 5 exposes every recommendation run for a member, including out-of-date r
 | `/member/intake` | Profile and preference intake/confirmation | Existing confirmed profile loads as editable values for Dana; members without a profile enter free text and later receive LLM-proposed values in Journey 2. Editable life stage, availability slots, group preference, interests, and `about_me`; explicit confirmation required. |
 | `/member/groups/[id]` | Group detail and ask to join | Full public description, note field, **Ask to join**, and pending state |
 | `/leader` | Leader home | My-group summary, recent joiners, and requests with Accept/Decline |
-| `/manager` | Manager dashboard | KPI tiles, groups table, escalations list, **Run review**, and escalation detail |
+| `/manager` | Manager insights | **Insights requiring review**: **Run AI review**, and persisted insight cards (title, summary, evidence, status, join-request state). No KPI tiles or groups table are required. |
 | `/manager/members/[id]/audit` | Recommendation audit | Run history, score breakdown, internal rationale, model/prompt metadata, and before/after compare |
 | All pages | App shell | Current persona, role badge, switch-persona link, and quiet demo-data banner |
 
@@ -151,7 +156,7 @@ Journey 5 exposes every recommendation run for a member, including out-of-date r
 
 **Expected outcome:** Dana's top recommendation is First Steps, and she asks to join it.
 
-#### Journey 2 · New attender intake (Jordan) · video 0:45
+#### Journey 2 · New attender intake (Jordan) · supporting, not required for the demo
 
 **Story:** Jordan moved here a month ago with two little ones. He has no confirmed profile. He describes himself in a sentence, reviews a structured proposal, confirms it, and becomes eligible to request recommendations.
 
@@ -170,7 +175,7 @@ Journey 5 exposes every recommendation run for a member, including out-of-date r
 
 **Guardrail:** The model proposes; Jordan confirms. Personal details never become unrestricted profile fields. Free text is used for group matching only. Gathered is not a crisis-detection system.
 
-#### Journey 3 · A leader accepts, and the group changes (Chris → Sam → Jordan) · video 0:45
+#### Journey 3 · A leader accepts, and the group changes (Chris → Sam → Jordan) · supporting, not required for the demo
 
 **Story:** Chris leads a forming men's group with no members yet. He accepts Sam, the first member. Jordan's recommendations shift because the group now has a dad of toddlers in it.
 
@@ -189,37 +194,37 @@ Journey 5 exposes every recommendation run for a member, including out-of-date r
 
 **Also seeded:** Tom has two waiting requests; one is nine days old and feeds Journey 4's rule escalation.
 
-#### Journey 4 · Manager oversight and escalations (Alan, Marcus) · video 1:00
+#### Journey 4 · Manager schedule-conflict insight (Alan, Marcus) · video 1:00
 
-**Story:** The groups pastor sees the health of every group and runs a review for issues that basic workflow and static rules do not fully explain. This journey includes the Marcus setup and the resulting hidden-conflict review.
+**Story:** Marcus asks to join Sunday Lunch D-Group, a perfectly valid request. The groups pastor, Alan, runs an AI review. Gathered notices something the structured data does not show on its own: the group meets right after second service, and Marcus serves in the preschool room at second service, so he may routinely arrive late. Alan sees the evidence and decides.
 
-**Setup in this journey:**
-- Switch to Marcus.
-- Marcus is a dad of two who serves in the preschool room at 11:00.
-- Marcus opens Sunday Lunch D-Group and asks to join.
-- This request is created solely as the input for the Manager review shown immediately afterward.
+**Required story:**
+1. Marcus has, or creates, a pending request for Sunday Lunch D-Group.
+2. Alan opens the Manager view.
+3. Alan chooses **Run AI review**.
+4. The system correlates Marcus's serving-schedule facts with the group's schedule and description.
+5. A **Potential schedule conflict** insight appears, with evidence.
+6. Alan remains the decision-maker.
 
-**Manager screens:**
-- **Dashboard tiles:** percentage of opted-in people connected to a group, groups below minimum, groups full, and requests waiting more than seven days.
-- **Groups table:** each group with members, open seats, 12-week meeting-attendance rate, and leader.
-- **Escalations list** with **Run review**.
-- **Rule items:** First Steps and Young Couples below minimum; Tom's nine-day-old request.
-- **AI item, hidden schedule conflict:** Marcus asked to join Sunday Lunch D-Group, which meets right after second service. He serves in the preschool room at 11:00 and may arrive 30–40 minutes late every week.
-- **AI item, unmet demand:** six moms of toddlers want weekday mornings, but no eligible nearby group serves them; the review proposes starting one and identifies a rule-qualified possible leader.
-- **Escalation detail:** evidence list with Acknowledge and Resolve.
+**Setup:** Marcus creates the request himself through the ordinary member path. Switch to Marcus, open Sunday Lunch D-Group, and choose **Ask to join** (a note is optional). The seed does not contain this request. It exists only as the input for the Manager review shown next; Marcus does not appear in Journey 1.
 
-**How the hidden conflict is found:** The review compares the requested group's public schedule/description with Marcus's supported busy-slot and profile facts. The recommendation and join-request workflow does not automatically reject the request; the escalation is advisory.
+**Manager screen (`/manager`):**
+- **Insights requiring review** with a primary **Run AI review** action. Nothing is reviewed on page load, on refresh, or when a request is created.
+- A persisted insight card: **Potential schedule conflict**, the member and group, a short summary, an **Evidence** list, and **Status: Needs review**. For example: *Marcus requested Sunday Lunch D-Group. His preschool serving assignment overlaps the service immediately before the group meets, so he may routinely arrive late.*
+- The card states that the join request is still pending and that nothing has been sent to anyone.
 
-**How unmet demand is found:** Opted-in unmatched members with zero eligible groups are clustered by available slots and life stage. Candidate leaders are selected by fixed rules. The model writes the summary and selects only from that candidate list.
+**How the conflict is found:** For each pending request whose requester serves on the same day the group meets, the review model is shown only the request, the group's meeting slot and description, and the requester's serving slots, serving areas and their own `about_me` text. It may raise an insight only when those facts support a concrete recurring conflict, and it may not invent times. Its answer is validated before anything is saved, and the evidence it returns is stored beside the exact facts it was shown.
 
 **Data:**
-- **Run review** executes rule checks and the two approved AI reviews, then inserts escalation rows with source `rule` or `ai` and status `open`.
-- Duplicate open escalations for the same kind, group, and person are not inserted.
-- Acknowledge/Resolve is Manager-only and creates an audit row.
+- A validated "raise" inserts one escalation (source `ai`, kind `schedule_conflict`, status `open`) with its evidence, model and prompt version. Nothing is stored when the model finds no conflict or answers invalidly.
+- Running the review again does not duplicate an insight that is already open or acknowledged, and makes no model call for it.
+- Every model attempt is written to the audit log.
 
-**Guardrail:** Escalations are advisory. Alan decides. AI escalations retain their evidence, model, and prompt version.
+**Guardrail:** The insight is advisory. The review never rejects, withdraws or changes Marcus's request, never changes his membership or his recommendations, never contacts Marcus or a leader, and draws no conclusion about him beyond a schedule overlap. Alan decides.
 
-#### Journey 5 · Under the hood: audit and the two-role proof (Alan, Tom) · video 0:45
+**Later / not required for the hackathon demo.** These were part of the earlier Journey 4 and are kept as ideas, not commitments: a Manager KPI dashboard and groups-health table; rule alerts (groups below minimum, requests waiting more than seven days, full groups, leaders with too many groups); an AI unmet-demand review that proposes starting a group and a possible leader; and a fuller escalation workflow (Acknowledge and Resolve with audit).
+
+#### Journey 5 · Under the hood: audit and the two-role proof (Alan, Tom) · show only if already easy
 
 **Story:** Show judges what the recommendation system decided and prove that role boundaries are enforced.
 
@@ -246,7 +251,7 @@ Journey 5 exposes every recommendation run for a member, including out-of-date r
 
 **Guardrail:** This is the live safeguards proof. Capture both views for the submission.
 
-#### Journey 6 · A member already in a group (Ruth) · video 0:10, optional
+#### Journey 6 · A member already in a group (Ruth) · optional, not required for the demo
 
 **Story:** A member who already belongs to a group sees that group's details, not Browse Groups or recommendations.
 
@@ -260,24 +265,26 @@ Journey 5 exposes every recommendation run for a member, including out-of-date r
 - **What a member sees after a decline.** Not specified. A leader's optional decline reason is not shown to the member in a designed screen.
 - **Editing group details, tags, or leaders.** Seeded only; no screen is designed.
 - **Changing preferences after intake.** The `/member/intake` route also serves as the confirmed-profile editor. A confirmed change invalidates the saved recommendation run. It does not generate recommendations automatically.
-- **Escalations for needs-care and group drift.** Out of demo scope.
+- **Escalations other than the schedule conflict.** Needs-care, group drift, unmet demand and the rule alerts are out of the required demo scope; only the Marcus schedule-conflict insight is built for the submission.
 - **Crisis detection or pastoral emergency routing.** Not part of the MVP.
 - **Contacting anyone.** Gathered does not send invitations or messages; people do.
 
 ### Demo Narrative
 
+#### The two proofs
+
+**Proof 1: Dana's recommendation.** Ordinary browsing and filtering leave real work for the member. Deterministic rules control eligibility. The LLM reasons over the unstructured member and group text to pick the strongest one to three choices, and Dana decides.
+
+**Proof 2: the Manager's schedule-conflict insight.** The operational facts alone do not explain the issue. The LLM connects a pending request, a serving schedule and a group's schedule and description, and the Manager receives evidence and decides.
+
 #### Video Run Order, five minutes or less
 
-The video follows a story arc that is intentionally different from build order.
+The video follows a story arc that is intentionally different from build order. It centers on the two proofs and does not require Jordan's intake, a leader accepting, an unmet-demand analysis, or Ruth's story.
 
 | Segment | Time |
 |---|---:|
-| Problem | 0:30 |
-| Journey 2: Jordan intake | 0:45 |
-| Journey 1: Dana browses about 140 groups, filters, gets one to three recommendations, and asks to join First Steps | 1:00 |
-| Journey 3: Chris accepts Sam and Jordan's ranking shifts | 0:45 |
-| Journey 4: Marcus request plus Manager conflict and unmet-demand review | 1:00 |
-| Journey 5: audit and two-role proof | 0:45 |
-| How it is built and the evaluation number | 0:15 |
-
-Journey 6 is an optional 0:10 clip and is not part of the run order above.
+| Problem and scale | 0:20–0:30 |
+| Journey 1: Dana browses about 140 groups, filters, gets one to three recommendations, and asks to join First Steps | 1:15–1:30 |
+| Journey 4: Marcus's request, then Alan's AI review and the schedule-conflict insight | 1:00–1:15 |
+| Manager audit and safeguards proof (Journey 5), only if already easy to show | 0:30–0:45 |
+| Architecture, safeguards and the evaluation summary | 0:30–0:45 |
