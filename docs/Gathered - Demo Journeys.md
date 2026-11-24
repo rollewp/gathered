@@ -14,6 +14,7 @@
 
 1. **Journey 1: Dana's recommendation.** A member faces a large catalog; ordinary filters only partly help; deterministic rules decide who and what is eligible; the LLM reasons over unstructured member and group text to reduce the search to one to three useful groups.
 2. **Journey 4: the Manager's schedule-conflict insight.** Operational facts alone do not explain the issue; the LLM connects a pending request, a serving schedule and a group's schedule and description; the Manager receives evidence and decides.
+3. **Databricks population analytics (a Manager section within Journey 4, no new journey).** Databricks turns six months of engagement history into the member features the matching uses (the serving schedule behind Marcus's insight) and into a population view for Alan: the "Group demand gaps" section on the Manager page lists the top cohorts of unplaced members (life stage and time slot) the current catalog does not serve, as counts only, with no names and no model.
 
 **Contents**
 - Product Principles
@@ -222,6 +223,8 @@ Journey 5 exposes every recommendation run for a member, including out-of-date r
 
 **Guardrail:** The insight is advisory. The review never rejects, withdraws or changes Marcus's request, never changes his membership or his recommendations, never contacts Marcus or a leader, and draws no conclusion about him beyond a schedule overlap. Alan decides.
 
+**Group demand gaps (Alan).** Below the insights, the Manager page shows up to five gap cohorts, ranked by people with no reachable group: life stage and slot, people without a group, open groups, open seats and a plain classification (No current group, High demand, Limited reach). Aggregates only; a person free at several times is counted in each cohort, so rows are not additive, and availability is not intent. The data is a persisted result written by the Databricks refresh; viewing the page runs no analysis and calls no model. Members and leaders never see it. In the V2 seed the story is weekday-morning demand (for example retired members free on Wednesday mornings: 38 people, one group, eight seats).
+
 **Later / not required for the hackathon demo.** These were part of the earlier Journey 4 and are kept as ideas, not commitments: a Manager KPI dashboard and groups-health table; rule alerts (groups below minimum, requests waiting more than seven days, full groups, leaders with too many groups); an AI unmet-demand review that proposes starting a group and a possible leader; and a fuller escalation workflow (Acknowledge and Resolve with audit).
 
 #### Journey 5 · Under the hood: audit and the two-role proof (Alan, Tom) · show only if already easy
@@ -286,5 +289,6 @@ The video follows a story arc that is intentionally different from build order. 
 | Problem and scale | 0:20–0:30 |
 | Journey 1: Dana browses about 140 groups, filters, gets one to three recommendations, and asks to join First Steps | 1:15–1:30 |
 | Journey 4: Marcus's request, then Alan's AI review and the schedule-conflict insight | 1:00–1:15 |
+| Alan's "Group demand gaps" from Databricks: the population view behind it (same Manager page) | 0:15–0:30 |
 | Manager audit and safeguards proof (Journey 5), only if already easy to show | 0:30–0:45 |
 | Architecture, safeguards and the evaluation summary | 0:30–0:45 |

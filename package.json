@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test": "npm run test:eval && npm run test:recommendations && npm run test:journey1 && npm run test:catalog && npm run test:profile && npm run test:schedule",
-    "test:eval": "node scripts/test_eval_metrics.mjs && node scripts/test_rank_contract.mjs && node scripts/test_schedule_contract.mjs",
+    "test": "npm run test:eval && npm run test:recommendations && npm run test:journey1 && npm run test:catalog && npm run test:profile && npm run test:schedule && npm run test:demand",
+    "test:eval": "node scripts/test_eval_metrics.mjs && node scripts/test_rank_contract.mjs && node scripts/test_schedule_contract.mjs && node scripts/test_demand_reference.mjs",
     "test:schedule": "node --import tsx --conditions=react-server --env-file=.env.local scripts/test_schedule_review.mjs",
     "test:profile": "node --import tsx --conditions=react-server --env-file=.env.local scripts/test_profile.mjs",
     "test:catalog": "node --import tsx --conditions=react-server --env-file=.env.local scripts/test_catalog.mjs",
@@ -23,7 +23,15 @@
     "seed:generate": "python seed/generate_seed.py",
     "seed:validate": "node scripts/seed_validate.mjs",
     "seed:check": "node scripts/seed_validate.mjs --determinism",
-    "seed:reset": "node --env-file=.env.local scripts/load_seed.mjs && node --env-file=.env.local scripts/compute_person_features.mjs"
+    "seed:reset": "node --env-file=.env.local scripts/load_seed.mjs && node --env-file=.env.local scripts/compute_person_features.mjs",
+    "test:demand": "node --import tsx --conditions=react-server --env-file=.env.local scripts/test_demand_gaps.mjs",
+    "dbx:ingest": "node databricks/ingest.mjs",
+    "dbx:features": "node databricks/features.mjs",
+    "dbx:demand": "node databricks/demand.mjs",
+    "dbx:verify": "node databricks/ingest.mjs && node databricks/features.mjs && node databricks/demand.mjs",
+    "dbx:deploy": "node --env-file=.env.local databricks/deploy.mjs",
+    "dbx:refresh": "node --env-file=.env.local databricks/deploy.mjs --run",
+    "smoke:demand": "node --env-file=.env.local scripts/smoke_demand_gaps.mjs"
   },
   "engines": {
     "node": ">=20.9"

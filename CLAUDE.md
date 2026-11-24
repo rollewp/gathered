@@ -23,6 +23,7 @@ AI for Church Hackathon entry (build window Oct 30 – Nov 27, 2026; **submit by
 - `.env.local`:
   - `DATABASE_URL` (gathered_app)
   - `DATABASE_OWNER_URL` (owner; migrations only)
+  - `DATABASE_REFRESH_URL` (`gathered_refresh`, narrow role for the Databricks refresh; used by `databricks/setup_refresh_secrets.mjs` and `test:demand`; stored for the job only in the Databricks secret scope `gathered`)
   - `OPENROUTER_API_KEY`
 - Databricks: use the CLI profile from `databricks auth login`. No tokens in files.
 - `.env*` is git-ignored.
@@ -50,7 +51,8 @@ AI for Church Hackathon entry (build window Oct 30 – Nov 27, 2026; **submit by
 - Tests: `npm test` (offline label/metric tests via `npm run test:eval`, then recommendation lifecycle + Journey 1 + Browse Groups catalog + member profile edit + Manager schedule-conflict review, stubbed, no external LLM calls, needs Node 20+) and `npm run build` are routine; `npm run smoke:journey1`, `npm run smoke:profile` and `npm run smoke:manager` drive a running app over HTTP (`LIVE=1` on `smoke:manager` makes one real review-model call). `npm run verify:openrouter`, `npm run verify:journey1` and `scripts/rank_eval.mjs` make real OpenRouter calls and are run explicitly only.
 - `npm run seed:generate` regenerates `seed/out` (Python 3, offline); `npm run seed:check` regenerates twice, compares, validates and rewrites the report; `npm run seed:validate` is the quick pass. None of them touch a database or call a model.
 - `npm run seed:reset` reloads the seed and recomputes `person_features` (returns the demo database to a known state, with no recommendation runs).
-- `scripts/compute_person_features.mjs` is a local bootstrap producer; Databricks is the intended deployed producer of `person_features`.
+- `scripts/compute_person_features.mjs` is the local bootstrap/reference producer; Databricks is the deployed producer of `person_features` and `app.demand_gap` (job `gathered-nightly-refresh`, see `databricks/README.md`).
+- Databricks commands (use the workspace budget deliberately; `databricks auth login --profile gathered` if the token expires): `npm run dbx:ingest` (Delta source tables), `dbx:features` (parity gate), `dbx:demand` (reconcile with the JS reference), `dbx:verify` (all three), `dbx:deploy`, `dbx:refresh` (run the job once). `npm run test:demand` and `npm run smoke:demand` (`RECONCILE=1` compares with Databricks) cover the Manager "Group demand gaps" section. Older suites delete runs and join requests: snapshot real demo state (e.g. Marcus's run and request) before a full `npm test`.
 - Drop schema `spike` once `app` exists.
 
 ## Repo layout

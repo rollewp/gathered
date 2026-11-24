@@ -73,7 +73,8 @@
 ```
 
 - **Where state lives:** current group, membership, profile and recommendation state is operational data in Lakebase. Databricks computes `person_features` only; it holds no recommendation state and does no ranking.
-- **Feature sync:** the nightly Databricks notebook writes `person_features` into Lakebase with a plain insert. Lakebase synced tables (Delta → Postgres) are untested in Free Edition and not required (§10.1, P5).
+- **Feature sync (as built, v0.12):** engagement history lives in Delta tables in `workspace.gathered` (Free Edition's default catalog; source tables plus the results `person_features` and `demand_gaps`). The serverless job `gathered-nightly-refresh` recomputes both results in Spark SQL and upserts them into Lakebase over a direct Postgres connection as the narrow role `gathered_refresh` (credentials in the Databricks secret scope `gathered`; select/insert/update on `person_features`, select/insert/update/delete on `app.demand_gap`, no BYPASSRLS, no access to people, profiles, runs or the audit log). A row is written only when a value differs (`computed_at` excluded), so an unchanged refresh updates nothing and, through the existing triggers (§6.6), invalidates no run. Lakebase synced tables remain untested and unused (§10.1, P5). `person_features` Spark SQL is a direct translation of `lib/features/person-features.mjs` with a hard parity gate (100% on the V2 seed).
+- **Population analytics (v0.12):** `app.demand_gap` holds aggregates only, one row per (life stage, available slot) cohort of opted-in adults without an active group, with catalog supply and reach (full hard filters) counts and a classification (No current group, High demand, Limited reach, Served, Not a gap; thresholds 5 people and 4 people per open seat). It is Manager-read-only by RLS, written only by the refresh role, and read by the Manager "Group demand gaps" section. No model is involved and no person is named.
 - **Rule-based escalations** run in the app (server code), not in Databricks (§8).
 
 ---
@@ -165,7 +166,7 @@ The recommendation run, its shortlist candidates and the slimmed `recommendation
   - `service`: two Sunday services (9:00, and 11:00, which is livestreamed) and Wednesday night. Includes `slot` and `livestreamed`.
   - `attendance_event`: `person_id`, `service_id`, `channel`, `checked_in_by`, `checked_in_at`, `minutes_watched`.
   - `ministry`, `serving_assignment`: `schedule_slot` (e.g. `sun_11`) is what makes the "kids-ministry volunteer arrives late" conflict detectable.
-- **person_features** (derived nightly in Databricks, written into Lakebase; until that job exists, `scripts/compute_person_features.mjs` is a **local bootstrap producer** of the same contract, with formulas in `lib/features/person-features.mjs`. It is a development and recovery tool, not the deployed architecture. Databricks must reach schema and value parity with it before cutover; that work is tracked in the Build Tracker):
+- **person_features** (derived in Databricks and written into Lakebase by the refresh job; `scripts/compute_person_features.mjs` is the **local bootstrap producer** of the same contract, with formulas in `lib/features/person-features.mjs`. It is the reference for parity and a development and recovery tool, not the deployed path. Parity is proven at 100% on the V2 seed):
   - `observed_weeks_12w`: weeks with any signal, counting the adult on a kiosk row's `checked_in_by`
   - `attendance_rate_12w`: of observed signals only
   - `signal_sources`: the channels seen for this person
@@ -562,7 +563,7 @@ Goal: decide where the operational store lives, testing Lakebase first with Neon
 5. **Prompt change:** invalidates runs from the previous version, without regenerating (§6.2, §6.6).
 
 ### 11.3 · Open
-1. **Databricks `person_features` job and cutover.** The recommendation lifecycle runs on the local bootstrap producer. The Databricks job, its value parity with the bootstrap output, and the switch of the deployed feature refresh path are tracked in the Build Tracker.
+1. **Databricks refresh schedule.** The job exists, has run twice with verified parity and idempotence (Build Tracker), and is created paused; enabling its nightly schedule and copying serving context into Lakebase are not done.
 2. **Consistency factor.** The scorer keeps consistency neutral (7.5) until Databricks parity confirms the `consistency_score` and `signal_confidence` definitions (§3b).
 
 ---
@@ -575,6 +576,7 @@ Goal: decide where the operational store lives, testing Lakebase first with Neon
 ---
 
 ## Revision history
+- **v0.12 (2026-11-24):** Databricks refresh built: Delta namespace `workspace.gathered`, the `gathered-nightly-refresh` job writes `person_features` (100% parity) and the new `app.demand_gap` aggregate into Lakebase as role `gathered_refresh` (migration 0009); Manager "Group demand gaps" section. No decision IDs changed.
 - **v0.10 (2026-11-23):** schedule-conflict escalation review contract recorded in §7 (prompt `schedule-conflict-v1`; no schema change).
 - **v0.11 (2026-11-23):** migration 0008 hardens escalation RLS: AI escalations are Manager-only to insert and read; rule escalations unchanged.
 - **v0.9 (2026-11-11):** ranking output is 1 to 3 groups instead of exactly `min(3, n)` (prompt sentence, validation, migration `0007`); the score fallback is unchanged. The model evaluation in §10.2 predates this change and has not been re-run.

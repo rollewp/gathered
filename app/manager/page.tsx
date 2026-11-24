@@ -1,9 +1,11 @@
 import { cookies } from 'next/headers'
-import { AlertCircle, Sparkles } from 'lucide-react'
+import { AlertCircle, BarChart3, Sparkles } from 'lucide-react'
 import { AppHeader, PageIntro, RoleBadge, SectionLabel } from '@/components/app-shell'
 import { PersonaChooser } from '@/components/persona-chooser'
 import { SubmitButton } from '@/components/submit-button'
 import { findPersona, PERSONA_COOKIE } from '@/lib/personas'
+import { getDemandGaps, type DemandGap, type DemandGapSummary } from '@/lib/analytics/demand-gaps'
+import { lifeStageLabel, slotLabel } from '@/lib/group-view'
 import { listInsights, type InsightRow } from '@/lib/review/schedule-review'
 import { runAiReview } from './actions'
 
@@ -54,6 +56,58 @@ function Insight({ i }: { i: InsightRow }) {
   )
 }
 
+const GAP_NOTE: Record<DemandGap['gap_classification'], (g: DemandGap) => string> = {
+  'No current group': () => 'No open group meets at this time for this life stage.',
+  'High demand': (g) => `About ${g.people_per_open_seat?.toFixed(1)} people for every open seat.`,
+  'Limited reach': (g) => `${g.people_without_reachable_group} of ${g.opted_in_ungrouped_count} have no suitable open group within 5 miles.`,
+}
+
+function DemandGapCard({ g }: { g: DemandGap }) {
+  const stage = lifeStageLabel(g.life_stage) ?? g.life_stage
+  return (
+    <li className="rounded-2xl border border-[#e1e8df] bg-white p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="font-serif text-xl text-[#26382b]">{stage} · {slotLabel(g.available_slot)}</p>
+          <p className="mt-1 text-sm leading-6 text-[#4a5a4e]">{GAP_NOTE[g.gap_classification](g)}</p>
+        </div>
+        <span className="rounded-full bg-[#f6efe2] px-3 py-1 text-xs font-semibold text-[#876f46]">{g.gap_classification}</span>
+      </div>
+      <dl className="mt-4 grid grid-cols-3 gap-3 text-sm">
+        <div><dt className="text-xs uppercase tracking-[0.12em] text-[#718b70]">People without a group</dt><dd className="mt-1 text-lg text-[#26382b]">{g.opted_in_ungrouped_count}</dd></div>
+        <div><dt className="text-xs uppercase tracking-[0.12em] text-[#718b70]">Open groups</dt><dd className="mt-1 text-lg text-[#26382b]">{g.serving_group_count}</dd></div>
+        <div><dt className="text-xs uppercase tracking-[0.12em] text-[#718b70]">Open seats</dt><dd className="mt-1 text-lg text-[#26382b]">{g.available_seat_count}</dd></div>
+      </dl>
+    </li>
+  )
+}
+
+function DemandGaps({ d, failed }: { d: DemandGapSummary | null; failed: boolean }) {
+  return (
+    <section aria-label="Group demand gaps" className="mt-12">
+      <div className="mb-3 flex items-center gap-3"><SectionLabel>Group demand gaps</SectionLabel>{d && <RoleBadge>{d.totalGapCohorts}</RoleBadge>}</div>
+      <p className="mb-4 flex gap-3 text-sm leading-6 text-[#69736b]">
+        <BarChart3 className="mt-1 size-4 shrink-0 text-[#718b70]" aria-hidden />
+        <span>Where opted-in adults without a group are concentrated in life-stage and time combinations the current groups serve poorly. Analyzed in Databricks across the whole congregation; only totals are shown.</span>
+      </p>
+      {failed ? (
+        <p role="alert" className="rounded-xl border border-[#ecd9d4] bg-[#fbf3f1] px-4 py-3 text-sm text-[#8a3b2e]">We couldn't load the demand analysis just now. Please try again in a moment.</p>
+      ) : !d || d.cohortsAnalyzed === 0 ? (
+        <div className="rounded-2xl border border-[#e1e8df] bg-white p-6 text-sm leading-6 text-[#69736b]">The demand analysis has not been loaded yet. It is produced by the scheduled Databricks refresh.</div>
+      ) : d.gaps.length === 0 ? (
+        <div className="rounded-2xl border border-[#e1e8df] bg-white p-6 text-sm leading-6 text-[#69736b]">No cohort is poorly served right now ({d.cohortsAnalyzed} life-stage and time combinations checked).</div>
+      ) : (
+        <>
+          <ul className="flex flex-col gap-3">{d.gaps.map((g) => <DemandGapCard key={`${g.life_stage}|${g.available_slot}`} g={g} />)}</ul>
+          <p className="mt-3 text-xs leading-5 text-[#69736b]">
+            Top {d.gaps.length} of {d.totalGapCohorts} gaps, from {d.cohortsAnalyzed} life-stage and time combinations{d.asOf ? `, engagement data through ${d.asOf}` : ''}. A person who is free at several times is counted in each, so rows are not additive.
+          </p>
+        </>
+      )}
+    </section>
+  )
+}
+
 export default async function ManagerPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const persona = findPersona((await cookies()).get(PERSONA_COOKIE)?.value)
   if (!persona || persona.role !== 'manager') return <PersonaChooser role="manager" label="Manager" currentName={persona?.display} />
@@ -63,6 +117,9 @@ export default async function ManagerPage({ searchParams }: { searchParams: Prom
   let insights: InsightRow[] = []
   let failed = false
   try { insights = await listInsights(persona.key) } catch { failed = true } // never show a database error to the Manager
+  let demand: DemandGapSummary | null = null
+  let demandFailed = false
+  try { demand = await getDemandGaps(persona.key) } catch { demandFailed = true }
 
   return (
     <div className="min-h-screen">
@@ -99,6 +156,8 @@ export default async function ManagerPage({ searchParams }: { searchParams: Prom
             <div className="flex flex-col gap-4">{insights.map((i) => <Insight key={i.escalation_id} i={i} />)}</div>
           )}
         </section>
+
+        <DemandGaps d={demand} failed={demandFailed} />
       </main>
     </div>
   )
