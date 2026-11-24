@@ -6,6 +6,7 @@ import { getRecommendations } from '@/lib/recommendations'
 import { requestToJoin, saveMyProfile, withdrawRequest } from '@/lib/member'
 import { parseProfileForm, type ProfileFields } from '@/lib/profile-schema'
 import { findPersona, PERSONA_COOKIE } from '@/lib/personas'
+import { requireDemoAccess } from '@/lib/demo-access'
 
 async function memberPersona() {
   const p = findPersona((await cookies()).get(PERSONA_COOKIE)?.value)
@@ -18,6 +19,7 @@ async function memberPersona() {
  * renders, catalog searches, filters and paging never call this.
  */
 export async function requestMyRecommendations() {
+  await requireDemoAccess()
   const persona = await memberPersona()
   if (!persona) redirect('/member')
   let notice = ''

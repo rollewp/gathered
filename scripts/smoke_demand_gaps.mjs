@@ -15,6 +15,8 @@ import path from "node:path";
 import pg from "pg";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:3117";
+import { accessCookie } from "./lib/demo_access.mjs";
+const AC = await accessCookie(BASE); // passes the demo access gate (needs DEMO_PASSWORD when the app enforces it)
 const FIXTURE = process.env.FIXTURE === "1";
 const RECONCILE = process.env.RECONCILE === "1";
 const ssl = { rejectUnauthorized: false };
@@ -33,7 +35,7 @@ let failed = 0;
 const check = (name, ok, extra = "") => { console.log(`  ${ok ? "PASS" : "FAIL"}  ${name}${ok ? "" : "  " + extra}`); if (!ok) failed++; };
 const unesc = (s) => s.replace(/&quot;/g, '"').replace(/&#x27;|&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 const text = (h) => unesc(h.replace(/<!--[\s\S]*?-->/g, "").replace(/<script[\s\S]*?<\/script>/g, " ").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ");
-const get = async (key, url) => { const r = await fetch(BASE + url, { headers: { cookie: key ? `personaKey=${key}` : "" }, redirect: "manual" }); return { status: r.status, html: await r.text() }; };
+const get = async (key, url) => { const r = await fetch(BASE + url, { headers: { cookie: AC + (key ? `personaKey=${key}` : "") }, redirect: "manual" }); return { status: r.status, html: await r.text() }; };
 const section = (t) => { const i = t.indexOf("Group demand gaps"); return i < 0 ? "" : t.slice(i); };
 
 const mk = (stage, slot, n, groups, seats, reach, cls, rank) => ({

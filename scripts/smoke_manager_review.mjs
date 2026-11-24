@@ -14,7 +14,9 @@ import fs from "node:fs";
 import path from "node:path";
 import pg from "pg";
 
-const BASE = process.env.BASE_URL ?? "http://localhost:3116";
+const BASE = process.env.BASE_URL ?? "http://localhost:3116";
+import { accessCookie } from "./lib/demo_access.mjs";
+const AC = await accessCookie(BASE); // passes the demo access gate (needs DEMO_PASSWORD when the app enforces it)
 const LIVE = process.env.LIVE === "1";
 const ssl = { rejectUnauthorized: false };
 const personas = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, "..", "seed", "out", "personas.json"), "utf8"));
@@ -29,13 +31,13 @@ let failed = 0;
 const check = (name, ok, extra = "") => { console.log(`  ${ok ? "PASS" : "FAIL"}  ${name}${ok ? "" : "  " + extra}`); if (!ok) failed++; };
 const unesc = (s) => s.replace(/&quot;/g, '"').replace(/&#x27;|&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 const text = (h) => unesc(h.replace(/<!--[\s\S]*?-->/g, "").replace(/<script[\s\S]*?<\/script>/g, " ").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ");
-const get = async (key, url) => { const r = await fetch(BASE + url, { headers: { cookie: key ? `personaKey=${key}` : "" }, redirect: "manual" }); return { status: r.status, html: await r.text(), loc: r.headers.get("location") }; };
+const get = async (key, url) => { const r = await fetch(BASE + url, { headers: { cookie: AC + (key ? `personaKey=${key}` : "") }, redirect: "manual" }); return { status: r.status, html: await r.text(), loc: r.headers.get("location") }; };
 const hidden = (html) => (html.match(/<input[^>]*type="hidden"[^>]*>/g) ?? []).map((t) => [t.match(/name="([^"]*)"/)?.[1], unesc(t.match(/value="([^"]*)"/)?.[1] ?? "")]).filter(([n]) => n);
 const submit = (key, url, html, fields = []) => {
   const f = new FormData();
   for (const [k, v] of hidden(html)) f.append(k, v);
   for (const [k, v] of fields) f.append(k, v);
-  return fetch(BASE + url, { method: "POST", body: f, redirect: "manual", headers: { cookie: `personaKey=${key}` } });
+  return fetch(BASE + url, { method: "POST", body: f, redirect: "manual", headers: { cookie: AC + `personaKey=${key}` } });
 };
 const escalations = () => q("select * from app.escalation where source = 'ai'");
 const reviewAudit = () => q("select detail from app.audit_log where id > $1 and action = 'llm_review_attempt' order by id", [startAuditId]);

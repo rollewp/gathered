@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { findPersona, PERSONA_COOKIE } from '@/lib/personas'
 import { z } from 'zod'
+import { requireDemoAccess } from '@/lib/demo-access'
 import { ReviewUnavailableError, resolveInsight, runScheduleReview } from '@/lib/review/schedule-review'
 
 /**
@@ -11,6 +12,7 @@ import { ReviewUnavailableError, resolveInsight, runScheduleReview } from '@/lib
  * Manager persona is sent back without anything being read or sent to a model.
  */
 export async function runAiReview() {
+  await requireDemoAccess()
   const persona = findPersona((await cookies()).get(PERSONA_COOKIE)?.value)
   if (!persona || persona.role !== 'manager') redirect('/manager')
   let query = ''

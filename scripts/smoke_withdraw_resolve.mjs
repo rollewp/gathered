@@ -17,7 +17,9 @@ import fs from "node:fs";
 import path from "node:path";
 import pg from "pg";
 
-const BASE = process.env.BASE_URL ?? "http://localhost:3118";
+const BASE = process.env.BASE_URL ?? "http://localhost:3118";
+import { accessCookie } from "./lib/demo_access.mjs";
+const AC = await accessCookie(BASE); // passes the demo access gate (needs DEMO_PASSWORD when the app enforces it)
 const ssl = { rejectUnauthorized: false };
 const personas = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, "..", "seed", "out", "personas.json"), "utf8"));
 const P = Object.fromEntries(personas.map((p) => [p.key, p]));
@@ -31,11 +33,11 @@ let failed = 0;
 const check = (name, ok, extra = "") => { console.log(`  ${ok ? "PASS" : "FAIL"}  ${name}${ok ? "" : "  " + extra}`); if (!ok) failed++; };
 const unesc = (s) => s.replace(/&quot;/g, '"').replace(/&#x27;|&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 const text = (h) => unesc(h.replace(/<!--[\s\S]*?-->/g, "").replace(/<script[\s\S]*?<\/script>/g, " ").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ");
-const get = async (key, url) => { const r = await fetch(BASE + url, { headers: { cookie: key ? `personaKey=${key}` : "" }, redirect: "manual" }); return { status: r.status, html: await r.text(), loc: r.headers.get("location") ?? "" }; };
+const get = async (key, url) => { const r = await fetch(BASE + url, { headers: { cookie: AC + (key ? `personaKey=${key}` : "") }, redirect: "manual" }); return { status: r.status, html: await r.text(), loc: r.headers.get("location") ?? "" }; };
 const hidden = (html) => (html.match(/<input[^>]*type="hidden"[^>]*>/g) ?? []).map((t) => [t.match(/name="([^"]*)"/)?.[1], unesc(t.match(/value="([^"]*)"/)?.[1] ?? "")]).filter(([n]) => n);
 // post the hidden fields of ONE form (the one whose aria-label matches) as another persona would
 const formFields = (html, label) => { const m = html.match(new RegExp(`<form[^>]*aria-label="${label}"[\\s\\S]*?</form>`)); return m ? hidden(m[0]) : []; };
-const post = (key, url, fields) => { const f = new FormData(); for (const [k, v] of fields) f.append(k, v); return fetch(BASE + url, { method: "POST", body: f, redirect: "manual", headers: { cookie: `personaKey=${key}` } }); };
+const post = (key, url, fields) => { const f = new FormData(); for (const [k, v] of fields) f.append(k, v); return fetch(BASE + url, { method: "POST", body: f, redirect: "manual", headers: { cookie: AC + `personaKey=${key}` } }); };
 const pending = () => q("select request_id, status, member_note, requested_at, decided_at, rec_id from app.join_request where person_id = $1 and group_id = $2 and status = 'requested'", [P.member_marcus.person_id, SL]);
 const openInsights = () => q("select escalation_id, status, evidence from app.escalation where source = 'ai' and kind = 'schedule_conflict' and person_id = $1 and status in ('open','acknowledged')", [P.member_marcus.person_id]);
 const runs = () => q("select run_id, is_current, invalidated_at from app.recommendation_run order by run_id");

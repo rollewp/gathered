@@ -13,6 +13,8 @@ import path from "node:path";
 import pg from "pg";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:3114";
+import { accessCookie } from "./lib/demo_access.mjs";
+const AC = await accessCookie(BASE); // passes the demo access gate (needs DEMO_PASSWORD when the app enforces it)
 const ssl = { rejectUnauthorized: false };
 const personas = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, "..", "seed", "out", "personas.json"), "utf8"));
 const P = Object.fromEntries(personas.map((p) => [p.key, p]));
@@ -25,7 +27,7 @@ let failed = 0;
 const check = (name, ok, extra = "") => { console.log(`  ${ok ? "PASS" : "FAIL"}  ${name}${ok ? "" : "  " + extra}`); if (!ok) failed++; };
 const unesc = (s) => s.replace(/&quot;/g, '"').replace(/&#x27;|&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 const text = (h) => unesc(h.replace(/<!--[\s\S]*?-->/g, "").replace(/<script[\s\S]*?<\/script>/g, " ").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ");
-const get = async (key, url) => { const r = await fetch(BASE + url, { headers: { cookie: key ? `personaKey=${key}` : "" }, redirect: "manual" }); return { status: r.status, html: await r.text(), loc: r.headers.get("location") }; };
+const get = async (key, url) => { const r = await fetch(BASE + url, { headers: { cookie: AC + (key ? `personaKey=${key}` : "") }, redirect: "manual" }); return { status: r.status, html: await r.text(), loc: r.headers.get("location") }; };
 const HIDDEN = /rationale|score_breakdown|shortlist|prompt_version|rank-v|stub-model|confidence|internal_rationale|busy_slots|attendance|"score"/i;
 const DANA = "member_dana";
 const profile = async (key) => (await own.query("select * from app.member_profile where person_id = $1", [P[key].person_id])).rows[0];
@@ -76,7 +78,7 @@ async function submit(key, html, fields) {
   const f = new FormData();
   for (const [k, v] of hiddenFields(html)) f.append(k, v);
   for (const [k, v] of fields) f.append(k, v);
-  return fetch(`${BASE}/member/intake`, { method: "POST", body: f, redirect: "manual", headers: { cookie: `personaKey=${key}` } });
+  return fetch(`${BASE}/member/intake`, { method: "POST", body: f, redirect: "manual", headers: { cookie: AC + `personaKey=${key}` } });
 }
 const same = (row) => [["life_stage", row.life_stage ?? ""], ...row.available_slots.map((s) => ["available_slots", s]), ["group_pref", row.group_pref ?? ""], ...row.interests.map((i) => ["interests", i]), ["about_me", row.about_me ?? ""]];
 
@@ -147,7 +149,7 @@ try {
   check("a crafted person_id in the payload is ignored: Priya is untouched", JSON.stringify(await profile("member_priya")) === priyaBefore);
   r = await get("leader_tom", "/member/intake");
   check("a Leader gets the member persona chooser, not Dana's or anyone's form", r.status === 200 && !text(r.html).includes("Save preferences"));
-  post = await fetch(`${BASE}/member/intake`, { method: "POST", body: (() => { const f = new FormData(); f.append("available_slots", "tue_am"); return f; })(), redirect: "manual", headers: { cookie: "personaKey=leader_tom" } });
+  post = await fetch(`${BASE}/member/intake`, { method: "POST", body: (() => { const f = new FormData(); f.append("available_slots", "tue_am"); return f; })(), redirect: "manual", headers: { cookie: AC + "personaKey=leader_tom" } });
   check("a Leader posting to the member action changes no member's profile (only a member persona is accepted)", JSON.stringify(await profile(DANA)) === before, String(post.status));
 
   console.log("\nNo profile (Journey 2 shell)");

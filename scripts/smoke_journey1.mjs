@@ -11,7 +11,9 @@ import fs from "node:fs";
 import path from "node:path";
 import pg from "pg";
 
-const BASE = process.env.BASE_URL ?? "http://localhost:3113";
+const BASE = process.env.BASE_URL ?? "http://localhost:3113";
+import { accessCookie } from "./lib/demo_access.mjs";
+const AC = await accessCookie(BASE); // passes the demo access gate (needs DEMO_PASSWORD when the app enforces it)
 const ssl = { rejectUnauthorized: false };
 const personas = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, "..", "seed", "out", "personas.json"), "utf8"));
 const P = Object.fromEntries(personas.map((p) => [p.key, p]));
@@ -23,7 +25,7 @@ const startAuditId = Number((await own.query("select coalesce(max(id), 0) m from
 let failed = 0;
 const check = (name, ok, extra = "") => { console.log(`  ${ok ? "PASS" : "FAIL"}  ${name}${ok ? "" : "  " + extra}`); if (!ok) failed++; };
 const text = (h) => h.replace(/<!--[\s\S]*?-->/g, "").replace(/<script[\s\S]*?<\/script>/g, " ").replace(/<[^>]+>/g, " ").replace(/&#x27;|&#39;/g, "'").replace(/&amp;/g, "&").replace(/\s+/g, " ");
-const get = async (key, url) => { const r = await fetch(BASE + url, { headers: { cookie: key ? `personaKey=${key}` : "" }, redirect: "manual" }); return { status: r.status, html: await r.text(), loc: r.headers.get("location") }; };
+const get = async (key, url) => { const r = await fetch(BASE + url, { headers: { cookie: AC + (key ? `personaKey=${key}` : "") }, redirect: "manual" }); return { status: r.status, html: await r.text(), loc: r.headers.get("location") }; };
 
 async function persist(personKey, max = 3) {
   const c = await app.connect();
@@ -121,7 +123,7 @@ try {
   const form = new FormData();
   for (const [k, v] of Object.entries(fields)) form.append(k, v);
   form.set("note", "Hi, I'm looking for a warm group.");
-  const post = await fetch(`${BASE}/member/groups/${gid}`, { method: "POST", body: form, redirect: "manual", headers: { cookie: "personaKey=member_dana" } });
+  const post = await fetch(`${BASE}/member/groups/${gid}`, { method: "POST", body: form, redirect: "manual", headers: { cookie: AC + "personaKey=member_dana" } });
   check("Ask to join action redirects back to the group", post.status === 303 && (post.headers.get("location") ?? "").endsWith(`/member/groups/${gid}`), `${post.status} ${post.headers.get("location")}`);
   const jr = (await own.query("select status, member_note, rec_id from app.join_request where person_id = $1 and group_id = $2", [P.member_dana.person_id, gid])).rows;
   check("exactly one pending request was stored, linked to the recommendation", jr.length === 1 && jr[0].status === "requested" && jr[0].rec_id && jr[0].member_note === "Hi, I'm looking for a warm group.", JSON.stringify(jr));
@@ -131,7 +133,7 @@ try {
   r = await get("member_dana", "/member");
   check("home shows the request under Your requests, and the recommended card is marked pending", text(r.html).includes("Your requests") && text((await get("member_dana", "/member?view=recommendations")).html).includes("Request sent · pending"));
 
-  const post2 = await fetch(`${BASE}/member/groups/${gid}`, { method: "POST", body: form, redirect: "manual", headers: { cookie: "personaKey=member_dana" } });
+  const post2 = await fetch(`${BASE}/member/groups/${gid}`, { method: "POST", body: form, redirect: "manual", headers: { cookie: AC + "personaKey=member_dana" } });
   const count = (await own.query("select count(*)::int c from app.join_request where person_id = $1 and group_id = $2", [P.member_dana.person_id, gid])).rows[0].c;
   check("re-posting the same request does not create a duplicate", count === 1, `status ${post2.status}, rows ${count}`);
 

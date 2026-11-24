@@ -29,6 +29,7 @@ export function AppHeader({ persona, name }: { persona?: Persona; name?: string 
           <div className="flex items-center gap-3">
             {persona && <span className="hidden text-sm text-[#69736b] sm:inline">Viewing as <strong className="font-medium text-[#36463b]">{name ? `${name} (${personaMeta[persona].label})` : personaMeta[persona].label}</strong></span>}
             <Link href="/" className="text-sm font-medium text-[#647267] underline-offset-4 hover:text-[#26382b] hover:underline">Switch persona</Link>
+            <form method="post" action="/access/lock"><button type="submit" className="text-sm font-medium text-[#647267] underline-offset-4 hover:text-[#26382b] hover:underline">Lock demo</button></form>
             <button className="rounded-md p-2 text-[#647267] sm:hidden" aria-label="Open menu"><Menu className="size-5" /></button>
           </div>
         </div>
