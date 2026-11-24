@@ -1,0 +1,13 @@
+import fs from "node:fs"; import path from "node:path"; import pg from "pg";
+import { requestToJoin, withdrawRequest } from "./lib/member.ts";
+import { runScheduleReview } from "./lib/review/schedule-review.ts";
+const own=new pg.Client({connectionString:process.env.DATABASE_OWNER_URL,ssl:{rejectUnauthorized:false}});await own.connect();
+const SL=(await own.query("select group_id from app.grp where name='Sunday Lunch D-Group'")).rows[0].group_id;
+console.log("REQ1",JSON.stringify(await requestToJoin("member_marcus",SL,null)));
+let calls=0;
+const s=await runScheduleReview("manager",{callModel:async(f)=>{calls++;return{raw:JSON.stringify({raise:false,kind:"schedule_conflict",severity:"low",summary:"x",evidence:[]}),usage:{prompt_tokens:1,completion_tokens:1,total_tokens:2,cost:0},latencyMs:1,model:"stub"}}});
+console.log("REVIEW",JSON.stringify({candidates:s.candidates,alreadyRaised:s.alreadyRaised,reviewed:s.reviewed,stubCalls:calls}));
+const id=(await own.query("select request_id from app.join_request jr join app.person p using(person_id) where p.first_name='Marcus' and jr.status='requested' and jr.group_id=$1",[SL])).rows[0]?.request_id;
+console.log("WITHDRAW",JSON.stringify(id?await withdrawRequest("member_marcus",id):"none"));
+await own.query("delete from app.audit_log where action='llm_review_attempt' and detail->>'model'='stub'");
+await own.end();

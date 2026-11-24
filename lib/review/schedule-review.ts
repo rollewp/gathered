@@ -77,9 +77,16 @@ const CANDIDATES = `
   order by jr.requested_at, jr.request_id
   limit 10`
 
+// Request-specific identity: an insight is tied to the join request it was raised for
+// (evidence.request_id), in ANY status. So resolving the insight for request A does not make the
+// review raise it again while A is still pending, yet a later request B by the same person to the
+// same group is a new request and can be reviewed. The person+group clause keeps the original
+// protection (one open or acknowledged insight per person and group) for older rows.
 const EXISTING = `
   select escalation_id from app.escalation
-  where source = 'ai' and kind = $1 and person_id = $2 and group_id = $3 and status in ('open', 'acknowledged')
+  where source = 'ai' and kind = $1
+    and ((evidence->>'request_id') = $4
+         or (person_id = $2 and group_id = $3 and status in ('open', 'acknowledged')))
   limit 1`
 
 async function audit(personKey: string, action: string, entity: string, entityId: string, detail: Record<string, unknown>) {
@@ -103,7 +110,7 @@ async function logAttempt(
   })
 }
 
-/** Write the escalation unless an open or acknowledged one already exists for this person and group. */
+/** Write the escalation unless one already exists for this request (any status), or an open/acknowledged one for this person and group. */
 async function persistEscalation(
   personKey: string, c: ReviewCandidate, facts: unknown,
   result: { severity: string; summary: string; evidence: string[] }, provenance: { model: string; prompt_version: string },
@@ -111,7 +118,7 @@ async function persistEscalation(
   return withPersona(personKey, async (db) => {
     // serialise concurrent reviews for the same person and group so a double click cannot duplicate
     await db.query('select pg_advisory_xact_lock(hashtextextended($1, 0))', [`${REVIEW_KIND}:${c.person_id}:${c.group_id}`])
-    const dup = (await db.query<{ escalation_id: string }>(EXISTING, [REVIEW_KIND, c.person_id, c.group_id])).rows[0]
+    const dup = (await db.query<{ escalation_id: string }>(EXISTING, [REVIEW_KIND, c.person_id, c.group_id, c.request_id])).rows[0]
     if (dup) return { created: false, id: dup.escalation_id }
     const evidence = {
       request_id: c.request_id, requested_at: c.requested_at,
@@ -148,7 +155,7 @@ export async function runScheduleReview(personKey: string, deps: { callModel?: R
   }
 
   for (const c of candidates) {
-    const existing = await withPersona(personKey, async (db) => (await db.query(EXISTING, [REVIEW_KIND, c.person_id, c.group_id])).rowCount)
+    const existing = await withPersona(personKey, async (db) => (await db.query(EXISTING, [REVIEW_KIND, c.person_id, c.group_id, c.request_id])).rowCount)
     if (existing) { out.alreadyRaised++; continue }
 
     const facts = reviewFacts({ ...c })
@@ -216,4 +223,33 @@ export async function listInsights(personKey: string): Promise<InsightRow[]> {
      join app.grp g on g.group_id = e.group_id
      where e.source = 'ai' and e.kind = $1 and e.status in ('open', 'acknowledged')
      order by e.created_at desc`, [REVIEW_KIND])).rows)
+}
+
+export type ResolveResult = { ok: true } | { ok: false; code: 'not_found' | 'forbidden' }
+
+/**
+ * The Manager resolves one AI schedule-conflict insight. The escalation row and its evidence are
+ * kept (status becomes 'resolved', resolved_by is the Manager's portal user); it simply leaves the
+ * default open list. The join request, membership, serving data and recommendations are untouched.
+ * Row-level security allows only the Manager to update escalations; the conditional update makes a
+ * repeat a clean "not_found" without a second audit row. No model call.
+ */
+export async function resolveInsight(personKey: string, escalationId: string): Promise<ResolveResult> {
+  const persona = findPersona(personKey)
+  if (!persona || persona.role !== 'manager') return { ok: false, code: 'forbidden' }
+  return withPersona(personKey, async (db) => {
+    const row = (await db.query<{ escalation_id: string; request_id: string | null; group_id: string; person_id: string; from_status: string }>(
+      `update app.escalation e
+          set status = 'resolved', resolved_by = (select user_id from app.portal_user where person_id = app._person())
+        from (select escalation_id, status as from_status from app.escalation where escalation_id = $1 for update) prev
+        where e.escalation_id = prev.escalation_id and e.source = 'ai' and e.kind = $2 and e.status in ('open', 'acknowledged')
+        returning e.escalation_id, e.evidence->>'request_id' as request_id, e.group_id, e.person_id, prev.from_status`,
+      [escalationId, REVIEW_KIND])).rows[0]
+    if (!row) return { ok: false as const, code: 'not_found' as const }
+    await db.query(
+      `insert into app.audit_log (actor_user_id, action, entity, entity_id, detail)
+       values ((select user_id from app.portal_user where person_id = app._person()), 'escalation_resolved', 'escalation', $1, $2::jsonb)`,
+      [row.escalation_id, JSON.stringify({ kind: REVIEW_KIND, source: 'ai', request_id: row.request_id, group_id: row.group_id, person_id: row.person_id, from_status: row.from_status, to_status: 'resolved' })])
+    return { ok: true as const }
+  })
 }

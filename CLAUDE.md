@@ -43,7 +43,7 @@ AI for Church Hackathon entry (build window Oct 30 – Nov 27, 2026; **submit by
   - Recommendation runs are persisted. A page view or refresh never calls the ranking LLM by itself; material changes invalidate runs through database triggers without calling it (a run is a first-class record that keeps its full shortlist; empty results are valid runs; a prompt-version change invalidates old runs); regeneration happens on the next eligible request with no valid run.
 - **Scope:** Gathered is not a crisis-detection or pastoral emergency-response system; do not add that capability in the MVP.
 - **Contact:** Gathered never contacts anyone. Every LLM call goes to `audit_log`.
-- **Minimal CRUD:** the only user-initiated writes are member intake confirmation, join request, leader accept/decline, manager acknowledge/resolve. System writes that follow from them: recommendation runs and invalidation, escalation inserts, audit rows.
+- **Minimal CRUD:** the only user-initiated writes are member intake confirmation, join request, leader accept/decline, manager acknowledge/resolve, member withdraw of own pending request (`app.withdraw_join_request`). System writes that follow from them: recommendation runs and invalidation, escalation inserts, audit rows.
 
 ## Working rules
 - Propose a short plan, then implement in small steps. Run SQL against Lakebase with the owner URL only for migrations and seeds.

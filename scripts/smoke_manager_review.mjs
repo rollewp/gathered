@@ -42,6 +42,7 @@ const reviewAudit = () => q("select detail from app.audit_log where id > $1 and 
 async function cleanup() {
   await own.query("delete from app.escalation where source = 'ai'");
   await own.query("delete from app.join_request where person_id = $1", [P.member_marcus.person_id]);
+  await own.query("update app.join_request set rec_id = null where rec_id is not null"); // kept (withdrawn/declined) requests reference recommendations
   for (const t of ["recommendation", "recommendation_run_candidate", "recommendation_run"]) await own.query(`delete from app.${t}`);
   await own.query("delete from app.audit_log where id > $1", [startAuditId]);
 }
@@ -103,7 +104,7 @@ try {
     const res2 = await submit("manager", "/manager", r.html);
     check("pressing Run AI review again makes no model call and adds no duplicate", res2.status === 303 && (await reviewAudit()).length === attempts.length && (await escalations()).length === 1, `${(await reviewAudit()).length} attempts, ${(await escalations()).length} escalations`);
     r = await get("manager", res2.headers.get("location"));
-    check("the repeat run reports the insight as already on the page", text(r.html).includes("already on this page"), text(r.html).slice(0, 300));
+    check("the repeat run reports the insight as already reviewed", text(r.html).includes("already reviewed"), text(r.html).slice(0, 300));
     for (const k of ["member_marcus", "member_dana", "leader_tom"]) {
       const m = await get(k, k.startsWith("leader") ? "/leader" : "/member");
       check(`${k}'s own pages show nothing about the insight`, !/schedule conflict|insight/i.test(text(m.html)));

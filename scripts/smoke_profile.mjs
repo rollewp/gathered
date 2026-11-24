@@ -43,6 +43,7 @@ async function persist(personKey) {
   } finally { c.release(); }
 }
 async function cleanup() {
+  await own.query("update app.join_request set rec_id = null where rec_id is not null"); // kept (withdrawn/declined) requests reference recommendations
   for (const t of ["recommendation", "recommendation_run_candidate", "recommendation_run"]) await own.query(`delete from app.${t}`);
   await own.query("delete from app.audit_log where id > $1", [startAuditId]);
 }

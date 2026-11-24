@@ -103,3 +103,24 @@ export async function saveMyProfile(personKey: string, next: ProfileFields): Pro
     return { ok: false, code: 'error' }
   }
 }
+
+export type WithdrawResult =
+  | { ok: true; groupId: string }
+  | { ok: false; code: 'not_pending' | 'not_allowed' | 'error' }
+
+/**
+ * The member withdraws their OWN pending request. The database enforces ownership, the member
+ * role and that the request is still pending (migration 0010); a repeat or a crafted id is
+ * rejected as not_pending without writing. No model call, no membership, no recommendation change.
+ */
+export async function withdrawRequest(personKey: string, requestId: string): Promise<WithdrawResult> {
+  try {
+    const row = await withPersona(personKey, async (db) =>
+      (await db.query<{ g: string }>('select app.withdraw_join_request($1) as g', [requestId])).rows[0])
+    return { ok: true, groupId: row.g }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : ''
+    for (const code of ['not_pending', 'not_allowed'] as const) if (msg.includes(code)) return { ok: false, code }
+    return { ok: false, code: 'error' }
+  }
+}

@@ -7,7 +7,7 @@ import { findPersona, PERSONA_COOKIE } from '@/lib/personas'
 import { getDemandGaps, type DemandGap, type DemandGapSummary } from '@/lib/analytics/demand-gaps'
 import { lifeStageLabel, slotLabel } from '@/lib/group-view'
 import { listInsights, type InsightRow } from '@/lib/review/schedule-review'
-import { runAiReview } from './actions'
+import { resolveAiInsight, runAiReview } from './actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,6 +16,10 @@ const one = (v: string | string[] | undefined) => (typeof v === 'string' ? v : u
 const num = (v: string | string[] | undefined) => Math.max(0, Math.min(999, Number.parseInt(one(v) ?? '0', 10) || 0))
 
 function resultLine(sp: SearchParams): { tone: 'ok' | 'bad'; text: string } | null {
+  const n = one(sp.notice)
+  if (n === 'resolved') return { tone: 'ok', text: 'Insight resolved. It has left this list and stays in history.' }
+  if (n === 'resolve_stale') return { tone: 'ok', text: 'That insight was already resolved, so nothing was changed.' }
+  if (n === 'resolve_failed') return { tone: 'bad', text: 'Something went wrong resolving the insight. Nothing was changed. Please try again.' }
   const r = one(sp.review)
   if (r === 'unavailable') return { tone: 'bad', text: "We couldn't reach the review assistant just now. Nothing was changed. Please try again in a moment." }
   if (r === 'error') return { tone: 'bad', text: 'Something went wrong running the review. Nothing was changed. Please try again.' }
@@ -24,7 +28,7 @@ function resultLine(sp: SearchParams): { tone: 'ok' | 'bad'; text: string } | nu
   if (c === 0) return { tone: 'ok', text: 'Reviewed: there are no pending requests with a possible schedule overlap.' }
   const parts = [`${c} pending ${c === 1 ? 'request' : 'requests'} checked`]
   if (raised) parts.push(`${raised} new ${raised === 1 ? 'insight' : 'insights'}`)
-  if (already) parts.push(`${already} already on this page`)
+  if (already) parts.push(`${already} already reviewed`)
   if (notRaised) parts.push(`${notRaised} with no conflict found`)
   if (invalid) parts.push(`${invalid} the assistant could not answer reliably`)
   return { tone: 'ok', text: `Review finished: ${parts.join(', ')}.` }
@@ -52,6 +56,14 @@ function Insight({ i }: { i: InsightRow }) {
         {i.request_status && <span>Join request: {i.request_status === 'requested' ? 'still pending' : i.request_status}</span>}
         <span>Advisory only. You decide; nothing has been sent to anyone.</span>
       </div>
+      <details className="mt-5">
+        <summary className="inline-flex h-8 cursor-pointer list-none items-center rounded-lg border border-[#dce5da] bg-white px-3 text-sm font-medium text-[#3e644b] hover:bg-[#f0f6ee] [&::-webkit-details-marker]:hidden">Resolve insight</summary>
+        <form action={resolveAiInsight} className="mt-3 flex flex-col gap-3 rounded-xl border border-[#eadfcf] bg-white p-4 sm:flex-row sm:items-center sm:justify-between" aria-label="Confirm resolving this insight">
+          <input type="hidden" name="escalationId" value={i.escalation_id} />
+          <p className="text-sm leading-6 text-[#4a5a4e]">Resolve this insight? It leaves this list and stays in history. The request is not changed.</p>
+          <SubmitButton pendingText="Resolving…" className="w-full sm:w-auto">Yes, resolve</SubmitButton>
+        </form>
+      </details>
     </article>
   )
 }

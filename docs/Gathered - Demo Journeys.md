@@ -221,6 +221,8 @@ Journey 5 exposes every recommendation run for a member, including out-of-date r
 - Running the review again does not duplicate an insight that is already open or acknowledged, and makes no model call for it.
 - Every model attempt is written to the audit log.
 
+**Repeating the demo (no database reset).** While the request is pending, Marcus's group page shows **Request sent · Pending** and **Withdraw request**; he confirms, the request becomes withdrawn (kept for history, no membership, recommendations untouched) and **Ask to join** returns. Alan can **Resolve insight** (with a confirmation) on an insight card: it leaves **Insights requiring review** and stays in history. A resolved insight is not recreated by another review while the same request is pending; a new request by Marcus to the same group is a new request and can produce a new insight. Neither action calls a model or contacts anyone.
+
 **Guardrail:** The insight is advisory. The review never rejects, withdraws or changes Marcus's request, never changes his membership or his recommendations, never contacts Marcus or a leader, and draws no conclusion about him beyond a schedule overlap. Alan decides.
 
 **Group demand gaps (Alan).** Below the insights, the Manager page shows up to five gap cohorts, ranked by people with no reachable group: life stage and slot, people without a group, open groups, open seats and a plain classification (No current group, High demand, Limited reach). Aggregates only; a person free at several times is counted in each cohort, so rows are not additive, and availability is not intent. The data is a persisted result written by the Databricks refresh; viewing the page runs no analysis and calls no model. Members and leaders never see it. In the V2 seed the story is weekday-morning demand (for example retired members free on Wednesday mornings: 38 people, one group, eight seats).
@@ -264,7 +266,7 @@ Journey 5 exposes every recommendation run for a member, including out-of-date r
 ### Scope Boundaries
 
 - **Leaving a group.** No member or leader action exists for leaving a group. The data model can record a departed membership, but it is not a user-initiated MVP action.
-- **Withdrawing a join request.** Not covered, although the data model can represent withdrawal.
+- **Withdrawing a join request.** Covered only as the small repeatability step in Journey 4 (no reasons, no messages to the leader, no notifications).
 - **What a member sees after a decline.** Not specified. A leader's optional decline reason is not shown to the member in a designed screen.
 - **Editing group details, tags, or leaders.** Seeded only; no screen is designed.
 - **Changing preferences after intake.** The `/member/intake` route also serves as the confirmed-profile editor. A confirmed change invalidates the saved recommendation run. It does not generate recommendations automatically.

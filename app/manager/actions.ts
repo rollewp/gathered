@@ -2,7 +2,8 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { findPersona, PERSONA_COOKIE } from '@/lib/personas'
-import { ReviewUnavailableError, runScheduleReview } from '@/lib/review/schedule-review'
+import { z } from 'zod'
+import { ReviewUnavailableError, resolveInsight, runScheduleReview } from '@/lib/review/schedule-review'
 
 /**
  * The Manager explicitly chooses "Run AI review". This is the only thing that calls the review
@@ -20,4 +21,24 @@ export async function runAiReview() {
     query = e instanceof ReviewUnavailableError ? '?review=unavailable' : '?review=error'
   }
   redirect(`/manager${query}`)
+}
+
+/**
+ * The Manager confirms resolving one insight. Only the Manager persona can reach the write (the
+ * database policy also allows only the Manager to update an escalation). No model call; the join
+ * request and everything else are left exactly as they were.
+ */
+export async function resolveAiInsight(formData: FormData) {
+  const persona = findPersona((await cookies()).get(PERSONA_COOKIE)?.value)
+  if (!persona || persona.role !== 'manager') redirect('/manager')
+  const id = z.uuid().safeParse(formData.get('escalationId'))
+  if (!id.success) redirect('/manager')
+  let notice = 'resolved'
+  try {
+    const r = await resolveInsight(persona.key, id.data)
+    if (!r.ok) notice = 'resolve_stale'
+  } catch {
+    notice = 'resolve_failed'
+  }
+  redirect(`/manager?notice=${notice}`)
 }

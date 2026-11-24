@@ -67,7 +67,7 @@ const DENIED = /permission denied|manager only|row-level security|does not exist
 
 const startAuditId = Number((await q("select coalesce(max(id), 0) as m from app.audit_log"))[0].m);
 async function llmAuditRows() { return Number((await q("select count(*) from app.audit_log where action = 'llm_rank_attempt' and id > $1", [startAuditId]))[0].count); }
-async function resetRuns() { for (const t of ["recommendation", "recommendation_run_candidate", "recommendation_run"]) await own.query(`delete from app.${t}`); }
+async function resetRuns() { await own.query("update app.join_request set rec_id = null where rec_id is not null"); for (const t of ["recommendation", "recommendation_run_candidate", "recommendation_run"]) await own.query(`delete from app.${t}`); }
 async function cleanup() { await resetRuns(); await own.query("delete from app.audit_log where id > $1", [startAuditId]); }
 const currentRuns = async (personKey) => q("select * from app.recommendation_run where person_id = $1 and is_current", [P[personKey].person_id]);
 const allRuns = async (personKey) => q("select * from app.recommendation_run where person_id = $1 order by generated_at", [P[personKey].person_id]);

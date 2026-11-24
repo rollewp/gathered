@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { getRecommendations } from '@/lib/recommendations'
-import { requestToJoin, saveMyProfile } from '@/lib/member'
+import { requestToJoin, saveMyProfile, withdrawRequest } from '@/lib/member'
 import { parseProfileForm, type ProfileFields } from '@/lib/profile-schema'
 import { findPersona, PERSONA_COOKIE } from '@/lib/personas'
 
@@ -50,6 +50,23 @@ export async function askToJoin(_prev: JoinFormState, formData: FormData): Promi
   if (!res.ok && res.code !== 'duplicate_request') return { error: MESSAGES[res.code] }
   // success (or already requested): show the confirmation state, which is read back from the database
   redirect(`/member/groups/${parsed.data.groupId}`)
+}
+
+const WithdrawInput = z.object({ requestId: z.uuid(), groupId: z.uuid() })
+
+/**
+ * The member confirms withdrawing their own pending request. Who is withdrawing comes from the
+ * persona cookie, never the form. No model call. A request that is no longer pending (a repeat
+ * submit, another tab) is not an error for the member: the page simply shows its current state.
+ */
+export async function withdrawMyRequest(formData: FormData) {
+  const persona = await memberPersona()
+  if (!persona) redirect('/member')
+  const parsed = WithdrawInput.safeParse({ requestId: formData.get('requestId'), groupId: formData.get('groupId') })
+  if (!parsed.success) redirect('/member')
+  const res = await withdrawRequest(persona.key, parsed.data.requestId)
+  const notice = res.ok ? 'withdrawn' : res.code === 'error' ? 'withdraw_failed' : 'withdraw_stale'
+  redirect(`/member/groups/${parsed.data.groupId}?notice=${notice}`)
 }
 
 export type PreferencesFormState = { errors?: Partial<Record<keyof ProfileFields | 'form', string>>; values?: ProfileFields }

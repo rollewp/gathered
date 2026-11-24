@@ -4,6 +4,8 @@ import { Check, Heart, MapPin, Users } from 'lucide-react'
 import { z } from 'zod'
 import { AppHeader, PageIntro, SectionLabel, Tag } from '@/components/app-shell'
 import { AskToJoinForm } from '@/components/ask-to-join-form'
+import { SubmitButton } from '@/components/submit-button'
+import { withdrawMyRequest } from '@/app/member/actions'
 import { PersonaChooser } from '@/components/persona-chooser'
 import { findPersona, PERSONA_COOKIE } from '@/lib/personas'
 import { getGroupCard, getMyRequests } from '@/lib/member'
@@ -16,12 +18,19 @@ function Card({ children }: { children: React.ReactNode }) {
   return <div className="rounded-2xl border border-[#e1e8df] bg-white p-6">{children}</div>
 }
 
-export default async function GroupDetailPage({ params }: { params: Promise<{ id: string }> }) {
+const NOTICES: Record<string, { tone: 'ok' | 'bad'; text: string }> = {
+  withdrawn: { tone: 'ok', text: 'Request withdrawn. You can ask to join again whenever you like.' },
+  withdraw_stale: { tone: 'ok', text: 'That request was no longer pending, so nothing was changed.' },
+  withdraw_failed: { tone: 'bad', text: 'Something went wrong withdrawing your request. Nothing was changed. Please try again.' },
+}
+
+export default async function GroupDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ notice?: string }> }) {
   const persona = findPersona((await cookies()).get(PERSONA_COOKIE)?.value)
   if (!persona || persona.role !== 'member') {
     return <PersonaChooser role="member" label="Member" currentName={persona?.display} />
   }
   const { id } = await params
+  const notice = NOTICES[String((await searchParams).notice ?? '')] ?? null
   if (!z.uuid().safeParse(id).success) notFound()
 
   const [group, requests, state] = await Promise.all([
@@ -58,13 +67,27 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ id
           </Card>
         </div>
 
+        {notice && (
+          <p role={notice.tone === 'bad' ? 'alert' : 'status'}
+            className={`mt-5 rounded-xl border px-4 py-3 text-sm ${notice.tone === 'bad' ? 'border-[#ecd9d4] bg-[#fbf3f1] text-[#8a3b2e]' : 'border-[#dfebdc] bg-[#f0f6ee] text-[#3e644b]'}`}>{notice.text}</p>
+        )}
+
         <div className="mt-5">
           <Card>
             {request ? (
               <>
-                <SectionLabel>Request sent</SectionLabel>
+                <SectionLabel>Request sent · Pending</SectionLabel>
                 <p className="flex items-center gap-2 font-medium text-[#3e644b]"><Check className="size-4" /> {leader ? `${leader} will reach out if it's a fit.` : "The group leader will reach out if it's a fit."}</p>
                 {request.member_note && <p className="mt-4 rounded-xl bg-[#fbfcf8] p-4 text-sm leading-6 text-[#69736b]">Your note: {request.member_note}</p>}
+                <details className="group mt-5">
+                  <summary className="inline-flex h-9 w-full cursor-pointer list-none items-center justify-center rounded-lg border border-[#dce5da] bg-white px-4 text-sm font-medium text-[#3e644b] hover:bg-[#f0f6ee] sm:w-auto [&::-webkit-details-marker]:hidden">Withdraw request</summary>
+                  <form action={withdrawMyRequest} className="mt-3 rounded-xl border border-[#eadfcf] bg-[#fffdf9] p-4" aria-label="Confirm withdrawing your request">
+                    <input type="hidden" name="requestId" value={request.request_id} />
+                    <input type="hidden" name="groupId" value={group.group_id} />
+                    <p className="text-sm leading-6 text-[#4a5a4e]">Withdraw your request to join this group? You can ask to join again later. Select <strong>Withdraw request</strong> above to keep it instead.</p>
+                    <SubmitButton pendingText="Withdrawing…" className="mt-4 w-full sm:w-auto">Yes, withdraw</SubmitButton>
+                  </form>
+                </details>
               </>
             ) : !eligible ? (
               <>
